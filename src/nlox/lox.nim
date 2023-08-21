@@ -1,6 +1,6 @@
 import std/[lists, strformat]
 
-import ./tokentype
+import ./token
 
 type
   Scanner = object
