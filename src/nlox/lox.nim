@@ -1,8 +1,9 @@
 import std/[lists, strformat]
 
+import ./tokentype
+
 type
   Scanner = object
-  Token = object
 
 var
   hadError* = false
