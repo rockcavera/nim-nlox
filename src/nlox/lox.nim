@@ -1,15 +1,9 @@
-import std/[lists, strformat]
+import std/strformat
 
-import ./token
-
-type
-  Scanner = object
+import ./scanner, ./token
 
 var
   hadError* = false
-
-proc scanTokens(scanner: Scanner): SinglyLinkedList[Token] =
-  discard
 
 proc report(line: int, where: string, message: string) =
   echo fmt"[line {line}] Error{where}: {message}"
@@ -21,7 +15,7 @@ proc error*(line: int, message: string) =
 
 proc run(source: string) =
   var
-    scanner: Scanner # = new Scanner(source)
+    scanner = initScanner(source)
     tokens = scanTokens(scanner)
 
   for token in tokens:
