@@ -1,3 +1,5 @@
+import std/strutils
+
 import ./logger, ./token, ./tokentype
 
 type
@@ -22,13 +24,26 @@ proc advance(scanner: var Scanner): char =
 
   inc(scanner.current)
 
-proc addToken(scanner: var Scanner, kind: TokenType, literal: string) =
-  let text = scanner.source[scanner.start..scanner.current]
+proc addToken(scanner: var Scanner, token: var Token) =
+  token.lexeme = scanner.source[scanner.start..scanner.current]
+  token.line = scanner.line
 
-  add(scanner.tokens, initToken(kind, text, literal, scanner.line))
+  add(scanner.tokens, token)
 
 proc addToken(scanner: var Scanner, kind: TokenType) =
-  addToken(scanner, kind, "") # nil
+  var token = initToken(kind)
+
+  addToken(scanner, token)
+
+proc addToken(scanner: var Scanner, str: string) =
+  var token = initTokenString(str)
+
+  addToken(scanner, token)
+
+proc addToken(scanner: var Scanner, number: float) =
+  var token = initTokenNumber(number)
+
+  addToken(scanner, token)
 
 proc match(scanner: var Scanner, expected: char): bool =
   if isAtEnd(scanner):
@@ -46,6 +61,12 @@ proc peek(scanner: Scanner): char =
   else:
     result = scanner.source[scanner.current]
 
+proc peekNext(scanner: Scanner): char =
+  if scanner.current + 1 >= len(scanner.source):
+    result = '\0'
+  else:
+    result = scanner.source[scanner.current + 1]
+
 proc string(scanner: var Scanner) =
   while (peek(scanner) != '"') and (not isAtEnd(scanner)):
     if peek(scanner) == '\n':
@@ -62,7 +83,24 @@ proc string(scanner: var Scanner) =
     # Trim the surrounding quotes.
     let value = scanner.source[(scanner.start + 1)..(scanner.current - 1)]
 
-    addToken(scanner, String, value)
+    addToken(scanner, value)
+
+proc isDigit(c: char): bool =
+  result = c in {'0' .. '9'}
+
+proc number(scanner: var Scanner) =
+  while isDigit(peek(scanner)):
+    discard advance(scanner)
+
+  # Look for a fractional part.
+  if (peek(scanner) == '.') and isDigit(peekNext(scanner)):
+    # Consume the "."
+    discard advance(scanner)
+
+    while (isDigit(peek(scanner))):
+      discard advance(scanner)
+
+  addToken(scanner, parseFloat(scanner.source[scanner.start..scanner.current]))
 
 proc scanToken(scanner: var Scanner) =
   let c = advance(scanner)
@@ -119,7 +157,10 @@ proc scanToken(scanner: var Scanner) =
   of '"':
     string(scanner)
   else:
-    error(scanner.line, "Unexpected character.")
+    if isDigit(c):
+      number(scanner)
+    else:
+      error(scanner.line, "Unexpected character.")
 
 proc scanTokens*(scanner: var Scanner): seq[Token] =
   while not isAtEnd(scanner):
@@ -127,4 +168,4 @@ proc scanTokens*(scanner: var Scanner): seq[Token] =
     scanner.start = scanner.current
     scanToken(scanner)
 
-  add(scanner.tokens, initToken(EOF, "", "", scanner.line))
+  addToken(scanner, Eof)
