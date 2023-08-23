@@ -30,6 +30,16 @@ proc addToken(scanner: var Scanner, kind: TokenType, literal: string) =
 proc addToken(scanner: var Scanner, kind: TokenType) =
   addToken(scanner, kind, "") # nil
 
+proc match(scanner: var Scanner, expected: char): bool =
+  if isAtEnd(scanner):
+    result = false
+  elif scanner.source[scanner.current] != expected:
+    result = false
+  else:
+    result = true
+
+    inc(scanner.current)
+
 proc scanToken(scanner: var Scanner) =
   let c = advance(scanner)
 
@@ -54,6 +64,22 @@ proc scanToken(scanner: var Scanner) =
     addToken(scanner, Semicolon)
   of '*':
     addToken(scanner, Star)
+  of '!':
+    let kind = if match(scanner, '='): BangEqual
+               else: Bang
+    addToken(scanner, kind)
+  of '=':
+    let kind = if match(scanner, '='): EqualEqual
+               else: Equal
+    addToken(scanner, kind)
+  of '<':
+    let kind = if match(scanner, '='): LessEqual
+               else: Less
+    addToken(scanner, kind)
+  of '>':
+    let kind = if match(scanner, '='): GreaterEqual
+               else: Greater
+    addToken(scanner, kind)
   else:
     error(scanner.line, "Unexpected character.")
 
