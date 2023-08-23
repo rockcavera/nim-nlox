@@ -1,3 +1,5 @@
+import std/lists
+
 import ./logger, ./scanner, ./token
 
 proc run(source: string) =

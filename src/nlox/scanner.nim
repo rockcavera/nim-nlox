@@ -1,11 +1,11 @@
-import std/[strutils, tables]
+import std/[lists, strutils, tables]
 
 import ./logger, ./token, ./tokentype
 
 type
   Scanner* = object
     source: string
-    tokens: seq[Token] # list?
+    tokens: SinglyLinkedList[Token]
     start: int ## points to the first character in the lexeme
     current: int ## points at the character currently being considered
     line: int
@@ -189,7 +189,7 @@ proc scanToken(scanner: var Scanner) =
     else:
       error(scanner.line, "Unexpected character.")
 
-proc scanTokens*(scanner: var Scanner): seq[Token] =
+proc scanTokens*(scanner: var Scanner): SinglyLinkedList[Token] =
   while not isAtEnd(scanner):
     # We are at the beginning of the next lexeme.
     scanner.start = scanner.current
