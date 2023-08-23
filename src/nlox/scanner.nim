@@ -1,4 +1,4 @@
-import std/strutils
+import std/[strutils, tables]
 
 import ./logger, ./token, ./tokentype
 
@@ -9,6 +9,12 @@ type
     start: int ## points to the first character in the lexeme
     current: int ## points at the character currently being considered
     line: int
+
+let
+  keywords = {"and": And, "class": Class, "else": Else, "false": False,
+              "for": For, "fun": Fun, "if": If, "nil": Nil, "or": Or,
+              "print": Print, "return": Return, "super": Super, "this": This,
+              "true": True, "var": Var, "while": While}.toTable
 
 proc initScanner*(source: string): Scanner =
   result.source = source
@@ -102,6 +108,22 @@ proc number(scanner: var Scanner) =
 
   addToken(scanner, parseFloat(scanner.source[scanner.start..scanner.current]))
 
+proc isAlpha(c: char): bool =
+  result = c in {'A'..'Z', '_', 'a'..'z'}
+
+proc isAlphaNumeric(c: char): bool =
+  result = isAlpha(c) or isDigit(c)
+
+proc identifier(scanner: var Scanner) =
+  while isAlphaNumeric(peek(scanner)):
+    discard advance(scanner)
+
+  let
+    text = scanner.source[scanner.start..scanner.current]
+    kind = getOrDefault(keywords, text, Identifier)
+
+  addToken(scanner, kind)
+
 proc scanToken(scanner: var Scanner) =
   let c = advance(scanner)
 
@@ -159,6 +181,8 @@ proc scanToken(scanner: var Scanner) =
   else:
     if isDigit(c):
       number(scanner)
+    elif isAlpha(c):
+      identifier(scanner)
     else:
       error(scanner.line, "Unexpected character.")
 
