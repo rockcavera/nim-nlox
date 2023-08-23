@@ -40,6 +40,12 @@ proc match(scanner: var Scanner, expected: char): bool =
 
     inc(scanner.current)
 
+proc peek(scanner: Scanner): char =
+  if isAtEnd(scanner):
+    result = '\0'
+  else:
+    result = scanner.source[scanner.current]
+
 proc scanToken(scanner: var Scanner) =
   let c = advance(scanner)
 
@@ -80,6 +86,18 @@ proc scanToken(scanner: var Scanner) =
     let kind = if match(scanner, '='): GreaterEqual
                else: Greater
     addToken(scanner, kind)
+  of '/':
+    if match(scanner, '/'):
+      # A comment goes until the end of the line.
+      while (peek(scanner) != '\n') and (not isAtEnd(scanner)):
+        discard advance(scanner)
+    else:
+      addToken(scanner, Slash)
+  of ' ', '\r', '\t':
+    # Ignore whitespace.
+    discard
+  of '\n':
+    inc(scanner.line)
   else:
     error(scanner.line, "Unexpected character.")
 
