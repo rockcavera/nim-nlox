@@ -195,6 +195,6 @@ proc scanTokens*(scanner: var Scanner): SinglyLinkedList[Token] =
     scanner.start = scanner.current
     scanToken(scanner)
 
-  addToken(scanner, Eof)
+  add(scanner.tokens, Token(kind: Eof, lexeme: "", line: scanner.line))
 
   result = scanner.tokens
