@@ -1,4 +1,4 @@
-import ./log, ./token, ./tokentype
+import ./logger, ./token, ./tokentype
 
 type
   Scanner* = object

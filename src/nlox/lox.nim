@@ -1,4 +1,4 @@
-import ./log, ./scanner, ./token
+import ./logger, ./scanner, ./token
 
 proc run(source: string) =
   var
