@@ -46,6 +46,24 @@ proc peek(scanner: Scanner): char =
   else:
     result = scanner.source[scanner.current]
 
+proc string(scanner: var Scanner) =
+  while (peek(scanner) != '"') and (not isAtEnd(scanner)):
+    if peek(scanner) == '\n':
+      inc(scanner.line)
+
+      discard advance(scanner)
+
+  if isAtEnd(scanner):
+    error(scanner.line, "Unterminated string.")
+  else:
+    # The closing ".
+    discard advance(scanner)
+
+    # Trim the surrounding quotes.
+    let value = scanner.source[(scanner.start + 1)..(scanner.current - 1)]
+
+    addToken(scanner, String, value)
+
 proc scanToken(scanner: var Scanner) =
   let c = advance(scanner)
 
@@ -98,6 +116,8 @@ proc scanToken(scanner: var Scanner) =
     discard
   of '\n':
     inc(scanner.line)
+  of '"':
+    string(scanner)
   else:
     error(scanner.line, "Unexpected character.")
 
