@@ -16,6 +16,9 @@ let
               "print": Print, "return": Return, "super": Super, "this": This,
               "true": True, "var": Var, "while": While}.toTable
 
+template subString(str: string, startIndex, endIndex: int): string =
+  str[startIndex..(endIndex - 1)]
+
 proc initScanner*(source: string): Scanner =
   result.source = source
   result.start = 0
@@ -31,7 +34,7 @@ proc advance(scanner: var Scanner): char =
   inc(scanner.current)
 
 proc addToken(scanner: var Scanner, token: var Token) =
-  token.lexeme = scanner.source[scanner.start..scanner.current]
+  token.lexeme = substring(scanner.source, scanner.start, scanner.current)
   token.line = scanner.line
 
   add(scanner.tokens, token)
@@ -78,7 +81,7 @@ proc string(scanner: var Scanner) =
     if peek(scanner) == '\n':
       inc(scanner.line)
 
-      discard advance(scanner)
+    discard advance(scanner)
 
   if isAtEnd(scanner):
     error(scanner.line, "Unterminated string.")
@@ -87,7 +90,7 @@ proc string(scanner: var Scanner) =
     discard advance(scanner)
 
     # Trim the surrounding quotes.
-    let value = scanner.source[(scanner.start + 1)..(scanner.current - 1)]
+    let value = subString(scanner.source, scanner.start + 1, scanner.current - 1)
 
     addToken(scanner, value)
 
@@ -106,7 +109,7 @@ proc number(scanner: var Scanner) =
     while (isDigit(peek(scanner))):
       discard advance(scanner)
 
-  addToken(scanner, parseFloat(scanner.source[scanner.start..scanner.current]))
+  addToken(scanner, parseFloat(subString(scanner.source, scanner.start, scanner.current)))
 
 proc isAlpha(c: char): bool =
   result = c in {'A'..'Z', '_', 'a'..'z'}
@@ -119,7 +122,7 @@ proc identifier(scanner: var Scanner) =
     discard advance(scanner)
 
   let
-    text = scanner.source[scanner.start..scanner.current]
+    text = subString(scanner.source, scanner.start, scanner.current)
     kind = getOrDefault(keywords, text, Identifier)
 
   addToken(scanner, kind)
@@ -193,3 +196,5 @@ proc scanTokens*(scanner: var Scanner): seq[Token] =
     scanToken(scanner)
 
   addToken(scanner, Eof)
+
+  result = scanner.tokens
