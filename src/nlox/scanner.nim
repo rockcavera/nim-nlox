@@ -1,4 +1,4 @@
-import ./token, ./tokentype
+import ./log, ./token, ./tokentype
 
 type
   Scanner* = object
@@ -55,7 +55,7 @@ proc scanToken(scanner: var Scanner) =
   of '*':
     addToken(scanner, Star)
   else:
-    discard
+    error(scanner.line, "Unexpected character.")
 
 proc scanTokens*(scanner: var Scanner): seq[Token] =
   while not isAtEnd(scanner):
