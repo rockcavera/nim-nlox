@@ -33,7 +33,7 @@ proc toString(token: Token): string =
   of String:
     add(result, token.stringLit)
   else:
-    add(result, "nil") # ?
+    add(result, "null")
 
 proc `$`*(token: Token): string =
   toString(token)
