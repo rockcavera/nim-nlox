@@ -1,7 +1,7 @@
 nlox is a Nim implementation of the Lox programming language interpreter. This implementation is based on the jlox interpreter, which is done in Java.
 
 ## What is Lox?
-Lox is a scripting language created by Robert Nystrom to teach in a practical way the implementation of a programming language throughout the book Crafting Interpreters. To learn more, visit craftinginterpreters.com.
+Lox is a scripting language created by Robert Nystrom to teach in a practical way the implementation of a programming language throughout the book Crafting Interpreters. To learn more, visit [craftinginterpreters.com](https://www.craftinginterpreters.com/).
 
 ## Why write another Lox interpreter?
 I have always been interested in learning how a programming language is implemented and the book Crafting Interpreters brings this in a very didactic and practical way. So it's a perfect opportunity to learn something new and develop myself as a programmer.
