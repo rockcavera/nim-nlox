@@ -1,8 +1,12 @@
+# Stdlib imports
 import std/lists
 
+# Internal imports
 import ./logger, ./scanner, ./token
 
 proc run(source: string) =
+  ## Starts a `Scanner`, performs the analysis of the lox code and prints all
+  ## analyzed `Token`.
   var
     scanner = initScanner(source)
     tokens = scanTokens(scanner)
@@ -11,6 +15,7 @@ proc run(source: string) =
     echo token
 
 proc runFile(path: string) =
+  ## Runs the .lox script passed in `path`.
   let bytes = readFile(path)
 
   run(bytes)
@@ -19,6 +24,8 @@ proc runFile(path: string) =
     quit(65)
 
 proc runPrompt() =
+  ## Runs the interactive prompt (REPL). If CTRL + D is sent, the execution will
+  ## end.
   while true:
     write(stdout, "> ")
 
@@ -32,6 +39,9 @@ proc runPrompt() =
     hadError = false
 
 proc main*(args: seq[string]) =
+  ## Runs the script.lox passed in `args[0]` or runs in interactive prompt mode
+  ## (REPL) when `len(args) == 0`. If `len(args) > 1`, execution will terminate
+  ## and return code 64.
   if len(args) > 1:
     echo "Usage: lox [script]"
 

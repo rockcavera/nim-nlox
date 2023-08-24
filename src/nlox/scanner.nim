@@ -1,60 +1,84 @@
+# Stdlib imports
 import std/[lists, strutils, tables]
 
+# Internal imports
 import ./logger, ./token, ./tokentype
 
 type
   Scanner* = object
+    ## Object that stores scanner information.
     source: string
+      ## Stores raw source code.
     tokens: SinglyLinkedList[Token]
-    start: int ## points to the first character in the lexeme
-    current: int ## points at the character currently being considered
+      ## Stores a list of all parsed tokens from raw source code.
+    start: int
+      ## Points to the first character in the lexeme.
+    current: int
+      ## Points at the character currently being considered.
     line: int
+      ## The line that is being scanned.
 
 let
   keywords = {"and": And, "class": Class, "else": Else, "false": False,
               "for": For, "fun": Fun, "if": If, "nil": Nil, "or": Or,
               "print": Print, "return": Return, "super": Super, "this": This,
               "true": True, "var": Var, "while": While}.toTable
+    ## A table with all keywords, where the key is the string representation and
+    ## the value the `TypeToken`.
 
 template subString(str: string, startIndex, endIndex: int): string =
+  ## A template that mimics the `java.substring()` method. Performs a slice on
+  ## `str`, starting at `startIndex` and ending at `endIndex - 1`. That is,
+  ## `startIndex` is included and `endIndex` is excluded.
   str[startIndex..(endIndex - 1)]
 
 proc initScanner*(source: string): Scanner =
+  ## Initializes a `Scanner` object with the raw source code of `source`.
   result.source = source
   result.start = 0
   result.current = 0
   result.line = 1
 
 proc isAtEnd(scanner: Scanner): bool =
+  ## Returns `true` if the scan done in `scanner` has reached the end.
   result = scanner.current >= len(scanner.source)
 
 proc advance(scanner: var Scanner): char =
+  ## Advances scanning of `scanner` and returns the next character.
   result = scanner.source[scanner.current]
 
   inc(scanner.current)
 
 proc addToken(scanner: var Scanner, token: var Token) =
+  ## Adds `token` to list of `scanner` tokens.
   token.lexeme = substring(scanner.source, scanner.start, scanner.current)
   token.line = scanner.line
 
   add(scanner.tokens, token)
 
 proc addToken(scanner: var Scanner, kind: TokenType) =
+  ## Adds a token of type `kind` to the list of `scanner` tokens.
   var token = initToken(kind)
 
   addToken(scanner, token)
 
 proc addToken(scanner: var Scanner, str: string) =
+  ## Adds a token of type `String`, with the literal value `str`, to the list of
+  ## `scanner` tokens.
   var token = initTokenString(str)
 
   addToken(scanner, token)
 
 proc addToken(scanner: var Scanner, number: float) =
+  ## Adds a token of type `Number`, with the literal value `number`, to the list
+  ## of `scanner` tokens.
   var token = initTokenNumber(number)
 
   addToken(scanner, token)
 
 proc match(scanner: var Scanner, expected: char): bool =
+  ## Returns `true` if the `expected` character is next in the raw source code
+  ## of `scanner`.
   if isAtEnd(scanner):
     result = false
   elif scanner.source[scanner.current] != expected:
@@ -65,18 +89,34 @@ proc match(scanner: var Scanner, expected: char): bool =
     inc(scanner.current)
 
 proc peek(scanner: Scanner): char =
+  ## Peeks the first character of the raw `scanner` source code beyond the
+  ## current one.
+  ##
+  ## Returns `\0` if the end of the raw source code of `scanner` has been
+  ## reached.
   if isAtEnd(scanner):
     result = '\0'
   else:
     result = scanner.source[scanner.current]
 
 proc peekNext(scanner: Scanner): char =
+  ## Peeks the second character of the raw source code of `scanner` beyond the
+  ## current one.
+  ##
+  ## Returns `\0` if the end of the raw source code of `scanner` has been
+  ## reached.
   if scanner.current + 1 >= len(scanner.source):
     result = '\0'
   else:
     result = scanner.source[scanner.current + 1]
 
 proc string(scanner: var Scanner) =
+  ## Parses the raw source code of `scanner` and captures the string literal
+  ## enclosed in double quotes, adding a `Token`, of type `String`, with its
+  ## value, to the list of tokens of `scanner`.
+  ##
+  ## An error is printed if the final double quote of the string cannot be
+  ## determined.
   while (peek(scanner) != '"') and (not isAtEnd(scanner)):
     if peek(scanner) == '\n':
       inc(scanner.line)
@@ -95,9 +135,13 @@ proc string(scanner: var Scanner) =
     addToken(scanner, value)
 
 proc isDigit(c: char): bool =
+  ## Returns `true` if the character `c` is a digit [0-9].
   result = c in {'0' .. '9'}
 
 proc number(scanner: var Scanner) =
+  ## Parses the raw source code of `scanner` and captures a literal number
+  ## (integer or decimal), adding a `Token`, of type `Number`, with its value,
+  ## in the list of tokens of `scanner`.
   while isDigit(peek(scanner)):
     discard advance(scanner)
 
@@ -112,12 +156,17 @@ proc number(scanner: var Scanner) =
   addToken(scanner, parseFloat(subString(scanner.source, scanner.start, scanner.current)))
 
 proc isAlpha(c: char): bool =
+  ## Returns `true` if character `c` is letter or underscore [A-Z_a-z].
   result = c in {'A'..'Z', '_', 'a'..'z'}
 
 proc isAlphaNumeric(c: char): bool =
+  ## Returns `true` if character `c` is alphanumeric or underscore [0-9A-Z_a-z].d
   result = isAlpha(c) or isDigit(c)
 
 proc identifier(scanner: var Scanner) =
+  ## Parses the raw source code of `scanner` and captures an identifier, which
+  ## may or may not be a keyword, by adding a `Token`, of type `Identifier` or
+  ## of the captured keyword, to the list of tokens of `scanner`.
   while isAlphaNumeric(peek(scanner)):
     discard advance(scanner)
 
@@ -128,6 +177,7 @@ proc identifier(scanner: var Scanner) =
   addToken(scanner, kind)
 
 proc scanToken(scanner: var Scanner) =
+  ## Recognizes lexemes from the raw source code of `scanner`.
   let c = advance(scanner)
 
   case c
@@ -190,6 +240,8 @@ proc scanToken(scanner: var Scanner) =
       error(scanner.line, "Unexpected character.")
 
 proc scanTokens*(scanner: var Scanner): SinglyLinkedList[Token] =
+  ## Returns a `SinglyLinkedList[Token]` with all tokens scanned from the raw
+  ## source code of `scanner`.
   while not isAtEnd(scanner):
     # We are at the beginning of the next lexeme.
     scanner.start = scanner.current
