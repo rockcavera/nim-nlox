@@ -1,3 +1,6 @@
+# Stdlib imports
+import std/strformat
+
 # Internal imports
 import ./tokentype
 
@@ -41,17 +44,12 @@ proc initTokenString*(stringLit: string): Token =
 
 proc toString(token: Token): string =
   ## Returns a string from the `Token` object.
-  add(result, $token.kind)
-  add(result, " ")
-  add(result, token.lexeme)
-  add(result, " ")
-  case token.kind
-  of Number:
-    add(result, $token.numberLit)
-  of String:
-    add(result, token.stringLit)
-  else:
-    add(result, "null")
+  let literal = case token.kind
+                of Number: $token.numberLit
+                of String: token.stringLit
+                else: "null"
+
+  result = fmt"{token.kind} {token.lexeme} {literal}"
 
 proc `$`*(token: Token): string =
   ## Stringify operator that returns a string from the `Token` object.
