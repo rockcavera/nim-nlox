@@ -18,15 +18,15 @@ proc splitFields(fields: string): seq[FieldDescription] =
 
     add(result, FieldDescription(name: name, kind: kind))
 
-proc defineType(writer: FileStream, baseName: string, className: string, fieldList: seq[FieldDescription]) =
-  writeLine(writer, indent(fmt"{className}* = ref object of {baseName}" , 2))
+proc defineType(writer: FileStream, baseName: string, kind: TypeDescription) =
+  writeLine(writer, indent(fmt"{kind.name}* = ref object of {baseName}" , 2))
 
-  for field in fieldList:
+  for field in kind.fields:
     writeLine(writer, indent(fmt"{field.name}*: {field.kind}" , 4))
 
-proc defineConstructor(writer: FileStream, baseName: string, className: string, fieldList: seq[FieldDescription]) =
-  writeLine(writer, fmt"proc new{className}(): {className} =")
-  writeLine(writer, indent(fmt"new({className})", 2))
+proc defineConstructor(writer: FileStream, kind: TypeDescription) =
+  writeLine(writer, fmt"proc new{kind.name}(): {kind.name} =")
+  writeLine(writer, indent(fmt"new({kind.name})", 2))
 
 proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
   let path = outputDir / fmt"{toLowerAscii(baseName)}.nim"
@@ -55,13 +55,13 @@ proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
 
   # Defining the types
   for kind in allTypes:
-    defineType(writer, baseName, kind.name, kind.fields)
+    defineType(writer, baseName, kind)
 
     writeLine(writer, "")
 
   # Defining the constructors
   for kind in allTypes:
-    defineConstructor(writer, baseName, kind.name, kind.fields)
+    defineConstructor(writer, kind)
 
     writeLine(writer, "")
 
