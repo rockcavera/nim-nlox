@@ -41,7 +41,7 @@ proc initScanner*(source: string): Scanner =
 
 proc isAtEnd(scanner: Scanner): bool =
   ## Returns `true` if the scan done in `scanner` has reached the end.
-  result = scanner.current >= len(scanner.source)
+  scanner.current >= len(scanner.source)
 
 proc advance(scanner: var Scanner): char =
   ## Advances scanning of `scanner` and returns the next character.
@@ -136,7 +136,7 @@ proc string(scanner: var Scanner) =
 
 proc isDigit(c: char): bool =
   ## Returns `true` if the character `c` is a digit [0-9].
-  result = c in {'0' .. '9'}
+  c in {'0' .. '9'}
 
 proc number(scanner: var Scanner) =
   ## Parses the raw source code of `scanner` and captures a literal number
@@ -157,11 +157,11 @@ proc number(scanner: var Scanner) =
 
 proc isAlpha(c: char): bool =
   ## Returns `true` if character `c` is letter or underscore [A-Z_a-z].
-  result = c in {'A'..'Z', '_', 'a'..'z'}
+  c in {'A'..'Z', '_', 'a'..'z'}
 
 proc isAlphaNumeric(c: char): bool =
   ## Returns `true` if character `c` is alphanumeric or underscore [0-9A-Z_a-z].d
-  result = isAlpha(c) or isDigit(c)
+  isAlpha(c) or isDigit(c)
 
 proc identifier(scanner: var Scanner) =
   ## Parses the raw source code of `scanner` and captures an identifier, which
