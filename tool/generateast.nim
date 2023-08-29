@@ -24,9 +24,19 @@ proc defineType(writer: FileStream, baseName: string, kind: TypeDescription) =
   for field in kind.fields:
     writeLine(writer, indent(fmt"{field.name}*: {field.kind}" , 4))
 
+proc fieldsToParamStr(fields: seq[FieldDescription]): string =
+  if len(fields) > 0:
+    for field in fields:
+      add(result, fmt"{field.name}: {field.kind}, ")
+
+    setLen(result, len(result) - 2)
+
 proc defineConstructor(writer: FileStream, kind: TypeDescription) =
-  writeLine(writer, fmt"proc new{kind.name}(): {kind.name} =")
-  writeLine(writer, indent(fmt"new({kind.name})", 2))
+  writeLine(writer, fmt"proc new{kind.name}*({fieldsToParamStr(kind.fields)}): {kind.name} =")
+  writeLine(writer, indent(fmt"result = new({kind.name})", 2))
+
+  for field in kind.fields:
+    writeLine(writer, indent(fmt"result.{field.name} = {field.name}", 2))
 
 proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
   let path = outputDir / fmt"{toLowerAscii(baseName)}.nim"
