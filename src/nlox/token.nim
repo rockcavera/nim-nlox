@@ -7,7 +7,7 @@ import ./tokentype
 type
   LiteralKind* = enum
     ## Enumerates the kinds of literals.
-    LitNone, LitNumber, LitString
+    LitNull, LitNumber, LitString, LitBoolean
 
   LiteralValue* = object
     ## Object to store a literal value, which can be Number or String.
@@ -18,6 +18,9 @@ type
     of LitString:
       stringLit*: string
         ## Stores the value of a String
+    of LitBoolean:
+      booleanLit*: bool
+        ## Stores the value of a Boolean
     else:
       discard
 
@@ -38,7 +41,7 @@ type
 proc initToken*(kind: TokenType): Token =
   ## Initializes a `Token` as `TokenType`.`kind`. The `lexeme` and `line` fields
   ## are initialized to `""` and `-1`, respectively.
-  Token(kind: kind, literal: LiteralValue(kind: LitNone), lexeme: "", line: -1)
+  Token(kind: kind, literal: LiteralValue(kind: LitNull), lexeme: "", line: -1)
 
 proc initTokenNumber*(numberLit: float): Token =
   ## Initialize a `Token` as `TokenType.Number` and the field `Token.numberLit`
@@ -72,14 +75,16 @@ proc toString(lit: LiteralValue): string =
   result = case lit.kind
            of LitNumber: stringifyLitNumber(lit.numberLit)
            of LitString: lit.stringLit
-           of LitNone: "nil"
+           of LitBoolean: $lit.booleanLit
+           of LitNull: "nil"
 
 proc toString2(lit: LiteralValue): string =
   ## Returns a string from the `LiteralValue` object.
   result = case lit.kind
            of LitNumber: $lit.numberLit
            of LitString: lit.stringLit
-           of LitNone: "null"
+           of LitBoolean: $lit.booleanLit
+           of LitNull: "null"
 
 proc `$`*(lit: LiteralValue): string =
   ## Stringify operator that returns a string from the `LiteralValue` object.
