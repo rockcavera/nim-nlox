@@ -46,7 +46,6 @@ proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
   if isNil(writer):
     quit(fmt"The file {path} cannot be opened.", 72)
 
-  writeLine(writer, "# Stdlib imports")
   writeLine(writer, "import ./token")
   writeLine(writer, "")
   writeLine(writer, "type")
