@@ -54,6 +54,18 @@ proc error(token: Token, message: string): ref ParseError =
 
   logger.error(token, message)
 
+proc synchronize(parser: var Parser) =
+  discard advance(parser)
+
+  while not isAtEnd(parser):
+    if previous(parser).kind == Semicolon:
+      break
+
+    if peek(parser).kind in {Class, Fun, Var, For, If, While, Print, Return}:
+      break
+
+    discard advance(parser)
+
 proc consume(parser: var Parser, typ: TokenType, message: string): Token =
   if check(parser, typ):
     result = advance(parser)
