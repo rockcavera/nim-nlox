@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[lists, strutils, tables]
+import std/[lists, sequtils, strutils, tables]
 
 # Internal imports
 import ./logger, ./token, ./tokentype
@@ -239,7 +239,7 @@ proc scanToken(scanner: var Scanner) =
     else:
       error(scanner.line, "Unexpected character.")
 
-proc scanTokens*(scanner: var Scanner): SinglyLinkedList[Token] =
+proc scanTokens*(scanner: var Scanner): seq[Token] =
   ## Returns a `SinglyLinkedList[Token]` with all tokens scanned from the raw
   ## source code of `scanner`.
   while not isAtEnd(scanner):
@@ -249,4 +249,4 @@ proc scanTokens*(scanner: var Scanner): SinglyLinkedList[Token] =
 
   add(scanner.tokens, Token(kind: Eof, lexeme: "", line: scanner.line))
 
-  result = scanner.tokens
+  result = toSeq(scanner.tokens)

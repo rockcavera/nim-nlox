@@ -1,18 +1,21 @@
-# Stdlib imports
-import std/lists
-
 # Internal imports
-import ./logger, ./scanner, ./token
+import ./astprinter, ./logger, ./parser, ./scanner
 
 proc run(source: string) =
   ## Starts a `Scanner`, performs the analysis of the lox code and prints all
   ## analyzed `Token`.
-  var
-    scanner = initScanner(source)
-    tokens = scanTokens(scanner)
+  var scanner = initScanner(source)
 
-  for token in tokens:
-    echo token
+  let tokens = scanTokens(scanner)
+
+  var parser = initParser(tokens)
+
+  let expression = parse(parser)
+
+  if hadError:
+    return
+
+  echo print(expression)
 
 proc runFile(path: string) =
   ## Runs the .lox script passed in `path`.

@@ -87,6 +87,8 @@ proc primary(parser: var Parser): Expr =
     discard consume(parser, RightParen, "Expect ')' after expression.")
 
     result = newGrouping(result)
+  else:
+    raise error(peek(parser), "Expect expression.")
 
 proc unary(parser: var Parser): Expr =
   if match(parser, Bang, Minus):
@@ -140,3 +142,9 @@ proc equality(parser: var Parser): Expr =
 
 proc expression(parser: var Parser): Expr =
   equality(parser)
+
+proc parse*(parser: var Parser): Expr =
+  try:
+    result = expression(parser)
+  except ParseError:
+    result = nil
