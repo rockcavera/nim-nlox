@@ -1,3 +1,4 @@
+{.used.}
 import std/private/[ospaths2], std/unittest
 
 import ./tconfig
