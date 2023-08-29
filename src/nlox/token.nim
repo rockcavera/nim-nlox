@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/strformat
+import std/[math, strformat]
 
 # Internal imports
 import ./tokentype
@@ -56,16 +56,38 @@ proc initTokenString*(stringLit: string): Token =
                                             stringLit: stringLit), lexeme: "",
                                             line: -1)
 
+proc stringifyLitNumber(number: float): string =
+  ## Stringify a Number.
+  let truncated = trunc(number)
+
+  if truncated == number:
+    result = $uint64(number)
+  else:
+    result = $number
+
 proc toString(lit: LiteralValue): string =
+  ## Returns a string from the `LiteralValue` object.
+  ##
+  ## When the decimal part of Number is 0, returns only the integer part.
+  result = case lit.kind
+           of LitNumber: stringifyLitNumber(lit.numberLit)
+           of LitString: lit.stringLit
+           of LitNone: "nil"
+
+proc toString2(lit: LiteralValue): string =
   ## Returns a string from the `LiteralValue` object.
   result = case lit.kind
            of LitNumber: $lit.numberLit
            of LitString: lit.stringLit
-           else: "null"
+           of LitNone: "null"
+
+proc `$`*(lit: LiteralValue): string =
+  ## Stringify operator that returns a string from the `LiteralValue` object.
+  toString(lit)
 
 proc toString(token: Token): string =
   ## Returns a string from the `Token` object.
-  fmt"{token.kind} {token.lexeme} {toString(token.literal)}"
+  fmt"{token.kind} {token.lexeme} {toString2(token.literal)}"
 
 proc `$`*(token: Token): string =
   ## Stringify operator that returns a string from the `Token` object.
