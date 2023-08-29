@@ -1,0 +1,117 @@
+import ./expr, ./token, ./tokentype
+
+type
+  Parser = object
+    tokens: seq[Token]
+    current: int
+
+# Forward declaration
+proc expression(parser: var Parser): Expr
+
+proc initParser*(tokens: seq[Token]): Parser =
+  result.tokens = tokens
+  result.current = 0
+
+proc previous(parser: var Parser): Token =
+  parser.tokens[parser.current - 1]
+
+proc peek(parser: Parser): Token =
+  parser.tokens[parser.current]
+
+proc isAtEnd(parser: Parser): bool =
+  peek(parser).kind == Eof
+
+proc advance(parser: var Parser): Token =
+  if not isAtEnd(parser):
+    inc(parser.current)
+
+  result = previous(parser)
+
+proc check(parser: Parser, typ: TokenType): bool =
+  if isAtEnd(parser):
+    result = false
+  else:
+    result = peek(parser).kind == typ
+
+proc match(parser: var Parser, types: varargs[TokenType]): bool =
+  result = false
+
+  for typ in types:
+    if check(parser, typ):
+      discard advance(parser)
+
+      result = true
+
+      break
+
+proc consume(parser: var Parser, typ: TokenType, msg: string) =
+  discard
+
+proc primary(parser: var Parser): Expr =
+  if match(parser, False):
+    result = newLiteral(LiteralValue(kind: LitBoolean, booleanLit: false))
+  elif match(parser, True):
+    result = newLiteral(LiteralValue(kind: LitBoolean, booleanLit: true))
+  elif match(parser, Nil):
+    result = newLiteral(LiteralValue(kind: LitNull))
+  elif match(parser, Number, String):
+    result = newLiteral(previous(parser).literal)
+  elif match(parser, LeftParen):
+    result = expression(parser)
+
+    consume(parser, RightParen, "Expect ')' after expression.")
+
+    result = newGrouping(result)
+
+proc unary(parser: var Parser): Expr =
+  if match(parser, Bang, Minus):
+    let
+      operator = previous(parser)
+      right = unary(parser)
+
+    result = newUnary(operator, right)
+  else:
+    result = primary(parser)
+
+proc factor(parser: var Parser): Expr =
+  result = unary(parser)
+
+  while match(parser, Slash, Star):
+    let
+      operator = previous(parser)
+      right = unary(parser)
+
+    result = newBinary(result, operator, right)
+
+proc term(parser: var Parser): Expr =
+  result = factor(parser)
+
+  while match(parser, Minus, Plus):
+    let
+      operator = previous(parser)
+      right = factor(parser)
+
+    result = newBinary(result, operator, right)
+
+proc comparison(parser: var Parser): Expr =
+  result = term(parser)
+
+  while match(parser, Greater, GreaterEqual, Less, LessEqual):
+    let
+      operator = previous(parser)
+      right = term(parser)
+
+    result = newBinary(result, operator, right)
+
+proc equality(parser: var Parser): Expr =
+  result = comparison(parser)
+
+  while match(parser, BangEqual, EqualEqual):
+    let
+      operator = previous(parser)
+      right = comparison(parser)
+
+    result = newBinary(result, operator, right)
+
+proc expression(parser: var Parser): Expr =
+  equality(parser)
