@@ -7,24 +7,24 @@ import ./expr, ./token, ./tokentype
 # Forward declaration
 proc parenthesize(name: string, exprs: varargs[Expr]): string
 
-method print(expr: Expr): string {.base.} =
+method print*(expr: Expr): string {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method print(expr: Binary): string =
+method print*(expr: Binary): string =
   ## Returns a `string` representing the expression `expr`.
   parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
-method print(expr: Grouping): string =
+method print*(expr: Grouping): string =
   ## Returns a `string` representing the expression `expr`.
   parenthesize("group", expr.expression)
 
-method print(expr: Literal): string =
+method print*(expr: Literal): string =
   ## Returns a `string` representing the expression `expr`.
   $expr.value
 
-method print(expr: Unary): string =
+method print*(expr: Unary): string =
   ## Returns a `string` representing the expression `expr`.
   parenthesize(expr.operator.lexeme, expr.right)
 
