@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./expr, ./token, ./tokentype
+import ./expr, ./token
 
 # Forward declaration
 proc parenthesize(name: string, exprs: varargs[Expr]): string
@@ -40,6 +40,8 @@ proc parenthesize(name: string, exprs: varargs[Expr]): string =
 
 # This may be removed in the future as it only serves to verify the above code.
 when isMainModule:
+  import ./tokentype
+
   proc main() =
     let expression = newBinary(
       newUnary(
