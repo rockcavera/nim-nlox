@@ -1,4 +1,3 @@
-# Stdlib imports
 import ./token
 
 type
