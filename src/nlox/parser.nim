@@ -1,9 +1,11 @@
-import ./expr, ./token, ./tokentype
+import ./expr, ./logger, ./token, ./tokentype
 
 type
   Parser = object
     tokens: seq[Token]
     current: int
+
+  ParseError = object of CatchableError
 
 # Forward declaration
 proc expression(parser: var Parser): Expr
@@ -44,8 +46,19 @@ proc match(parser: var Parser, types: varargs[TokenType]): bool =
 
       break
 
-proc consume(parser: var Parser, typ: TokenType, msg: string) =
-  discard
+proc error(token: Token, message: string): ref ParseError =
+  new(result)
+
+  result.msg = message
+  result.parent = nil
+
+  logger.error(token, message)
+
+proc consume(parser: var Parser, typ: TokenType, message: string): Token =
+  if check(parser, typ):
+    result = advance(parser)
+  else:
+    raise error(peek(parser), message) # raise
 
 proc primary(parser: var Parser): Expr =
   if match(parser, False):
@@ -59,7 +72,7 @@ proc primary(parser: var Parser): Expr =
   elif match(parser, LeftParen):
     result = expression(parser)
 
-    consume(parser, RightParen, "Expect ')' after expression.")
+    discard consume(parser, RightParen, "Expect ')' after expression.")
 
     result = newGrouping(result)
 

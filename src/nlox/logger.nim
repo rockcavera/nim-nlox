@@ -3,6 +3,8 @@
 # Stdlib imports
 import std/strformat
 
+import ./token, ./tokentype
+
 # From src/lox.nim
 
 var
@@ -14,6 +16,12 @@ proc report(line: int, where: string, message: string) =
   echo fmt"[line {line}] Error{where}: {message}"
 
   hadError = true
+
+proc error*(token: Token, message: string) =
+  if token.kind == Eof:
+    report(token.line, " at end", message)
+  else:
+    report(token.line, fmt" at '{token.lexeme}'", message)
 
 proc error*(line: int, message: string) =
   ## Reports that a syntax error occurred on a given `line` printing a
