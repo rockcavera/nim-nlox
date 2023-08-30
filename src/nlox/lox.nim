@@ -28,6 +28,9 @@ proc runFile(path: string) =
   if hadError:
     quit(65)
 
+  if hadRuntimeError:
+    quit(70)
+
 proc runPrompt() =
   ## Runs the interactive prompt (REPL). If CTRL + D is sent, the execution will
   ## end.

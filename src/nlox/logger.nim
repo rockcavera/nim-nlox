@@ -4,13 +4,14 @@
 import std/strformat
 
 # Internal imports
-import ./token, ./tokentype
+import ./runtimeerror, ./token, ./tokentype
 
 # From src/lox.nim
 
 var
   hadError* = false
     ## Determines if an error occurred in code execution.
+  hadRuntimeError* = false
 
 proc report(line: int, where: string, message: string) =
   ## `error()` helper procedure.
@@ -30,5 +31,10 @@ proc error*(line: int, message: string) =
   ## Reports that a syntax error occurred on a given `line` printing a
   ## `message`.
   report(line, "", message)
+
+proc runtimeError*(error: ref RuntimeError) =
+  echo fmt"{error.msg}{'\n'}[line {error.token.line}]"
+
+  hadRuntimeError = true
 
 # End src/lox.nim

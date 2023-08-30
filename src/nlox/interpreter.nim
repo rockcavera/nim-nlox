@@ -1,6 +1,6 @@
 import std/[math, strutils]
 
-import ./expr, ./literals, ./runtimeerror, ./token, ./tokentype
+import ./expr, ./logger, ./literals, ./runtimeerror, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
   case literal.kind
@@ -129,7 +129,7 @@ proc stringify(literal: LiteralValue): string =
   of LitBoolean:
     result = $literal.booleanLit
 
-proc interpret(expression: Expr) =
+proc interpret*(expression: Expr) =
   try:
     let value = evaluate(expression)
 
