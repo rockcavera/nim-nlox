@@ -1,5 +1,14 @@
 import ./expr, ./token, ./tokentype
 
+proc isTruthy(literal: LiteralValue): bool =
+  case literal.kind
+  of LitNull:
+    result = false
+  of LitBoolean:
+    result = literal.booleanLit
+  else:
+    result = true
+
 method evaluate(expr: Expr): LiteralValue {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
