@@ -1,3 +1,5 @@
+import std/math
+
 import ./expr, ./literals, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
@@ -10,13 +12,30 @@ proc isTruthy(literal: LiteralValue): bool =
     result = true
 
 proc isEqual(a: LiteralValue, b: LiteralValue): bool =
-  if a.kind == LitNull:
+  case a.kind
+  of LitNull:
     if b.kind == LitNull:
       result = true
     else:
       result = false
-  else:
-    result = a == b
+  of LitNumber:
+    if b.kind == LitNumber:
+      if isNaN(a.numberLit) and isNaN(b.numberLit):
+        result = true
+      else:
+        result = a.numberLit == b.numberLit
+    else:
+      result = false
+  of LitString:
+    if b.kind == LitString:
+      result = a.stringLit == b.stringLit
+    else:
+      result = false
+  of LitBoolean:
+    if b.kind == LitBoolean:
+      result = a.booleanLit == b.booleanLit
+    else:
+      result = false
 
 method evaluate(expr: Expr): LiteralValue {.base.} =
   raise newException(CatchableError, "Method without implementation override")
