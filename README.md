@@ -18,7 +18,7 @@ I. WELCOME
 II. A TREE-WALK INTERPRETER
 - [x] 4. Scanning
 - [x] 5. Representing Code
-- [ ] 6. Parsing Expressions
+- [x] 6. Parsing Expressions
 - [ ] 7. Evaluating Expressions
 - [ ] 8. Statements and State
 - [ ] 9. Control Flow
