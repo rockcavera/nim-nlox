@@ -2,8 +2,10 @@
 import ./astprinter, ./logger, ./parser, ./scanner
 
 proc run(source: string) =
-  ## Starts a `Scanner`, performs the analysis of the lox code and prints all
-  ## analyzed `Token`.
+  ## Initializes a `Scanner` object with the raw `source` code, scans the
+  ## `Scanner` object, parses the scanned tokens and prints the parsed
+  ## expression. If an error occurred, it returns without printing the
+  ## expression.
   var scanner = initScanner(source)
 
   let tokens = scanTokens(scanner)
