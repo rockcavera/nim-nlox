@@ -72,7 +72,7 @@ proc error(token: Token, message: string): ref ParseError =
 
   logger.error(token, message)
 
-proc synchronize(parser: var Parser) =
+proc synchronize(parser: var Parser) {.used.} =
   ## Discards tokens until it encounters a statement boundary. It is called
   ## after catching a `ParseError` to get the parser back in sync.
   discard advance(parser)
