@@ -1,1 +1,1 @@
-import ./tcompile, ./tscanning
+import ./tcompile, ./texpressions, ./tscanning

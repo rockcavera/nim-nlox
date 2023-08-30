@@ -32,6 +32,7 @@ Identifier ab123 null
 Identifier abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_ null
 Eof  null
 """
+
     check expectedOutput == scanningTest(script)
 
   test "Keywords":
