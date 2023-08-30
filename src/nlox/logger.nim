@@ -3,6 +3,7 @@
 # Stdlib imports
 import std/strformat
 
+# Internal imports
 import ./token, ./tokentype
 
 # From src/lox.nim
@@ -18,6 +19,8 @@ proc report(line: int, where: string, message: string) =
   hadError = true
 
 proc error*(token: Token, message: string) =
+  ## Reports that an error occurred in a particular token `token`. The location
+  ## of the token, the token itself and a `message` message will be printed.
   if token.kind == Eof:
     report(token.line, " at end", message)
   else:
