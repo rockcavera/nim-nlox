@@ -1,4 +1,4 @@
-import std/math
+import std/[math, strutils]
 
 import ./expr, ./literals, ./runtimeerror, ./token, ./tokentype
 
@@ -114,3 +114,25 @@ method evaluate(expr: Binary): LiteralValue =
     result = initLiteralNumber(left.numberLit * right.numberLit)
   else:
     result = initLiteral() # You may need another type
+
+proc stringify(literal: LiteralValue): string =
+  case literal.kind
+  of LitNull:
+    result = "nil"
+  of LitNumber:
+    result = $literal.numberLit
+
+    if endsWith(result, ".0"):
+      setLen(result, len(result) - 2)
+  of LitString:
+    result = literal.stringLit
+  of LitBoolean:
+    result = $literal.booleanLit
+
+proc interpret(expression: Expr) =
+  try:
+    let value = evaluate(expression)
+
+    echo stringify(value)
+  except RuntimeError as error:
+    runtimeError(error)
