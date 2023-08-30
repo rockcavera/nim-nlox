@@ -5,3 +5,6 @@ method evaluate(expr: Expr): LiteralValue {.base.} =
 
 method evaluate(expr: Literal): LiteralValue =
   expr.value
+
+method evaluate(expr: Grouping): LiteralValue =
+  evaluate(expr.expression)
