@@ -1,7 +1,8 @@
+# Internal imports
 import ./expr, ./logger, ./token, ./tokentype
 
 type
-  Parser = object
+  Parser* = object
     tokens: seq[Token]
     current: int
 
