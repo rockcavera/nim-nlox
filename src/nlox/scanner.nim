@@ -240,8 +240,8 @@ proc scanToken(scanner: var Scanner) =
       error(scanner.line, "Unexpected character.")
 
 proc scanTokens*(scanner: var Scanner): seq[Token] =
-  ## Returns a `SinglyLinkedList[Token]` with all tokens scanned from the raw
-  ## source code of `scanner`.
+  ## Returns a `seq[Token]` with all tokens scanned from the raw source code of
+  ## `scanner`.
   while not isAtEnd(scanner):
     # We are at the beginning of the next lexeme.
     scanner.start = scanner.current
