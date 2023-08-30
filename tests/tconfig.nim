@@ -3,7 +3,7 @@ import std/private/[oscommon, ospaths2], std/[osproc, strformat]
 const
   nloxExe = "src" / "nlox.exe"
   nloxSource = "src" / "nlox.nim"
-  loxScriptsFolder = "tests" / "scripts"
+  loxScriptsFolder* = "tests" / "scripts"
 
 var nloxExeCompiled = false
 

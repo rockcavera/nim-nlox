@@ -1,15 +1,27 @@
 {.used.}
 import std/private/[ospaths2], std/unittest
 
+import nlox/[scanner, token]
+
 import ./tconfig
 
 const folder = "scanning"
+
+proc scanningTest(scriptFile: string): string =
+  let source = readFile(loxScriptsFolder / scriptFile)
+
+  var scanner = initScanner(source)
+
+  let tokens = scanTokens(scanner)
+
+  for token in tokens:
+    add(result, $token)
+    add(result, '\n')
 
 suite "Scanning":
   test "Identifiers":
     const
       script = folder / "identifiers.lox"
-      expectedExitCode = 0
       expectedOutput = """Identifier andy null
 Identifier formless null
 Identifier fo null
@@ -20,12 +32,11 @@ Identifier ab123 null
 Identifier abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_ null
 Eof  null
 """
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
 
   test "Keywords":
     const
       script = folder / "keywords.lox"
-      expectedExitCode = 0
       expectedOutput = """And and null
 Class class null
 Else else null
@@ -44,12 +55,11 @@ While while null
 Eof  null
 """
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
 
   test "Numbers":
     const
       script = folder / "numbers.lox"
-      expectedExitCode = 0
       expectedOutput = """Number 123 123.0
 Number 123.456 123.456
 Dot . null
@@ -59,12 +69,11 @@ Dot . null
 Eof  null
 """
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
 
   test "Punctuators":
     const
       script = folder / "punctuators.lox"
-      expectedExitCode = 0
       expectedOutput = """LeftParen ( null
 RightParen ) null
 LeftBrace { null
@@ -86,20 +95,18 @@ Dot . null
 Eof  null
 """
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
 
   test "Strings":
     const
       script = folder / "strings.lox"
-      expectedExitCode = 0
       expectedOutput = "String \"\" \nString \"string\" string\nEof  null\n"
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
 
   test "Whitespace":
     const
       script = folder / "whitespace.lox"
-      expectedExitCode = 0
       expectedOutput = """Identifier space null
 Identifier tabs null
 Identifier newlines null
@@ -107,4 +114,4 @@ Identifier end null
 Eof  null
 """
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == scanningTest(script)
