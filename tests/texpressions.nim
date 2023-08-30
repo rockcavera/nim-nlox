@@ -28,3 +28,12 @@ suite "Expressions":
       expectedOutput = """(+ (group (- 5.0 (group (- 3.0 1.0)))) (- 1.0))"""
 
     check expectedOutput == expressionsTest(script)
+
+  test "Evaluate":
+    const
+      script = folder / "evaluate.lox"
+      expectedExitCode = 0
+      expectedOutput = """2
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
