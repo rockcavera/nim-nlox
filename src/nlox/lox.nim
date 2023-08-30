@@ -1,5 +1,5 @@
 # Internal imports
-import ./astprinter, ./logger, ./parser, ./scanner
+import ./interpreter, ./logger, ./parser, ./scanner
 
 proc run(source: string) =
   ## Initializes a `Scanner` object with the raw `source` code, scans the
@@ -17,7 +17,7 @@ proc run(source: string) =
   if hadError:
     return
 
-  echo print(expression)
+  interpret(expression)
 
 proc runFile(path: string) =
   ## Runs the .lox script passed in `path`.
