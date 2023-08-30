@@ -99,7 +99,7 @@ method evaluate(expr: Binary): LiteralValue =
     result = initLiteralNumber(left.numberLit - right.numberLit)
   of Plus:
     if left.kind == LitNumber and right.kind == LitNumber:
-      result = initLiteralNumber(left.numberLit - right.numberLit)
+      result = initLiteralNumber(left.numberLit + right.numberLit)
     elif left.kind == LitString and right.kind == LitString:
       result = initLiteralString(left.stringLit & right.stringLit)
     else:
