@@ -1,4 +1,4 @@
-import ./token
+import ./literals, ./token
 
 type
   Expr* = ref object of RootObj

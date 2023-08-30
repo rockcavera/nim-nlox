@@ -22,23 +22,21 @@ type
 proc initToken*(kind: TokenType): Token =
   ## Initializes a `Token` as `TokenType`.`kind`. The `lexeme` and `line` fields
   ## are initialized to `""` and `-1`, respectively.
-  Token(kind: kind, literal: LiteralValue(kind: LitNull), lexeme: "", line: -1)
+  Token(kind: kind, literal: initLiteral(), lexeme: "", line: -1)
 
 proc initTokenNumber*(numberLit: float): Token =
   ## Initialize a `Token` as `TokenType.Number` and the field `Token.numberLit`
   ## as `numberLit`. The `lexeme` and `line` fields are initialized to `""` and
   ## `-1`, respectively.
-  Token(kind: Number, literal: LiteralValue(kind: LitNumber,
-                                            numberLit: numberlit), lexeme: "",
-                                            line: -1)
+  Token(kind: Number, literal: initLiteralNumber(numberlit), lexeme: "",
+        line: -1)
 
 proc initTokenString*(stringLit: string): Token =
   ## Initialize a `Token` as `TokenType.String` and the field `Token.stringLit`
   ## as `stringLit`. The `lexeme` and `line` fields are initialized to `""` and
   ## `-1`, respectively.
-  Token(kind: String, literal: LiteralValue(kind: LitString,
-                                            stringLit: stringLit), lexeme: "",
-                                            line: -1)
+  Token(kind: String, literal: initLiteralString(stringLit), lexeme: "",
+        line: -1)
 
 proc toString(token: Token): string =
   ## Returns a string from the `Token` object.

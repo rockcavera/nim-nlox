@@ -46,7 +46,7 @@ proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
   if isNil(writer):
     quit(fmt"The file {path} cannot be opened.", 72)
 
-  writeLine(writer, "import ./token")
+  writeLine(writer, "import ./literals, ./token")
   writeLine(writer, "")
   writeLine(writer, "type")
   writeLine(writer, indent(fmt"{baseName}* = ref object of RootObj" , 2))

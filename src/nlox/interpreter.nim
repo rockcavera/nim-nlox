@@ -1,4 +1,4 @@
-import ./expr, ./token, ./tokentype
+import ./expr, ./literals, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
   case literal.kind
@@ -32,11 +32,11 @@ method evaluate(expr: Unary): LiteralValue =
 
   case expr.operator.kind
   of Bang:
-    result = LiteralValue(kind: LitBoolean, booleanLit: not isTruthy(right))
+    result = initLiteralBoolean(not isTruthy(right))
   of Minus:
-    result = LiteralValue(kind: LitNumber, numberLit: -right.numberLit) # I need to see later the behavior for non-numbers
+    result = initLiteralNumber(-right.numberLit) # I need to see later the behavior for non-numbers
   else:
-    result = LiteralValue(kind: LitNull) # You may need another type
+    result = initLiteral() # You may need another type
 
 method evaluate(expr: Binary): LiteralValue =
   let
@@ -45,27 +45,27 @@ method evaluate(expr: Binary): LiteralValue =
 
   case expr.operator.kind
   of BangEqual:
-    result = LiteralValue(kind: LitBoolean, booleanLit: not isEqual(left, right))
+    result = initLiteralBoolean(not isEqual(left, right))
   of EqualEqual:
-    result = LiteralValue(kind: LitBoolean, booleanLit: isEqual(left, right))
+    result = initLiteralBoolean(isEqual(left, right))
   of Greater:
-    result = LiteralValue(kind: LitBoolean, booleanLit: left.numberLit > right.numberLit)
+    result = initLiteralBoolean(left.numberLit > right.numberLit)
   of GreaterEqual:
-    result = LiteralValue(kind: LitBoolean, booleanLit: left.numberLit >= right.numberLit)
+    result = initLiteralBoolean(left.numberLit >= right.numberLit)
   of Less:
-    result = LiteralValue(kind: LitBoolean, booleanLit: left.numberLit < right.numberLit)
+    result = initLiteralBoolean(left.numberLit < right.numberLit)
   of LessEqual:
-    result = LiteralValue(kind: LitBoolean, booleanLit: left.numberLit <= right.numberLit)
+    result = initLiteralBoolean(left.numberLit <= right.numberLit)
   of Minus:
-    result = LiteralValue(kind: LitNumber, numberLit: left.numberLit - right.numberLit)
+    result = initLiteralNumber(left.numberLit - right.numberLit)
   of Plus:
     if left.kind == LitNumber and right.kind == LitNumber:
-      result = LiteralValue(kind: LitNumber, numberLit: left.numberLit - right.numberLit)
+      result = initLiteralNumber(left.numberLit - right.numberLit)
     elif left.kind == LitString and right.kind == LitString:
-      result = LiteralValue(kind: LitString, stringLit: left.stringLit & right.stringLit)
+      result = initLiteralString(left.stringLit & right.stringLit)
   of Slash:
-    result = LiteralValue(kind: LitNumber, numberLit: left.numberLit / right.numberLit)
+    result = initLiteralNumber(left.numberLit / right.numberLit)
   of Star:
-    result = LiteralValue(kind: LitNumber, numberLit: left.numberLit * right.numberLit)
+    result = initLiteralNumber(left.numberLit * right.numberLit)
   else:
-    result = LiteralValue(kind: LitNull) # You may need another type
+    result = initLiteral() # You may need another type

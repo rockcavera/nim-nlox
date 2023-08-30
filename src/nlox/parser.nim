@@ -1,5 +1,5 @@
 # Internal imports
-import ./expr, ./logger, ./token, ./tokentype
+import ./expr, ./literals, ./logger, ./token, ./tokentype
 
 type
   Parser* = object
@@ -99,11 +99,11 @@ proc primary(parser: var Parser): Expr =
   # primary → NUMBER | STRING | "true" | "false" | "nil"
   #         | "(" expression ")" ;
   if match(parser, False):
-    result = newLiteral(LiteralValue(kind: LitBoolean, booleanLit: false))
+    result = newLiteral(initLiteralBoolean(false))
   elif match(parser, True):
-    result = newLiteral(LiteralValue(kind: LitBoolean, booleanLit: true))
+    result = newLiteral(initLiteralBoolean(true))
   elif match(parser, Nil):
-    result = newLiteral(LiteralValue(kind: LitNull))
+    result = newLiteral(initLiteral())
   elif match(parser, Number, String):
     result = newLiteral(previous(parser).literal)
   elif match(parser, LeftParen):
