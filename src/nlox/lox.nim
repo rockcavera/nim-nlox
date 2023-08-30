@@ -3,8 +3,8 @@ import ./interpreter, ./logger, ./parser, ./scanner
 
 proc run(source: string) =
   ## Initializes a `Scanner` object with the raw `source` code, scans the
-  ## `Scanner` object, parses the scanned tokens and prints the parsed
-  ## expression. If an error occurred, it returns without printing the
+  ## `Scanner` object, parses the scanned tokens and interprets the parsed
+  ## expression. If an error occurred, it returns without printing the evaluated
   ## expression.
   var scanner = initScanner(source)
 

@@ -1,8 +1,11 @@
+# Stdlib imports
 import std/[math, strutils]
 
+# Internal imports
 import ./expr, ./logger, ./literals, ./runtimeerror, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
+  ## Transforms the `literal` object into a boolean type and returns it.
   case literal.kind
   of LitNull:
     result = false
@@ -12,6 +15,8 @@ proc isTruthy(literal: LiteralValue): bool =
     result = true
 
 proc isEqual(a: LiteralValue, b: LiteralValue): bool =
+  ## Returns `true` if objects `a` and `b` are equal. Otherwise, it returns
+  ## `false`.
   case a.kind
   of LitNull:
     if b.kind == LitNull:
@@ -38,23 +43,33 @@ proc isEqual(a: LiteralValue, b: LiteralValue): bool =
       result = false
 
 proc checkNumberOperand(operator: Token, operand: LiteralValue) =
+  ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
+  ## it raises a `RuntimeError`.
   if operand.kind != LitNumber:
     raise newRuntimeError(operator, "Operand must be a number.")
 
-proc checkNumberOperands(operator: Token, left: LiteralValue, right: LiteralValue) =
+proc checkNumberOperands(operator: Token, left: LiteralValue,
+                         right: LiteralValue) =
+  ## Checks if the operands `left` and `right` are numbers, and if they are, it
+  ## does nothing. Otherwise, it raises a `RuntimeError`.
   if left.kind != LitNumber or right.kind != LitNumber:
     raise newRuntimeError(operator, "Operands must be numbers.")
 
 method evaluate(expr: Expr): LiteralValue {.base.} =
+  ## Base method that raises `CatchableError` exception when `expr` has not had
+  ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
 method evaluate(expr: Literal): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of a `Literal` expression.
   expr.value
 
 method evaluate(expr: Grouping): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of a `Grouping` expression.
   evaluate(expr.expression)
 
 method evaluate(expr: Unary): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of an `Unary` expression.
   let right = evaluate(expr.right)
 
   case expr.operator.kind
@@ -65,9 +80,10 @@ method evaluate(expr: Unary): LiteralValue =
 
     result = initLiteralNumber(-right.numberLit)
   else:
-    result = initLiteral() # You may need another type
+    result = initLiteral()
 
 method evaluate(expr: Binary): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of an `Binary` expression.
   let
     left = evaluate(expr.left)
     right = evaluate(expr.right)
@@ -103,7 +119,8 @@ method evaluate(expr: Binary): LiteralValue =
     elif left.kind == LitString and right.kind == LitString:
       result = initLiteralString(left.stringLit & right.stringLit)
     else:
-      raise newRuntimeError(expr.operator, "Operands must be two numbers or two strings.")
+      raise newRuntimeError(expr.operator,
+                            "Operands must be two numbers or two strings.")
   of Slash:
     checkNumberOperands(expr.operator, left, right)
 
@@ -113,9 +130,11 @@ method evaluate(expr: Binary): LiteralValue =
 
     result = initLiteralNumber(left.numberLit * right.numberLit)
   else:
-    result = initLiteral() # You may need another type
+    result = initLiteral()
 
 proc stringify(literal: LiteralValue): string =
+  ## Returns a `string` of `literal`. This is different from the `$` operator
+  ## for the `LiteralValue` type.
   case literal.kind
   of LitNull:
     result = "nil"
@@ -130,6 +149,8 @@ proc stringify(literal: LiteralValue): string =
     result = $literal.booleanLit
 
 proc interpret*(expression: Expr) =
+  ## Attempts to evaluate `expression` and prints the evaluated value.
+  ## Otherwise, it throws a runtime error.
   try:
     let value = evaluate(expression)
 

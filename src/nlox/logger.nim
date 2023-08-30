@@ -12,6 +12,7 @@ var
   hadError* = false
     ## Determines if an error occurred in code execution.
   hadRuntimeError* = false
+    ## Determines that a runtime error occurred while running a Lox script.
 
 proc report(line: int, where: string, message: string) =
   ## `error()` helper procedure.
@@ -33,6 +34,8 @@ proc error*(line: int, message: string) =
   report(line, "", message)
 
 proc runtimeError*(error: ref RuntimeError) =
+  ## Reports a runtime error by providing the line of code that was executing
+  ## when the error occurred.
   echo fmt"{error.msg}{'\n'}[line {error.token.line}]"
 
   hadRuntimeError = true
