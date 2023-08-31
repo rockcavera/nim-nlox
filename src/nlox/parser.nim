@@ -1,4 +1,4 @@
-import std/lists
+import std/[lists, sequtils]
 
 # Internal imports
 import ./expr, ./literals, ./logger, ./stmt, ./token, ./tokentype
@@ -209,3 +209,5 @@ proc parse*(parser: var Parser): seq[Stmt] =
 
   while not isAtEnd(parser):
     add(statements, statement(parser))
+
+  result = toSeq(statements)
