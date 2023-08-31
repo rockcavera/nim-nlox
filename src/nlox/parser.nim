@@ -264,3 +264,11 @@ proc parse*(parser: var Parser): seq[Stmt] =
     add(statements, declaration(parser))
 
   result = toSeq(statements)
+
+when defined(nloxTests):
+  proc parseForParseTest*(parser: var Parser): Expr =
+    ## Returns a parsed `Expr` from `parser`.
+    try:
+      result = expression(parser)
+    except ParseError:
+      result = nil

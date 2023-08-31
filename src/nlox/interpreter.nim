@@ -203,3 +203,14 @@ proc interpret*(statements: seq[Stmt]) =
       execute(statement)
   except RuntimeError as error:
     runtimeError(error)
+
+when defined(nloxTests):
+  proc interpretForEvaluateTest*(expression: Expr): string =
+    ## Attempts to evaluate `expression` and returns the evaluated value.
+    ## Otherwise, it throws a runtime error.
+    try:
+      let value = evaluate(expression)
+
+      result = stringify(value)
+    except RuntimeError as error:
+      runtimeError(error)

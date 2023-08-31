@@ -1,13 +1,13 @@
 {.used.}
 import std/private/[ospaths2], std/unittest
 
-import nlox/[astprinter, logger, parser, scanner]
+import nlox/[astprinter, interpreter, logger, parser, scanner]
 
 import ./tconfig
 
 const folder = "expressions"
 
-proc expressionsTest(scriptFile: string): string =
+proc parseTest(scriptFile: string): string =
   let source = readFile(loxScriptsFolder / scriptFile)
 
   var scanner = initScanner(source)
@@ -16,10 +16,24 @@ proc expressionsTest(scriptFile: string): string =
 
   var parser = initParser(tokens)
 
-  let expression = parse(parser)
+  let expression = parseForParseTest(parser)
 
   if not hadError:
     result = print(expression)
+
+proc evaluateTest(scriptFile: string): string =
+  let source = readFile(loxScriptsFolder / scriptFile)
+
+  var scanner = initScanner(source)
+
+  let tokens = scanTokens(scanner)
+
+  var parser = initParser(tokens)
+
+  let expression = parseForParseTest(parser)
+
+  if not hadError:
+    result = interpretForEvaluateTest(expression)
 
 suite "Expressions":
   test "Parse":
@@ -27,13 +41,11 @@ suite "Expressions":
       script = folder / "parse.lox"
       expectedOutput = """(+ (group (- 5.0 (group (- 3.0 1.0)))) (- 1.0))"""
 
-    check expectedOutput == expressionsTest(script)
+    check expectedOutput == parseTest(script)
 
   test "Evaluate":
     const
       script = folder / "evaluate.lox"
-      expectedExitCode = 0
-      expectedOutput = """2
-"""
+      expectedOutput = """2"""
 
-    check (expectedOutput, expectedExitCode) == nloxTest(script)
+    check expectedOutput == evaluateTest(script)
