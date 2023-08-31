@@ -6,11 +6,14 @@ type
   Environment* = object
     values: Table[string, LiteralValue]
 
-proc define*(env: var Environment, name: string, value: LiteralValue) =
-  env.values[name] = value
+proc initEnvironment*(): Environment =
+  Environment(values: initTable[string, LiteralValue]())
 
-proc get*(env: var Environment, name: Token): LiteralValue =
-  if hasKey(env.values, name.lexeme):
-    result = env.values[name.lexeme]
+proc define*(environment: var Environment, name: string, value: LiteralValue) =
+  environment.values[name] = value
+
+proc get*(environment: var Environment, name: Token): LiteralValue =
+  if hasKey(environment.values, name.lexeme):
+    result = environment.values[name.lexeme]
   else:
     raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
