@@ -12,12 +12,12 @@ proc run(source: string) =
 
   var parser = initParser(tokens)
 
-  let expression = parse(parser)
+  let statements = parse(parser)
 
   if hadError:
     return
 
-  interpret(expression)
+  interpret(statements)
 
 proc runFile(path: string) =
   ## Runs the .lox script passed in `path`.

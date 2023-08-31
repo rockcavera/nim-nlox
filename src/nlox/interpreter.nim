@@ -2,7 +2,7 @@
 import std/[math, strutils]
 
 # Internal imports
-import ./expr, ./logger, ./literals, ./runtimeerror, ./token, ./tokentype
+import ./expr, ./logger, ./literals, ./runtimeerror, ./stmt, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
@@ -148,12 +148,25 @@ proc stringify(literal: LiteralValue): string =
   of LitBoolean:
     result = $literal.booleanLit
 
-proc interpret*(expression: Expr) =
+method evaluate(stmt: Stmt) {.base.} =
+  raise newException(CatchableError, "Method without implementation override")
+
+method evaluate(stmt: Expression) =
+  discard evaluate(stmt.expression)
+
+method evaluate(stmt: Print) =
+  let value = evaluate(stmt.expression)
+
+  echo stringify(value)
+
+proc execute(stmt: Stmt) =
+  evaluate(stmt)
+
+proc interpret*(statements: seq[Stmt]) =
   ## Attempts to evaluate `expression` and prints the evaluated value.
   ## Otherwise, it throws a runtime error.
   try:
-    let value = evaluate(expression)
-
-    echo stringify(value)
+    for statement in statements:
+      execute(statement)
   except RuntimeError as error:
     runtimeError(error)
