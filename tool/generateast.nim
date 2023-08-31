@@ -102,6 +102,7 @@ proc main*(args: seq[string]) =
     "Variable : Token name"])
 
   defineAst(outputDir, "Stmt", @["expr", "token"], @[
+    "Block      : seq[Stmt] statements",
     "Expression : Expr expression",
     "Print      : Expr expression",
     "Var        : Token name, Expr initializer"])

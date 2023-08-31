@@ -4,6 +4,9 @@ import std/[math, strutils]
 # Internal imports
 import ./environment, ./expr, ./logger, ./literals, ./runtimeerror, ./stmt, ./token, ./tokentype
 
+# Forward declaration
+proc execute(stmt: Stmt)
+
 proc isTruthy(literal: LiteralValue): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
   case literal.kind
@@ -156,6 +159,17 @@ proc stringify(literal: LiteralValue): string =
   of LitBoolean:
     result = $literal.booleanLit
 
+proc executeBlock(statements: seq[Stmt], env: Environment) =
+  let previous = environment.environment
+
+  try:
+    environment.environment = env
+
+    for statement in statements:
+      execute(statement)
+  finally:
+    environment.environment = previous
+
 method evaluate(stmt: Stmt) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
@@ -174,6 +188,9 @@ method evaluate(stmt: Var) =
     value = evaluate(stmt.initializer)
 
   define(environment.environment, stmt.name.lexeme, value)
+
+method evaluate(stmt: Block) =
+  executeBlock(stmt.statements, newEnvironment(environment.environment))
 
 proc execute(stmt: Stmt) =
   evaluate(stmt)

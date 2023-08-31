@@ -16,6 +16,7 @@ type
 
 # Forward declaration
 proc expression(parser: var Parser): Expr
+proc declaration(parser: var Parser): Stmt
 
 proc initParser*(tokens: seq[Token]): Parser =
   ## Initializes a `Parser` object with the sequence of `tokens`.
@@ -226,9 +227,21 @@ proc expressionStatement(parser: var Parser): Stmt =
 
   result = newExpression(expr)
 
+proc block2(parser: var Parser): seq[Stmt] =
+  var statements = initSinglyLinkedList[Stmt]()
+
+  while (not check(parser, RightBrace)) and (not isAtEnd(parser)):
+    add(statements, declaration(parser))
+
+  discard consume(parser, RightBrace, "Expect '}' after block.")
+
+  result = toSeq(statements)
+
 proc statement(parser: var Parser): Stmt =
   if match(parser, tokentype.Print):
     result = printStatement(parser)
+  elif match(parser, LeftBrace):
+    result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.
   else:
     result = expressionStatement(parser)
 
