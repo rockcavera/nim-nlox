@@ -74,7 +74,7 @@ proc error(token: Token, message: string): ref ParseError =
 
   logger.error(token, message)
 
-proc synchronize(parser: var Parser) {.used.} =
+proc synchronize(parser: var Parser) =
   ## Discards tokens until it encounters a statement boundary. It is called
   ## after catching a `ParseError` to get the parser back in sync.
   discard advance(parser)
@@ -108,6 +108,8 @@ proc primary(parser: var Parser): Expr =
     result = newLiteral(initLiteral())
   elif match(parser, Number, String):
     result = newLiteral(previous(parser).literal)
+  elif match(parser, Identifier):
+    result = newVariable(previous(parser))
   elif match(parser, LeftParen):
     result = expression(parser)
 
@@ -190,6 +192,18 @@ proc printStatement(parser: var Parser): Stmt =
 
   result = newPrint(value)
 
+proc varDeclaration(parser: var Parser): Stmt =
+  let name = consume(parser, Identifier, "Expect variable name.")
+
+  var initializer: Expr = nil
+
+  if match(parser, Equal):
+    initializer = expression(parser)
+
+  discard consume(parser, Semicolon, "Expect ';' after variable declaration.")
+
+  result = newVar(name, initializer)
+
 proc expressionStatement(parser: var Parser): Stmt =
   let expr = expression(parser)
 
@@ -203,11 +217,22 @@ proc statement(parser: var Parser): Stmt =
   else:
     result = expressionStatement(parser)
 
+proc declaration(parser: var Parser): Stmt =
+  try:
+    if match(parser, tokentype.Var):
+      result = varDeclaration(parser)
+    else:
+      result = statement(parser)
+  except ParseError:
+    synchronize(parser)
+
+    result = nil
+
 proc parse*(parser: var Parser): seq[Stmt] =
   ## Returns a parsed `Expr` from `parser`.
   var statements = initSinglyLinkedList[Stmt]()
 
   while not isAtEnd(parser):
-    add(statements, statement(parser))
+    add(statements, declaration(parser))
 
   result = toSeq(statements)
