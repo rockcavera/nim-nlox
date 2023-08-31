@@ -94,6 +94,7 @@ proc main*(args: seq[string]) =
   let outputDir = args[0]
 
   defineAst(outputDir, "Expr", @["literals", "token"], @[
+    "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : LiteralValue value",

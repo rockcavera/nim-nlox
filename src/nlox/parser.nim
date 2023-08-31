@@ -180,10 +180,25 @@ proc equality(parser: var Parser): Expr =
 
     result = newBinary(result, operator, right)
 
+proc assignment(parser: var Parser): Expr =
+  result = equality(parser)
+
+  if match(parser, Equal):
+    let
+      equals = previous(parser)
+      value = assignment(parser)
+
+    if result of Variable:
+      let name = Variable(result).name
+
+      result = newAssign(name, value)
+    else:
+      logger.error(equals, "Invalid assignment target.")
+
 proc expression(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule expression.
   # expression → equality ;
-  equality(parser)
+  assignment(parser)
 
 proc printStatement(parser: var Parser): Stmt =
   let value = expression(parser)
