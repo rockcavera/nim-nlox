@@ -1,5 +1,7 @@
+import std/lists
+
 # Internal imports
-import ./expr, ./literals, ./logger, ./token, ./tokentype
+import ./expr, ./literals, ./logger, ./stmt, ./token, ./tokentype
 
 type
   Parser* = object
@@ -181,9 +183,29 @@ proc expression(parser: var Parser): Expr =
   # expression → equality ;
   equality(parser)
 
-proc parse*(parser: var Parser): Expr =
+proc printStatement(parser: var Parser): Stmt =
+  let value = expression(parser)
+
+  discard consume(parser, Semicolon, "Expect ';' after value.")
+
+  result = newPrint(value)
+
+proc expressionStatement(parser: var Parser): Stmt =
+  let expr = expression(parser)
+
+  discard consume(parser, Semicolon, "Expect ';' after expression.")
+
+  result = newExpression(expr)
+
+proc statement(parser: var Parser): Stmt =
+  if match(parser, tokentype.Print):
+    result = printStatement(parser)
+  else:
+    result = expressionStatement(parser)
+
+proc parse*(parser: var Parser): seq[Stmt] =
   ## Returns a parsed `Expr` from `parser`.
-  try:
-    result = expression(parser)
-  except ParseError:
-    result = nil
+  var statements = initSinglyLinkedList[Stmt]()
+
+  while not isAtEnd(parser):
+    add(statements, statement(parser))
