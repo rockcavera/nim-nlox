@@ -133,7 +133,7 @@ method evaluate(expr: Binary): LiteralValue =
     result = initLiteral()
 
 method evaluate(expr: Variable): LiteralValue =
-  get(environment, expr.name)
+  result = get(environment.environment, expr.name)
 
 proc stringify(literal: LiteralValue): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
@@ -168,7 +168,7 @@ method evaluate(stmt: Var) =
   if not isNil(stmt.initializer):
     value = evaluate(stmt.initializer)
 
-  define(environment, stmt.name, value)
+  define(environment.environment, stmt.name.lexeme, value)
 
 proc execute(stmt: Stmt) =
   evaluate(stmt)
