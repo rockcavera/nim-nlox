@@ -135,6 +135,11 @@ method evaluate(expr: Binary): LiteralValue =
 method evaluate(expr: Variable): LiteralValue =
   get(environment.environment, expr.name)
 
+method evaluate(expr: Assign): LiteralValue =
+  result = evaluate(expr.value)
+
+  assign(environment.environment, expr.name, result)
+
 proc stringify(literal: LiteralValue): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `LiteralValue` type.

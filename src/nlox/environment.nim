@@ -18,4 +18,10 @@ proc get*(environment: var Environment, name: Token): LiteralValue =
   else:
     raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
 
+proc assign*(environment: var Environment, name: Token, value: LiteralValue) =
+  if hasKey(environment.values, name.lexeme):
+    environment.values[name.lexeme] = value
+  else:
+    raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
+
 var environment* = initEnvironment()
