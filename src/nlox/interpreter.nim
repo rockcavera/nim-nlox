@@ -2,7 +2,7 @@
 import std/[math, strutils]
 
 # Internal imports
-import ./expr, ./logger, ./literals, ./runtimeerror, ./stmt, ./token, ./tokentype
+import ./environment, ./expr, ./logger, ./literals, ./runtimeerror, ./stmt, ./token, ./tokentype
 
 proc isTruthy(literal: LiteralValue): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
@@ -132,6 +132,9 @@ method evaluate(expr: Binary): LiteralValue =
   else:
     result = initLiteral()
 
+method evaluate(expr: Variable): LiteralValue =
+  get(environment, expr.name)
+
 proc stringify(literal: LiteralValue): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `LiteralValue` type.
@@ -158,6 +161,14 @@ method evaluate(stmt: Print) =
   let value = evaluate(stmt.expression)
 
   echo stringify(value)
+
+method evaluate(stmt: Var) =
+  var value = initLiteral()
+
+  if not isNil(stmt.initializer):
+    value = evaluate(stmt.initializer)
+
+  define(environment, stmt.name, value)
 
 proc execute(stmt: Stmt) =
   evaluate(stmt)
