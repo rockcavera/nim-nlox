@@ -38,7 +38,16 @@ proc defineConstructor(writer: FileStream, kind: TypeDescription) =
   for field in kind.fields:
     writeLine(writer, indent(fmt"result.{field.name} = {field.name}", 2))
 
-proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
+proc generateImportString(imports: seq[string]): string =
+  for name in imports:
+    add(result, "./")
+    add(result, name)
+    add(result, ", ")
+
+  if len(result) > 0:
+    setLen(result, len(result) - 2)
+
+proc defineAst(outputDir: string, baseName: string, imports: seq[string], types: seq[string]) =
   let path = outputDir / fmt"{toLowerAscii(baseName)}.nim"
 
   var writer = newFileStream(path, fmWrite)
@@ -46,8 +55,10 @@ proc defineAst(outputDir: string, baseName: string, types: seq[string]) =
   if isNil(writer):
     quit(fmt"The file {path} cannot be opened.", 72)
 
-  writeLine(writer, "import ./literals, ./token")
-  writeLine(writer, "")
+  if len(imports) > 0:
+    writeLine(writer, fmt"import {generateImportString(imports)}")
+    writeLine(writer, "")
+
   writeLine(writer, "type")
   writeLine(writer, indent(fmt"{baseName}* = ref object of RootObj" , 2))
   writeLine(writer, "")
@@ -82,10 +93,14 @@ proc main*(args: seq[string]) =
 
   let outputDir = args[0]
 
-  defineAst(outputDir, "Expr", @[
+  defineAst(outputDir, "Expr", @["literals", "token"], @[
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : LiteralValue value",
     "Unary    : Token operator, Expr right"])
+
+  defineAst(outputDir, "Stmt", @["expr"], @[
+    "Expression : Expr expression",
+    "Print      : Expr expression"])
 
 main(commandLineParams())
