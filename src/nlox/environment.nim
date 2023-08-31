@@ -17,3 +17,5 @@ proc get*(environment: var Environment, name: Token): LiteralValue =
     result = environment.values[name.lexeme]
   else:
     raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
+
+var environment* = initEnvironment()
