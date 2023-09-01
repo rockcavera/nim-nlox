@@ -146,6 +146,17 @@ method evaluate(expr: Assign): LiteralValue =
 
   assign(environment.environment, expr.name, result)
 
+method evaluate(expr: Logical): LiteralValue =
+  let left = evaluate(expr.left)
+
+  if expr.operator.kind == Or:
+    if isTruthy(result):
+      result = left
+  elif not isTruthy(left):
+      result = left
+  else:
+    result = evaluate(expr.right)
+
 proc stringify(literal: LiteralValue): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `LiteralValue` type.

@@ -185,11 +185,31 @@ proc equality(parser: var Parser): Expr =
 
     result = newBinary(result, operator, right)
 
+proc and2(parser: var Parser): Expr =
+  result = equality(parser)
+
+  while match(parser, And):
+    let
+      operator = previous(parser)
+      right = equality(parser)
+
+    result = newLogical(result, operator, right)
+
+proc or2(parser: var Parser): Expr =
+  result = and2(parser) # `and` is a reserved keyword in Nim.
+
+  while match(parser, Or):
+    let
+      operator = previous(parser)
+      right = and2(parser)
+
+    result = newLogical(result, operator, right)
+
 proc assignment(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule assignment.
   # assignment → IDENTIFIER "=" assignment
-  #            | equality ;
-  result = equality(parser)
+  #            | logic_or ;
+  result = or2(parser) # `or` is a reserved keyword in Nim.
 
   if match(parser, Equal):
     let
