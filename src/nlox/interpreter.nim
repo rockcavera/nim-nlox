@@ -2,7 +2,8 @@
 import std/[math, strutils]
 
 # Internal imports
-import ./environment, ./expr, ./logger, ./literals, ./runtimeerror, ./stmt, ./token, ./tokentype
+import ./environment, ./expr, ./logger, ./literals, ./runtimeerror, ./stmt,
+       ./token, ./tokentype
 
 # Forward declaration
 proc execute(stmt: Stmt)
@@ -136,9 +137,11 @@ method evaluate(expr: Binary): LiteralValue =
     result = initLiteral()
 
 method evaluate(expr: Variable): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of a `Variable` expression.
   get(environment.environment, expr.name)
 
 method evaluate(expr: Assign): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of an `Assign` expression.
   result = evaluate(expr.value)
 
   assign(environment.environment, expr.name, result)
@@ -160,6 +163,8 @@ proc stringify(literal: LiteralValue): string =
     result = $literal.booleanLit
 
 proc executeBlock(statements: seq[Stmt], env: Environment) =
+  ## Runs `statements` from a higher block and changes the global environment
+  ## variable reference to `env`.
   let previous = environment.environment
 
   try:
@@ -171,17 +176,22 @@ proc executeBlock(statements: seq[Stmt], env: Environment) =
     environment.environment = previous
 
 method evaluate(stmt: Stmt) {.base.} =
+  ## Base method that raises `CatchableError` exception when `stmt` has not had
+  ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
 method evaluate(stmt: Expression) =
+  ## Evaluate the `Expression` statement.
   discard evaluate(stmt.expression)
 
 method evaluate(stmt: Print) =
+  ## Evaluate the `Print` statement.
   let value = evaluate(stmt.expression)
 
   echo stringify(value)
 
 method evaluate(stmt: Var) =
+  ## Evaluate the `Var` statement.
   var value = initLiteral()
 
   if not isNil(stmt.initializer):
@@ -190,14 +200,15 @@ method evaluate(stmt: Var) =
   define(environment.environment, stmt.name.lexeme, value)
 
 method evaluate(stmt: Block) =
+  ## Evaluate the `Block` statement.
   executeBlock(stmt.statements, newEnvironment(environment.environment))
 
 proc execute(stmt: Stmt) =
+  ## Helper procedure to evaluate `stmt`.
   evaluate(stmt)
 
 proc interpret*(statements: seq[Stmt]) =
-  ## Attempts to evaluate `expression` and prints the evaluated value.
-  ## Otherwise, it throws a runtime error.
+  ## Try to execute `statements`. Otherwise, it throws a runtime error.
   try:
     for statement in statements:
       execute(statement)
@@ -206,7 +217,7 @@ proc interpret*(statements: seq[Stmt]) =
 
 when defined(nloxTests):
   proc interpretForEvaluateTest*(expression: Expr): string =
-    ## Attempts to evaluate `expression` and returns the evaluated value.
+    ## Attempts to evaluate `expression` and returns the stringified value.
     ## Otherwise, it throws a runtime error.
     try:
       let value = evaluate(expression)

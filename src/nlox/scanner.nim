@@ -130,7 +130,8 @@ proc string(scanner: var Scanner) =
     discard advance(scanner)
 
     # Trim the surrounding quotes.
-    let value = subString(scanner.source, scanner.start + 1, scanner.current - 1)
+    let value = subString(scanner.source, scanner.start + 1,
+                          scanner.current - 1)
 
     addToken(scanner, value)
 
@@ -153,14 +154,15 @@ proc number(scanner: var Scanner) =
     while (isDigit(peek(scanner))):
       discard advance(scanner)
 
-  addToken(scanner, parseFloat(subString(scanner.source, scanner.start, scanner.current)))
+  addToken(scanner, parseFloat(subString(scanner.source, scanner.start,
+                                         scanner.current)))
 
 proc isAlpha(c: char): bool =
   ## Returns `true` if character `c` is letter or underscore [A-Z_a-z].
   c in {'A'..'Z', '_', 'a'..'z'}
 
 proc isAlphaNumeric(c: char): bool =
-  ## Returns `true` if character `c` is alphanumeric or underscore [0-9A-Z_a-z].d
+  ## Returns `true` if character `c` is alphanumeric or underscore [0-9A-Z_a-z].
   isAlpha(c) or isDigit(c)
 
 proc identifier(scanner: var Scanner) =

@@ -4,8 +4,7 @@ import ./interpreter, ./logger, ./parser, ./scanner
 proc run(source: string) =
   ## Initializes a `Scanner` object with the raw `source` code, scans the
   ## `Scanner` object, parses the scanned tokens and interprets the parsed
-  ## expression. If an error occurred, it returns without printing the evaluated
-  ## expression.
+  ## statements. If an error occurred, it returns without interpreting.
   var scanner = initScanner(source)
 
   let tokens = scanTokens(scanner)

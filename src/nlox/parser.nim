@@ -1,3 +1,4 @@
+# Stdlib imports
 import std/[lists, sequtils]
 
 # Internal imports
@@ -99,8 +100,10 @@ proc consume(parser: var Parser, typ: TokenType, message: string): Token =
 
 proc primary(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule primary.
-  # primary → NUMBER | STRING | "true" | "false" | "nil"
-  #         | "(" expression ")" ;
+  # primary → "true" | "false" | "nil"
+  #         | NUMBER | STRING
+  #         | "(" expression ")"
+  #         | IDENTIFIER ;
   if match(parser, False):
     result = newLiteral(initLiteralBoolean(false))
   elif match(parser, True):
@@ -182,6 +185,9 @@ proc equality(parser: var Parser): Expr =
     result = newBinary(result, operator, right)
 
 proc assignment(parser: var Parser): Expr =
+  ## Returns `Expr` from parsing the grammar rule assignment.
+  # assignment → IDENTIFIER "=" assignment
+  #            | equality ;
   result = equality(parser)
 
   if match(parser, Equal):
@@ -198,10 +204,12 @@ proc assignment(parser: var Parser): Expr =
 
 proc expression(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule expression.
-  # expression → equality ;
+  # expression → assignment ;
   assignment(parser)
 
 proc printStatement(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule printStmt.
+  # printStmt → "print" expression ";" ;
   let value = expression(parser)
 
   discard consume(parser, Semicolon, "Expect ';' after value.")
@@ -209,6 +217,8 @@ proc printStatement(parser: var Parser): Stmt =
   result = newPrint(value)
 
 proc varDeclaration(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule varDecl.
+  # varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
   let name = consume(parser, Identifier, "Expect variable name.")
 
   var initializer: Expr = nil
@@ -221,6 +231,8 @@ proc varDeclaration(parser: var Parser): Stmt =
   result = newVar(name, initializer)
 
 proc expressionStatement(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule exprStmt.
+  # exprStmt → expression ";" ;
   let expr = expression(parser)
 
   discard consume(parser, Semicolon, "Expect ';' after expression.")
@@ -228,6 +240,8 @@ proc expressionStatement(parser: var Parser): Stmt =
   result = newExpression(expr)
 
 proc block2(parser: var Parser): seq[Stmt] =
+  ## Returns `Stmt` from parsing the grammar rule block.
+  # block → "{" declaration* "}" ;
   var statements = initSinglyLinkedList[Stmt]()
 
   while (not check(parser, RightBrace)) and (not isAtEnd(parser)):
@@ -238,6 +252,10 @@ proc block2(parser: var Parser): seq[Stmt] =
   result = toSeq(statements)
 
 proc statement(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule statement.
+  # statement → exprStmt
+  #           | printStmt
+  #           | block ;
   if match(parser, tokentype.Print):
     result = printStatement(parser)
   elif match(parser, LeftBrace):
@@ -246,6 +264,9 @@ proc statement(parser: var Parser): Stmt =
     result = expressionStatement(parser)
 
 proc declaration(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule declaration.
+  # declaration → varDecl
+  #             | statement ;
   try:
     if match(parser, tokentype.Var):
       result = varDeclaration(parser)
@@ -257,7 +278,8 @@ proc declaration(parser: var Parser): Stmt =
     result = nil
 
 proc parse*(parser: var Parser): seq[Stmt] =
-  ## Returns a parsed `Expr` from `parser`.
+  ## Returns a sequence of parsed statements from `parser`.
+  # program → declaration* EOF ;
   var statements = initSinglyLinkedList[Stmt]()
 
   while not isAtEnd(parser):
