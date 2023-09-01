@@ -20,7 +20,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 5. Representing Code
 - [x] 6. Parsing Expressions
 - [x] 7. Evaluating Expressions
-- [ ] 8. Statements and State
+- [x] 8. Statements and State
 - [ ] 9. Control Flow
 - [ ] 10. Functions
 - [ ] 11. Resolving and Binding
