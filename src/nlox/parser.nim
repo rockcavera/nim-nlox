@@ -18,6 +18,7 @@ type
 # Forward declaration
 proc expression(parser: var Parser): Expr
 proc declaration(parser: var Parser): Stmt
+proc statement(parser: var Parser): Stmt
 
 proc initParser*(tokens: seq[Token]): Parser =
   ## Initializes a `Parser` object with the sequence of `tokens`.
@@ -251,12 +252,31 @@ proc block2(parser: var Parser): seq[Stmt] =
 
   result = toSeq(statements)
 
+proc ifStatement(parser: var Parser): Stmt =
+  discard consume(parser, LeftParen, "Expect '(' after 'if'.")
+
+  let condition = expression(parser)
+
+  discard consume(parser, RightParen, "Expect ')' after if condition.")
+
+  let thenBranch = statement(parser)
+
+  var elseBranch: Stmt = nil
+
+  if match(parser, Else):
+    elseBranch = statement(parser)
+
+  result = newIf(condition, thenBranch, elseBranch)
+
 proc statement(parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule statement.
   # statement → exprStmt
+  #           | ifStmt
   #           | printStmt
   #           | block ;
-  if match(parser, tokentype.Print):
+  if match(parser, tokentype.If):
+    result = ifStatement(parser)
+  elif match(parser, tokentype.Print):
     result = printStatement(parser)
   elif match(parser, LeftBrace):
     result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.

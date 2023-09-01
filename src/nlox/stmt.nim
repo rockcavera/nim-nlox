@@ -9,6 +9,11 @@ type
   Expression* = ref object of Stmt
     expression*: Expr
 
+  If* = ref object of Stmt
+    condition*: Expr
+    thenBranch*: Stmt
+    elseBranch*: Stmt
+
   Print* = ref object of Stmt
     expression*: Expr
 
@@ -23,6 +28,12 @@ proc newBlock*(statements: seq[Stmt]): Block =
 proc newExpression*(expression: Expr): Expression =
   result = new(Expression)
   result.expression = expression
+
+proc newIf*(condition: Expr, thenBranch: Stmt, elseBranch: Stmt): If =
+  result = new(If)
+  result.condition = condition
+  result.thenBranch = thenBranch
+  result.elseBranch = elseBranch
 
 proc newPrint*(expression: Expr): Print =
   result = new(Print)

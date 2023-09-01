@@ -203,6 +203,12 @@ method evaluate(stmt: Block) =
   ## Evaluate the `Block` statement.
   executeBlock(stmt.statements, newEnvironment(environment.environment))
 
+method evaluate(stmt: If) =
+  if isTruthy(evaluate(stmt.condition)):
+    execute(stmt.thenBranch)
+  elif not isNil(stmt.elseBranch):
+    execute(stmt.elseBranch)
+
 proc execute(stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt)
