@@ -147,14 +147,15 @@ method evaluate(expr: Assign): LiteralValue =
   assign(environment.environment, expr.name, result)
 
 method evaluate(expr: Logical): LiteralValue =
-  let left = evaluate(expr.left)
+  result = evaluate(expr.left)
 
-  if expr.operator.kind == Or:
-    if isTruthy(result):
-      result = left
-  elif not isTruthy(left):
-      result = left
-  else:
+  block shortCircuit:
+    if expr.operator.kind == Or:
+      if isTruthy(result):
+        break shortCircuit
+    elif not isTruthy(result):
+      break shortCircuit
+
     result = evaluate(expr.right)
 
 proc stringify(literal: LiteralValue): string =
