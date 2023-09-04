@@ -147,6 +147,7 @@ method evaluate(expr: Assign): LiteralValue =
   assign(environment.environment, expr.name, result)
 
 method evaluate(expr: Logical): LiteralValue =
+  ## Returns a `LiteralValue` from the evaluation of a `Logical` expression.
   result = evaluate(expr.left)
 
   block shortCircuit:
@@ -216,12 +217,14 @@ method evaluate(stmt: Block) =
   executeBlock(stmt.statements, newEnvironment(environment.environment))
 
 method evaluate(stmt: If) =
+  ## Evaluate the `If` statement.
   if isTruthy(evaluate(stmt.condition)):
     execute(stmt.thenBranch)
   elif not isNil(stmt.elseBranch):
     execute(stmt.elseBranch)
 
 method evaluate(stmt: While) =
+  ## Evaluate the `While` statement.
   while isTruthy(evaluate(stmt.condition)):
     execute(stmt.body)
 

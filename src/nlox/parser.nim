@@ -186,6 +186,8 @@ proc equality(parser: var Parser): Expr =
     result = newBinary(result, operator, right)
 
 proc and2(parser: var Parser): Expr =
+  ## Returns `Expr` from parsing the grammar rule logic_and.
+  # logic_and → equality ( "and" equality )* ;
   result = equality(parser)
 
   while match(parser, And):
@@ -196,6 +198,8 @@ proc and2(parser: var Parser): Expr =
     result = newLogical(result, operator, right)
 
 proc or2(parser: var Parser): Expr =
+  ## Returns `Expr` from parsing the grammar rule logic_or.
+  # logic_or → logic_and ( "or" logic_and )* ;
   result = and2(parser) # `and` is a reserved keyword in Nim.
 
   while match(parser, Or):
@@ -252,6 +256,8 @@ proc varDeclaration(parser: var Parser): Stmt =
   result = newVar(name, initializer)
 
 proc whileStatement(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule whileStmt.
+  # whileStmt → "while" "(" expression ")" statement ;
   discard consume(parser, LeftParen, "Expect '(' after 'while'.")
 
   let condition = expression(parser)
@@ -284,6 +290,9 @@ proc block2(parser: var Parser): seq[Stmt] =
   result = toSeq(statements)
 
 proc ifStatement(parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule ifStmt.
+  # ifStmt → "if" "(" expression ")" statement
+  #        ( "else" statement )? ;
   discard consume(parser, LeftParen, "Expect '(' after 'if'.")
 
   let condition = expression(parser)
@@ -300,6 +309,10 @@ proc ifStatement(parser: var Parser): Stmt =
   result = newIf(condition, thenBranch, elseBranch)
 
 proc forStatement(parser: var Parser): Stmt =
+  ## ## Returns `Stmt` from parsing the grammar rule forStmt.
+  # forStmt → "for" "(" ( varDecl | exprStmt | ";" )
+  #           expression? ";"
+  #           expression? ")" statement ;
   discard consume(parser, LeftParen, "Expect '(' after 'for'.")
 
   var initializer: Stmt
