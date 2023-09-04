@@ -21,7 +21,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 6. Parsing Expressions
 - [x] 7. Evaluating Expressions
 - [x] 8. Statements and State
-- [ ] 9. Control Flow
+- [x] 9. Control Flow
 - [ ] 10. Functions
 - [ ] 11. Resolving and Binding
 - [ ] 12. Classes
