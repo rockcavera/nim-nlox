@@ -221,6 +221,10 @@ method evaluate(stmt: If) =
   elif not isNil(stmt.elseBranch):
     execute(stmt.elseBranch)
 
+method evaluate(stmt: While) =
+  while isTruthy(evaluate(stmt.condition)):
+    execute(stmt.body)
+
 proc execute(stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt)

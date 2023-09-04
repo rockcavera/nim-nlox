@@ -21,6 +21,10 @@ type
     name*: Token
     initializer*: Expr
 
+  While* = ref object of Stmt
+    condition*: Expr
+    body*: Stmt
+
 proc newBlock*(statements: seq[Stmt]): Block =
   result = new(Block)
   result.statements = statements
@@ -43,4 +47,9 @@ proc newVar*(name: Token, initializer: Expr): Var =
   result = new(Var)
   result.name = name
   result.initializer = initializer
+
+proc newWhile*(condition: Expr, body: Stmt): While =
+  result = new(While)
+  result.condition = condition
+  result.body = body
 

@@ -251,6 +251,17 @@ proc varDeclaration(parser: var Parser): Stmt =
 
   result = newVar(name, initializer)
 
+proc whileStatement(parser: var Parser): Stmt =
+  discard consume(parser, LeftParen, "Expect '(' after 'while'.")
+
+  let condition = expression(parser)
+
+  discard consume(parser, RightParen, "Expect ')' after condition.")
+
+  let body = statement(parser)
+
+  result = newWhile(condition, body)
+
 proc expressionStatement(parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule exprStmt.
   # exprStmt → expression ";" ;
@@ -293,11 +304,14 @@ proc statement(parser: var Parser): Stmt =
   # statement → exprStmt
   #           | ifStmt
   #           | printStmt
+  #           | whileStmt
   #           | block ;
   if match(parser, tokentype.If):
     result = ifStatement(parser)
   elif match(parser, tokentype.Print):
     result = printStatement(parser)
+  elif match(parser, tokentype.While):
+    result = whileStatement(parser)
   elif match(parser, LeftBrace):
     result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.
   else:
