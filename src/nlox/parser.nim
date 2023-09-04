@@ -299,14 +299,56 @@ proc ifStatement(parser: var Parser): Stmt =
 
   result = newIf(condition, thenBranch, elseBranch)
 
+proc forStatement(parser: var Parser): Stmt =
+  discard consume(parser, LeftParen, "Expect '(' after 'for'.")
+
+  var initializer: Stmt
+
+  if match(parser, Semicolon):
+    initializer = nil
+  elif match(parser, tokentype.Var):
+    initializer = varDeclaration(parser)
+  else:
+    initializer = expressionStatement(parser)
+
+  var condition: Expr = nil
+
+  if not check(parser, Semicolon):
+    condition = expression(parser)
+
+  discard consume(parser, Semicolon, "Expect ';' after loop condition.")
+
+  var increment: Expr = nil
+
+  if not check(parser, RightParen):
+    increment = expression(parser)
+
+  discard consume(parser, RightParen, "Expect ')' after for clauses.")
+
+  result = statement(parser)
+
+  if not isNil(increment):
+    result = newBlock(@[result, newExpression(increment)])
+
+  if isNil(condition):
+    condition = newLiteral(initLiteralBoolean(true))
+
+  result = newWhile(condition, result)
+
+  if not isNil(initializer):
+    result = newBlock(@[initializer, result])
+
 proc statement(parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule statement.
   # statement → exprStmt
+  #           | forStmt
   #           | ifStmt
   #           | printStmt
   #           | whileStmt
   #           | block ;
-  if match(parser, tokentype.If):
+  if match(parser, For):
+    result = forStatement(parser)
+  elif match(parser, tokentype.If):
     result = ifStatement(parser)
   elif match(parser, tokentype.Print):
     result = printStatement(parser)
