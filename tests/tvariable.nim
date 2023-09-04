@@ -149,3 +149,12 @@ local
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Unreached undefined":
+    const
+      script = folder / "unreached_undefined.lox"
+      expectedExitCode = 0
+      expectedOutput = """ok
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

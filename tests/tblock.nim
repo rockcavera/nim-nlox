@@ -15,3 +15,12 @@ outer
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Empty":
+    const
+      script = folder / "empty.lox"
+      expectedExitCode = 0
+      expectedOutput = """ok
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
