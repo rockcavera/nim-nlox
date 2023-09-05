@@ -199,7 +199,7 @@ proc equality(parser: var Parser): Expr =
 
     result = newBinary(result, operator, right)
 
-proc and2(parser: var Parser): Expr =
+proc `and`(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule logic_and.
   # logic_and → equality ( "and" equality )* ;
   result = equality(parser)
@@ -211,15 +211,15 @@ proc and2(parser: var Parser): Expr =
 
     result = newLogical(result, operator, right)
 
-proc or2(parser: var Parser): Expr =
+proc `or`(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule logic_or.
   # logic_or → logic_and ( "or" logic_and )* ;
-  result = and2(parser) # `and` is a reserved keyword in Nim.
+  result = and(parser)
 
   while match(parser, Or):
     let
       operator = previous(parser)
-      right = and2(parser)
+      right = and(parser)
 
     result = newLogical(result, operator, right)
 
@@ -227,7 +227,7 @@ proc assignment(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule assignment.
   # assignment → IDENTIFIER "=" assignment
   #            | logic_or ;
-  result = or2(parser) # `or` is a reserved keyword in Nim.
+  result = or(parser)
 
   if match(parser, Equal):
     let
@@ -291,7 +291,7 @@ proc expressionStatement(parser: var Parser): Stmt =
 
   result = newExpression(expr)
 
-proc block2(parser: var Parser): seq[Stmt] =
+proc `block`(parser: var Parser): seq[Stmt] =
   ## Returns `Stmt` from parsing the grammar rule block.
   # block → "{" declaration* "}" ;
   var statements = initSinglyLinkedList[Stmt]()
@@ -382,7 +382,7 @@ proc statement(parser: var Parser): Stmt =
   elif match(parser, TokenType.While):
     result = whileStatement(parser)
   elif match(parser, LeftBrace):
-    result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.
+    result = newBlock(`block`(parser))
   else:
     result = expressionStatement(parser)
 
