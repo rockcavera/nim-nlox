@@ -129,6 +129,9 @@ proc finishCall(parser: var Parser, callee: Expr): Expr =
 
   if not check(parser, RightParen):
     while true:
+      if len(arguments) >= 255:
+        logger.error(peek(parser), "Can't have more than 255 arguments.")
+
       add(arguments, expression(parser))
 
       if not match(parser, Comma):
