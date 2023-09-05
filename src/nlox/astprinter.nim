@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./expr, ./literals, ./token
+import ./expr, ./literals, ./types
 
 # Forward declaration
 proc parenthesize(name: string, exprs: varargs[Expr]): string

@@ -2,16 +2,7 @@
 import std/[tables, strformat]
 
 # Internal imports
-import ./literals, ./runtimeerror, ./token
-
-type
-  Environment* = ref object
-    ## Object that stores the variables
-    enclosing: Environment
-      ## Reference to the outer level environment. For the global environment
-      ## this is `nil`.
-    values: Table[string, LiteralValue]
-      ## Hash table that stores variable names and values.
+import ./runtimeerror, ./types
 
 proc newEnvironment*(): Environment =
   ## Creates a new `Environment` with `enclosing` equal to `nil`.

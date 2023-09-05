@@ -93,7 +93,7 @@ proc main*(args: seq[string]) =
 
   let outputDir = args[0]
 
-  defineAst(outputDir, "Expr", @["literals", "token"], @[
+  defineAst(outputDir, "Expr", @["types"], @[
     "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
     "Call     : Expr callee, Token paren, seq[Expr] arguments",
@@ -103,7 +103,7 @@ proc main*(args: seq[string]) =
     "Unary    : Token operator, Expr right",
     "Variable : Token name"])
 
-  defineAst(outputDir, "Stmt", @["expr", "token"], @[
+  defineAst(outputDir, "Stmt", @["expr", "types"], @[
     "Block      : seq[Stmt] statements",
     "Expression : Expr expression",
     "If         : Expr condition, Stmt thenBranch," &

@@ -1,22 +1,5 @@
-type
-  LiteralKind* = enum
-    ## Enumerates the kinds of literals.
-    LitNull, LitNumber, LitString, LitBoolean
-
-  LiteralValue* = object
-    ## Object to store a literal value, which can be Number or String.
-    case kind*: LiteralKind
-    of LitNumber:
-      numberLit*: float
-        ## Stores the value of the Number
-    of LitString:
-      stringLit*: string
-        ## Stores the value of a String
-    of LitBoolean:
-      booleanLit*: bool
-        ## Stores the value of a Boolean
-    else:
-      discard
+# Internal imports
+import ./types
 
 proc initLiteral*(): LiteralValue =
   ## Initializes a `LiteralValue` object of kind `LitNull`

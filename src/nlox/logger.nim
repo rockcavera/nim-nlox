@@ -4,7 +4,7 @@
 import std/strformat
 
 # Internal imports
-import ./runtimeerror, ./token, ./tokentype
+import ./types
 
 # From src/lox.nim
 

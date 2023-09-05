@@ -2,21 +2,7 @@
 import std/[lists, sequtils, strutils, tables]
 
 # Internal imports
-import ./logger, ./token, ./tokentype
-
-type
-  Scanner* = object
-    ## Object that stores scanner information.
-    source: string
-      ## Stores raw source code.
-    tokens: SinglyLinkedList[Token]
-      ## Stores a list of all parsed tokens from raw source code.
-    start: int
-      ## Points to the first character in the lexeme.
-    current: int
-      ## Points at the character currently being considered.
-    line: int
-      ## The line that is being scanned.
+import ./logger, ./token, ./types
 
 let
   keywords = {"and": And, "class": Class, "else": Else, "false": False,

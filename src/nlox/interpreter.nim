@@ -2,8 +2,8 @@
 import std/[math, strutils]
 
 # Internal imports
-import ./environment, ./expr, ./logger, ./literals, ./runtimeerror, ./stmt,
-       ./token, ./tokentype
+import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
+       ./types
 
 # Forward declaration
 proc execute(stmt: Stmt)

@@ -2,22 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./literals, ./tokentype
-
-type
-  Token* = object
-    ## Object that stores token information.
-    ##
-    ## For convenience, object variants have been used instead of a `literal`
-    ## field.
-    kind*: TokenType
-      ## Stores the type of token.
-    literal*: LiteralValue
-      ## Stores a literal value, which can be Number or String.
-    lexeme*: string
-      ## Stores the lexeme.
-    line*: int
-      ## Stores the token line.
+import ./literals, ./types
 
 proc initToken*(kind: TokenType): Token =
   ## Initializes a `Token` as `TokenType`.`kind`. The `lexeme` and `line` fields

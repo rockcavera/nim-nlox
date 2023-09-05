@@ -1,4 +1,4 @@
-import ./expr, ./token
+import ./expr, ./types
 
 type
   Stmt* = ref object of RootObj

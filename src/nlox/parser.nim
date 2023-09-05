@@ -2,18 +2,7 @@
 import std/[lists, sequtils]
 
 # Internal imports
-import ./expr, ./literals, ./logger, ./stmt, ./token, ./tokentype
-
-type
-  Parser* = object
-    ## Object that stores parser information.
-    tokens: seq[Token]
-      ## Sequence of tokens.
-    current: int
-      ## Index of next token waiting for parsing.
-
-  ParseError = object of CatchableError
-    ## Raised if a parsing error occurred.
+import ./expr, ./literals, ./logger, ./stmt, ./types
 
 # Forward declaration
 proc expression(parser: var Parser): Expr
@@ -344,7 +333,7 @@ proc forStatement(parser: var Parser): Stmt =
 
   if match(parser, Semicolon):
     initializer = nil
-  elif match(parser, tokentype.Var):
+  elif match(parser, types.Var):
     initializer = varDeclaration(parser)
   else:
     initializer = expressionStatement(parser)
@@ -386,11 +375,11 @@ proc statement(parser: var Parser): Stmt =
   #           | block ;
   if match(parser, For):
     result = forStatement(parser)
-  elif match(parser, tokentype.If):
+  elif match(parser, types.If):
     result = ifStatement(parser)
-  elif match(parser, tokentype.Print):
+  elif match(parser, types.Print):
     result = printStatement(parser)
-  elif match(parser, tokentype.While):
+  elif match(parser, types.While):
     result = whileStatement(parser)
   elif match(parser, LeftBrace):
     result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.
@@ -402,7 +391,7 @@ proc declaration(parser: var Parser): Stmt =
   # declaration → varDecl
   #             | statement ;
   try:
-    if match(parser, tokentype.Var):
+    if match(parser, types.Var):
       result = varDeclaration(parser)
     else:
       result = statement(parser)
