@@ -21,7 +21,7 @@ type
     else:
       discard
 
-  TokenType* = enum
+  TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
     # Single-character tokens.
     LeftParen,    # (

@@ -333,7 +333,7 @@ proc forStatement(parser: var Parser): Stmt =
 
   if match(parser, Semicolon):
     initializer = nil
-  elif match(parser, types.Var):
+  elif match(parser, TokenType.Var):
     initializer = varDeclaration(parser)
   else:
     initializer = expressionStatement(parser)
@@ -375,11 +375,11 @@ proc statement(parser: var Parser): Stmt =
   #           | block ;
   if match(parser, For):
     result = forStatement(parser)
-  elif match(parser, types.If):
+  elif match(parser, TokenType.If):
     result = ifStatement(parser)
-  elif match(parser, types.Print):
+  elif match(parser, TokenType.Print):
     result = printStatement(parser)
-  elif match(parser, types.While):
+  elif match(parser, TokenType.While):
     result = whileStatement(parser)
   elif match(parser, LeftBrace):
     result = newBlock(block2(parser)) # `block` is a reserved keyword in Nim.
@@ -391,7 +391,7 @@ proc declaration(parser: var Parser): Stmt =
   # declaration → varDecl
   #             | statement ;
   try:
-    if match(parser, types.Var):
+    if match(parser, TokenType.Var):
       result = varDeclaration(parser)
     else:
       result = statement(parser)
