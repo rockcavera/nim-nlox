@@ -96,6 +96,7 @@ proc main*(args: seq[string]) =
   defineAst(outputDir, "Expr", @["literals", "token"], @[
     "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
+    "Call     : Expr callee, Token paren, seq[Expr] arguments",
     "Grouping : Expr expression",
     "Literal  : LiteralValue value",
     "Logical  : Expr left, Token operator, Expr right",

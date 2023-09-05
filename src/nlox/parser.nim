@@ -124,10 +124,32 @@ proc primary(parser: var Parser): Expr =
   else:
     raise error(peek(parser), "Expect expression.")
 
+proc finishCall(parser: var Parser, callee: Expr): Expr =
+  var arguments: seq[Expr]
+
+  if not check(parser, RightParen):
+    while true:
+      add(arguments, expression(parser))
+
+      if not match(parser, Comma):
+        break
+
+  let paren = consume(parser, RightParen, "Expect ')' after arguments.")
+
+  result = newCall(callee, paren, arguments)
+
+proc call(parser: var Parser): Expr =
+  result = primary(parser)
+
+  while true:
+    if match(parser, LeftParen):
+      result = finishCall(parser, result)
+    else:
+      break
+
 proc unary(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule unary.
-  # unary → ( "!" | "-" ) unary
-  #       | primary ;
+  # unary → ( "!" | "-" ) unary | call ;
   if match(parser, Bang, Minus):
     let
       operator = previous(parser)
@@ -135,7 +157,7 @@ proc unary(parser: var Parser): Expr =
 
     result = newUnary(operator, right)
   else:
-    result = primary(parser)
+    result = call(parser)
 
 proc factor(parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule factor.

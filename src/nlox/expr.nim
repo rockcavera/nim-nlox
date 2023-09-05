@@ -12,6 +12,11 @@ type
     operator*: Token
     right*: Expr
 
+  Call* = ref object of Expr
+    callee*: Expr
+    paren*: Token
+    arguments*: seq[Expr]
+
   Grouping* = ref object of Expr
     expression*: Expr
 
@@ -40,6 +45,12 @@ proc newBinary*(left: Expr, operator: Token, right: Expr): Binary =
   result.left = left
   result.operator = operator
   result.right = right
+
+proc newCall*(callee: Expr, paren: Token, arguments: seq[Expr]): Call =
+  result = new(Call)
+  result.callee = callee
+  result.paren = paren
+  result.arguments = arguments
 
 proc newGrouping*(expression: Expr): Grouping =
   result = new(Grouping)
