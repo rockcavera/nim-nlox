@@ -269,9 +269,6 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
   for argument in expr.arguments:
     add(arguments, evaluate(argument, interpreter))
 
-  if not(callee of LoxCallable):
-    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
-
   if callee of LoxFunction:
     let function = cast[LoxFunction](callee)
 
@@ -281,7 +278,7 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
                             fmt"{len(arguments)}.")
 
     result = call(function, interpreter, arguments)
-  else:
+  elif callee of LoxCallable:
     let function = cast[LoxCallable](callee)
 
     if len(arguments) != function.arity(function):
@@ -290,6 +287,8 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
                             fmt" but got {len(arguments)}.")
 
     result = function.call(function, interpreter, arguments)
+  else:
+    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
