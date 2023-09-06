@@ -40,6 +40,3 @@ proc assign*(environment: Environment, name: Token, value: Object) =
     assign(environment.enclosing, name, value)
   else:
     raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
-
-var environment* = newEnvironment()
-  ## Global environment variable.

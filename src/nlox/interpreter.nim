@@ -6,7 +6,11 @@ import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
        ./types
 
 # Forward declaration
-proc execute(stmt: Stmt)
+proc execute(interpreter: var Interpreter, stmt: Stmt)
+
+proc initInterpreter*(): Interpreter =
+  ## Initializes an `Interpreter` object.
+  result.environment = newEnvironment()
 
 proc isTruthy(literal: Object): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
@@ -48,22 +52,22 @@ proc checkNumberOperands(operator: Token, left: Object, right: Object) =
   if not(left of Number) or not(right of Number):
     raise newRuntimeError(operator, "Operands must be numbers.")
 
-method evaluate(expr: Expr): Object {.base.} =
+method evaluate(expr: Expr, interpreter: var Interpreter): Object {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method evaluate(expr: Literal): Object =
+method evaluate(expr: Literal, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Literal` expression.
   expr.value
 
-method evaluate(expr: Grouping): Object =
+method evaluate(expr: Grouping, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Grouping` expression.
-  evaluate(expr.expression)
+  evaluate(expr.expression, interpreter)
 
-method evaluate(expr: Unary): Object =
+method evaluate(expr: Unary, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Unary` expression.
-  let right = evaluate(expr.right)
+  let right = evaluate(expr.right, interpreter)
 
   case expr.operator.kind
   of Bang:
@@ -75,11 +79,11 @@ method evaluate(expr: Unary): Object =
   else:
     result = newObject()
 
-method evaluate(expr: Binary): Object =
+method evaluate(expr: Binary, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Binary` expression.
   let
-    left = evaluate(expr.left)
-    right = evaluate(expr.right)
+    left = evaluate(expr.left, interpreter)
+    right = evaluate(expr.right, interpreter)
 
   case expr.operator.kind
   of BangEqual:
@@ -125,19 +129,19 @@ method evaluate(expr: Binary): Object =
   else:
     result = newObject()
 
-method evaluate(expr: Variable): Object =
+method evaluate(expr: Variable, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Variable` expression.
-  get(environment.environment, expr.name)
+  get(interpreter.environment, expr.name)
 
-method evaluate(expr: Assign): Object =
+method evaluate(expr: Assign, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Assign` expression.
-  result = evaluate(expr.value)
+  result = evaluate(expr.value, interpreter)
 
-  assign(environment.environment, expr.name, result)
+  assign(interpreter.environment, expr.name, result)
 
-method evaluate(expr: Logical): Object =
+method evaluate(expr: Logical, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Logical` expression.
-  result = evaluate(expr.left)
+  result = evaluate(expr.left, interpreter)
 
   block shortCircuit:
     if expr.operator.kind == Or:
@@ -146,7 +150,7 @@ method evaluate(expr: Logical): Object =
     elif not isTruthy(result):
       break shortCircuit
 
-    result = evaluate(expr.right)
+    result = evaluate(expr.right, interpreter)
 
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
@@ -160,68 +164,70 @@ proc stringify(literal: Object): string =
       if endsWith(result, ".0"):
         setLen(result, len(result) - 2)
 
-proc executeBlock(statements: seq[Stmt], env: Environment) =
+proc executeBlock(interpreter: var Interpreter, statements: seq[Stmt],
+                  environment: Environment) =
   ## Runs `statements` from a higher block and changes the global environment
-  ## variable reference to `env`.
-  let previous = environment.environment
+  ## variable reference to `environment`.
+  let previous = interpreter.environment
 
   try:
-    environment.environment = env
+    interpreter.environment = environment
 
     for statement in statements:
-      execute(statement)
+      execute(interpreter, statement)
   finally:
-    environment.environment = previous
+    interpreter.environment = previous
 
-method evaluate(stmt: Stmt) {.base.} =
+method evaluate(stmt: Stmt, interpreter: var Interpreter) {.base.} =
   ## Base method that raises `CatchableError` exception when `stmt` has not had
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method evaluate(stmt: Expression) =
+method evaluate(stmt: Expression, interpreter: var Interpreter) =
   ## Evaluate the `Expression` statement.
-  discard evaluate(stmt.expression)
+  discard evaluate(stmt.expression, interpreter)
 
-method evaluate(stmt: Print) =
+method evaluate(stmt: Print, interpreter: var Interpreter) =
   ## Evaluate the `Print` statement.
-  let value = evaluate(stmt.expression)
+  let value = evaluate(stmt.expression, interpreter)
 
   echo stringify(value)
 
-method evaluate(stmt: Var) =
+method evaluate(stmt: Var, interpreter: var Interpreter) =
   ## Evaluate the `Var` statement.
   var value = newObject()
 
   if not isNil(stmt.initializer):
-    value = evaluate(stmt.initializer)
+    value = evaluate(stmt.initializer, interpreter)
 
-  define(environment.environment, stmt.name.lexeme, value)
+  define(interpreter.environment, stmt.name.lexeme, value)
 
-method evaluate(stmt: Block) =
+method evaluate(stmt: Block, interpreter: var Interpreter) =
   ## Evaluate the `Block` statement.
-  executeBlock(stmt.statements, newEnvironment(environment.environment))
+  executeBlock(interpreter, stmt.statements,
+               newEnvironment(interpreter.environment))
 
-method evaluate(stmt: If) =
+method evaluate(stmt: If, interpreter: var Interpreter) =
   ## Evaluate the `If` statement.
-  if isTruthy(evaluate(stmt.condition)):
-    execute(stmt.thenBranch)
+  if isTruthy(evaluate(stmt.condition, interpreter)):
+    execute(interpreter, stmt.thenBranch)
   elif not isNil(stmt.elseBranch):
-    execute(stmt.elseBranch)
+    execute(interpreter, stmt.elseBranch)
 
-method evaluate(stmt: While) =
+method evaluate(stmt: While, interpreter: var Interpreter) =
   ## Evaluate the `While` statement.
-  while isTruthy(evaluate(stmt.condition)):
-    execute(stmt.body)
+  while isTruthy(evaluate(stmt.condition, interpreter)):
+    execute(interpreter, stmt.body)
 
-proc execute(stmt: Stmt) =
+proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
-  evaluate(stmt)
+  evaluate(stmt, interpreter)
 
-proc interpret*(statements: seq[Stmt]) =
+proc interpret*(interpreter: var Interpreter, statements: seq[Stmt]) =
   ## Try to execute `statements`. Otherwise, it throws a runtime error.
   try:
     for statement in statements:
-      execute(statement)
+      execute(interpreter, statement)
   except RuntimeError as error:
     runtimeError(error)
 
@@ -229,8 +235,10 @@ when defined(nloxTests):
   proc interpretForEvaluateTest*(expression: Expr): string =
     ## Attempts to evaluate `expression` and returns the stringified value.
     ## Otherwise, it throws a runtime error.
+    var interpreter = initInterpreter()
+
     try:
-      let value = evaluate(expression)
+      let value = evaluate(expression, interpreter)
 
       result = stringify(value)
     except RuntimeError as error:

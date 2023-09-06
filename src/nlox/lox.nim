@@ -1,7 +1,7 @@
 # Internal imports
-import ./interpreter, ./logger, ./parser, ./scanner
+import ./interpreter, ./logger, ./parser, ./scanner, ./types
 
-proc run(source: string) =
+proc run(interpreter: var Interpreter, source: string) =
   ## Initializes a `Scanner` object with the raw `source` code, scans the
   ## `Scanner` object, parses the scanned tokens and interprets the parsed
   ## statements. If an error occurred, it returns without interpreting.
@@ -16,13 +16,15 @@ proc run(source: string) =
   if hadError:
     return
 
-  interpret(statements)
+  interpret(interpreter, statements)
 
 proc runFile(path: string) =
   ## Runs the .lox script passed in `path`.
   let bytes = readFile(path)
 
-  run(bytes)
+  var interpreter = initInterpreter()
+
+  run(interpreter, bytes)
 
   if hadError:
     quit(65)
@@ -33,6 +35,8 @@ proc runFile(path: string) =
 proc runPrompt() =
   ## Runs the interactive prompt (REPL). If CTRL + D is sent, the execution will
   ## end.
+  var interpreter = initInterpreter()
+
   while true:
     write(stdout, "> ")
 
@@ -41,7 +45,7 @@ proc runPrompt() =
     if line == "\4": # Ctrl + D
       break
 
-    run(line)
+    run(interpreter, line)
 
     hadError = false
 

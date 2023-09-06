@@ -105,6 +105,11 @@ type
     values*: Table[string, Object]
       ## Hash table that stores variable names and values.
 
+  Interpreter* = object
+    ## Object that stores interpreter information
+    environment*: Environment
+      ## Reference to the interpreter environment
+
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
 
