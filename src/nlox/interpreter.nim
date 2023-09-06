@@ -5,12 +5,14 @@ import std/[math, strformat, strutils, times]
 import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
        ./types
 
+# Internal import of module with keyword name
 import "./return"
 
 # Forward declaration
 proc execute(interpreter: var Interpreter, stmt: Stmt)
 
 proc defineClock(interpreter: var Interpreter) =
+  ## Defines the built-in function `clock()`
   var clock = new(LoxCallable)
 
   proc arity(caller: LoxCallable): int = 0
@@ -79,6 +81,23 @@ proc checkNumberOperands(operator: Token, left: Object, right: Object) =
   ## does nothing. Otherwise, it raises a `RuntimeError`.
   if not(left of Number) or not(right of Number):
     raise newRuntimeError(operator, "Operands must be numbers.")
+
+proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
+                   environment: Environment) =
+  ## Runs `statements` from a higher block and changes the global environment
+  ## variable reference to `environment`.
+  let previous = interpreter.environment
+
+  try:
+    interpreter.environment = environment
+
+    for statement in statements:
+      execute(interpreter, statement)
+  finally:
+    interpreter.environment = previous
+
+# Delayed imports
+import ./loxfunction # The `loxfunction` module calls `executeBlock()`
 
 method evaluate(expr: Expr, interpreter: var Interpreter): Object {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
@@ -180,22 +199,36 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
-proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
-                   environment: Environment) =
-  ## Runs `statements` from a higher block and changes the global environment
-  ## variable reference to `environment`.
-  let previous = interpreter.environment
+method evaluate(expr: Call, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Call` expression.
+  let callee = evaluate(expr.callee, interpreter)
 
-  try:
-    interpreter.environment = environment
+  var arguments = newSeqOfCap[Object](len(expr.arguments))
 
-    for statement in statements:
-      execute(interpreter, statement)
-  finally:
-    interpreter.environment = previous
+  for argument in expr.arguments:
+    add(arguments, evaluate(argument, interpreter))
 
-# Delayed imports
-import ./loxfunction
+  # use method?
+  if callee of LoxFunction:
+    let function = cast[LoxFunction](callee)
+
+    if len(arguments) != arity(function):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {arity(function)} arguments but got " &
+                            fmt"{len(arguments)}.")
+
+    result = call(function, interpreter, arguments)
+  elif callee of LoxCallable:
+    let function = cast[LoxCallable](callee)
+
+    if len(arguments) != function.arity(function):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {function.arity(function)} arguments" &
+                            fmt" but got {len(arguments)}.")
+
+    result = function.call(function, interpreter, arguments)
+  else:
+    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
@@ -259,6 +292,7 @@ method evaluate(stmt: While, interpreter: var Interpreter) =
     execute(interpreter, stmt.body)
 
 method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
+  ## Evaluate the `Return` statement.
   var value: Object = nil
 
   if not isNil(stmt.value):
@@ -267,38 +301,10 @@ method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
   raise newReturn(value)
 
 method evaluate(stmt: Function, interpreter: var Interpreter) =
+  ## Evaluate the `Function` statement.
   let function = newLoxFunction(stmt, interpreter.environment)
 
   define(interpreter.environment, stmt.name.lexeme, function)
-
-method evaluate(expr: Call, interpreter: var Interpreter): Object =
-  let callee = evaluate(expr.callee, interpreter)
-
-  var arguments = newSeqOfCap[Object](len(expr.arguments))
-
-  for argument in expr.arguments:
-    add(arguments, evaluate(argument, interpreter))
-
-  if callee of LoxFunction:
-    let function = cast[LoxFunction](callee)
-
-    if len(arguments) != arity(function):
-      raise newRuntimeError(expr.paren,
-                            fmt"Expected {arity(function)} arguments but got " &
-                            fmt"{len(arguments)}.")
-
-    result = call(function, interpreter, arguments)
-  elif callee of LoxCallable:
-    let function = cast[LoxCallable](callee)
-
-    if len(arguments) != function.arity(function):
-      raise newRuntimeError(expr.paren,
-                            fmt"Expected {function.arity(function)} arguments" &
-                            fmt" but got {len(arguments)}.")
-
-    result = function.call(function, interpreter, arguments)
-  else:
-    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.

@@ -115,6 +115,7 @@ proc primary(lox: var Lox, parser: var Parser): Expr =
     raise error(lox, peek(parser), "Expect expression.")
 
 proc finishCall(lox: var Lox, parser: var Parser, callee: Expr): Expr =
+  ## Helper procedure for parsing the call grammar rule.
   var arguments: seq[Expr]
 
   if not check(parser, RightParen):
@@ -132,6 +133,8 @@ proc finishCall(lox: var Lox, parser: var Parser, callee: Expr): Expr =
   result = newCall(callee, paren, arguments)
 
 proc call(lox: var Lox, parser: var Parser): Expr =
+  ## Returns `Expr` from parsing the grammar rule call.
+  # call → primary ( "(" arguments? ")" )* ;
   result = primary(lox, parser)
 
   while true:
@@ -257,6 +260,8 @@ proc printStatement(lox: var Lox, parser: var Parser): Stmt =
   result = newPrint(value)
 
 proc returnStatement(lox: var Lox, parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule returnStmt.
+  # returnStmt → "return" expression? ";" ;
   let keyword = previous(parser)
 
   var value: Expr = nil
@@ -318,6 +323,9 @@ proc `block`(lox: var Lox, parser: var Parser): seq[Stmt] =
   result = toSeq(statements)
 
 proc function(lox: var Lox, parser: var Parser, kind: string): Function =
+  ## Returns `Function` from parsing the grammar rule funDecl.
+  # funDecl  → "fun" function ;
+  # function → IDENTIFIER "(" parameters? ")" block ;
   let name = consume(lox, parser, Identifier, fmt"Expect {kind} name.")
 
   discard consume(lox, parser, LeftParen, fmt"Expect '(' after {kind} name.")

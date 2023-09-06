@@ -17,10 +17,15 @@ type
     data*: string
 
   LoxCallable* = ref object of Object
+    ## An object for Lox calls.
     arity*: proc (caller: LoxCallable): int
+      ## Procedure that returns the arity of the call.
     call*: proc (caller: LoxCallable, interpreter: var Interpreter,
                  arguments: seq[Object]): Object
+      ## Procedure that evaluates the `LoxCallable` object and returns `Object`.
     toString*: proc (caller: LoxCallable): string
+      ## Procedure that returns a `string` representation of the `LoxCallable`
+      ## object
 
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
@@ -127,7 +132,10 @@ type
       ## Determines that a runtime error occurred while running a Lox script.
 
   Return* = object of CatchableError
+    ## Object used to unroll the stack when return is called in Lox. It is not
+    ## used to raise an error of fact.
     value*: Object
+      ## The returned value.
 
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
