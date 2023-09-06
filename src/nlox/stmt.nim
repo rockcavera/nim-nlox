@@ -9,6 +9,11 @@ type
   Expression* = ref object of Stmt
     expression*: Expr
 
+  Function* = ref object of Stmt
+    name*: Token
+    params*: seq[Token]
+    body*: seq[Stmt]
+
   If* = ref object of Stmt
     condition*: Expr
     thenBranch*: Stmt
@@ -32,6 +37,12 @@ proc newBlock*(statements: seq[Stmt]): Block =
 proc newExpression*(expression: Expr): Expression =
   result = new(Expression)
   result.expression = expression
+
+proc newFunction*(name: Token, params: seq[Token], body: seq[Stmt]): Function =
+  result = new(Function)
+  result.name = name
+  result.params = params
+  result.body = body
 
 proc newIf*(condition: Expr, thenBranch: Stmt, elseBranch: Stmt): If =
   result = new(If)

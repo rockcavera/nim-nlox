@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[lists, sequtils]
+import std/[lists, sequtils, strformat]
 
 # Internal imports
 import ./expr, ./literals, ./logger, ./stmt, ./types
@@ -305,6 +305,34 @@ proc `block`(lox: var Lox, parser: var Parser): seq[Stmt] =
 
   result = toSeq(statements)
 
+proc function(lox: var Lox, parser: var Parser, kind: string): Function =
+  let name = consume(lox, parser, Identifier, fmt"Expect {kind} name.")
+
+  discard consume(lox, parser, LeftParen, fmt"Expect '(' after {kind} name.")
+
+  var parameters = newSeqOfCap[Token](255)
+
+  if not check(parser, RightParen):
+    while true:
+      if len(parameters) >= 255:
+        logger.error(lox, peek(parser), "Can't have more than 255 parameters.")
+
+      add(parameters, consume(lox, parser, Identifier,
+                              "Expect parameter name."))
+
+      if not match(parser, Comma):
+        break
+
+  const leftBraceStr = '{'
+
+  discard consume(lox, parser, RightParen, "Expect ')' after parameters.")
+  discard consume(lox, parser, LeftBrace,
+                  fmt"Expect '{leftBraceStr}' before {kind} body.")
+
+  let body = `block`(lox, parser)
+
+  result = newFunction(name, parameters, body)
+
 proc ifStatement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule ifStmt.
   # ifStmt → "if" "(" expression ")" statement
@@ -390,10 +418,13 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
 
 proc declaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule declaration.
-  # declaration → varDecl
+  # declaration → funDecl
+  #             | varDecl
   #             | statement ;
   try:
-    if match(parser, TokenType.Var):
+    if match(parser, Fun):
+      result = function(lox, parser, "function")
+    elif match(parser, TokenType.Var):
       result = varDeclaration(lox, parser)
     else:
       result = statement(lox, parser)
