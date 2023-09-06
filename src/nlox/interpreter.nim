@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[math, strutils]
+import std/[math, strformat, strutils]
 
 # Internal imports
 import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
@@ -164,6 +164,11 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
     raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
   let function = cast[LoxCallable](callee)
+
+  if len(arguments) != arity(function):
+    raise newRuntimeError(expr.paren,
+                          fmt"Expected {arity(function)} arguments but got" &
+                          fmt"{len(arguments)}.")
 
   result = call(function, interpreter, arguments)
 
