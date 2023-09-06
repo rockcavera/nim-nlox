@@ -152,6 +152,18 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
+method evaluate(expr: Call, interpreter: var Interpreter): Object =
+  let callee = evaluate(expr.callee, interpreter)
+
+  var arguments = newSeqOfCap[Object](len(expr.arguments))
+
+  for argument in expr.arguments:
+    add(arguments, evaluate(argument, interpreter))
+
+  let function = cast[LoxCallable](callee)
+
+  result = call(function, interpreter, arguments)
+
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `Object` type.

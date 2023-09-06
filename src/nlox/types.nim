@@ -16,6 +16,8 @@ type
     ## An object for Lox's String type.
     data*: string
 
+  LoxCallable* = ref object of Object
+
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
     # Single-character tokens.
