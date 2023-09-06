@@ -17,6 +17,9 @@ type
     data*: string
 
   LoxCallable* = ref object of Object
+    arity*: proc (): int
+    call*: proc (interpreter: Interpreter, arguments: seq[Object]): Object
+    toString*: proc (): string
 
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
@@ -109,6 +112,7 @@ type
 
   Interpreter* = object
     ## Object that stores interpreter information
+    globals*: Environment
     environment*: Environment
       ## Reference to the interpreter environment
 

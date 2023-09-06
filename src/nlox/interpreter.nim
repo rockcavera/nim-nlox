@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[math, strformat, strutils]
+import std/[math, strformat, strutils, times]
 
 # Internal imports
 import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
@@ -8,9 +8,34 @@ import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
 # Forward declaration
 proc execute(interpreter: var Interpreter, stmt: Stmt)
 
+proc defineClock(interpreter: var Interpreter) =
+  var clock = new(LoxCallable)
+
+  proc arity(): int = 0
+
+  proc call(interpreter: Interpreter, arguments: seq[Object]): Object =
+    let
+      currentTime = getTime()
+      seconds = float(toUnix(currentTime))
+      milliseconds = float(convert(Nanoseconds, Milliseconds,
+                                   nanosecond(currentTime))) / 1000.0
+
+    result = newNumber(seconds + milliseconds)
+
+  proc toString(): string = "<native fn>"
+
+  clock.arity = arity
+  clock.call = call
+  clock.toString = toString
+
+  define(interpreter.globals, "clock", clock)
+
 proc initInterpreter*(): Interpreter =
   ## Initializes an `Interpreter` object.
-  result.environment = newEnvironment()
+  result.globals = newEnvironment()
+  result.environment = result.globals
+
+  defineClock(result)
 
 proc isTruthy(literal: Object): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
@@ -165,12 +190,12 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
 
   let function = cast[LoxCallable](callee)
 
-  if len(arguments) != arity(function):
+  if len(arguments) != function.arity():
     raise newRuntimeError(expr.paren,
-                          fmt"Expected {arity(function)} arguments but got" &
+                          fmt"Expected {function.arity()} arguments but got" &
                           fmt"{len(arguments)}.")
 
-  result = call(function, interpreter, arguments)
+  result = function.call(interpreter, arguments)
 
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
