@@ -22,6 +22,10 @@ type
   Print* = ref object of Stmt
     expression*: Expr
 
+  Return* = ref object of Stmt
+    keyword*: Token
+    value*: Expr
+
   Var* = ref object of Stmt
     name*: Token
     initializer*: Expr
@@ -53,6 +57,11 @@ proc newIf*(condition: Expr, thenBranch: Stmt, elseBranch: Stmt): If =
 proc newPrint*(expression: Expr): Print =
   result = new(Print)
   result.expression = expression
+
+proc newReturn*(keyword: Token, value: Expr): Return =
+  result = new(Return)
+  result.keyword = keyword
+  result.value = value
 
 proc newVar*(name: Token, initializer: Expr): Var =
   result = new(Var)

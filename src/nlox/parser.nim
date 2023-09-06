@@ -256,6 +256,18 @@ proc printStatement(lox: var Lox, parser: var Parser): Stmt =
 
   result = newPrint(value)
 
+proc returnStatement(lox: var Lox, parser: var Parser): Stmt =
+  let keyword = previous(parser)
+
+  var value: Expr = nil
+
+  if not check(parser, SemiColon):
+    value = expression(lox, parser)
+
+  discard consume(lox, parser, Semicolon, "Expect ';' after return value.")
+
+  result = newReturn(keyword, value)
+
 proc varDeclaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule varDecl.
   # varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
@@ -401,6 +413,7 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
   #           | forStmt
   #           | ifStmt
   #           | printStmt
+  #           | returnStmt
   #           | whileStmt
   #           | block ;
   if match(parser, For):
@@ -409,6 +422,8 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
     result = ifStatement(lox, parser)
   elif match(parser, TokenType.Print):
     result = printStatement(lox, parser)
+  elif match(parser, TokenType.Return):
+    result = returnStatement(lox, parser)
   elif match(parser, TokenType.While):
     result = whileStatement(lox, parser)
   elif match(parser, LeftBrace):
