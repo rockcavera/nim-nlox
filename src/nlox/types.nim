@@ -126,6 +126,9 @@ type
     hadRuntimeError* = false
       ## Determines that a runtime error occurred while running a Lox script.
 
+  Return* = object of CatchableError
+    value*: Object
+
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
 

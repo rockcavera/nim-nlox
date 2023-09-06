@@ -13,9 +13,12 @@ proc call*(caller: LoxFunction, interpreter: var Interpreter,
   for i in 0 ..< len(caller.declaration.params):
     define(environment, caller.declaration.params[i].lexeme, arguments[i])
 
-  executeBlock(interpreter, caller.declaration.body, environment)
-
   result = nil
+
+  try:
+    executeBlock(interpreter, caller.declaration.body, environment)
+  except types.Return as returnValue:
+    result = returnValue.value
 
 proc arity*(caller: LoxFunction): int =
   len(caller.declaration.params)

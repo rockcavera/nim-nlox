@@ -5,6 +5,8 @@ import std/[math, strformat, strutils, times]
 import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
        ./types
 
+import "./return"
+
 # Forward declaration
 proc execute(interpreter: var Interpreter, stmt: Stmt)
 
@@ -255,6 +257,14 @@ method evaluate(stmt: While, interpreter: var Interpreter) =
   ## Evaluate the `While` statement.
   while isTruthy(evaluate(stmt.condition, interpreter)):
     execute(interpreter, stmt.body)
+
+method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
+  var value: Object = nil
+
+  if not isNil(stmt.value):
+    value = evaluate(stmt.value, interpreter)
+
+  raise newReturn(value)
 
 method evaluate(stmt: Function, interpreter: var Interpreter) =
   let function = newLoxFunction(stmt)
