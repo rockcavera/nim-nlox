@@ -160,6 +160,9 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
   for argument in expr.arguments:
     add(arguments, evaluate(argument, interpreter))
 
+  if not(callee of LoxCallable):
+    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
+
   let function = cast[LoxCallable](callee)
 
   result = call(function, interpreter, arguments)
