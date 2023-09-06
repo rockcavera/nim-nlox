@@ -23,26 +23,18 @@ proc isEqual(a: Object, b: Object): bool =
   if isNil(a):
     if isNil(b):
       result = true
-    else:
-      result = false
   elif a of Number:
     if b of Number:
       if isNaN(Number(a).data) and isNaN(Number(b).data):
         result = true
       else:
         result = Number(a).data == Number(b).data
-    else:
-      result = false
   elif a of Boolean:
     if b of Boolean:
       result = Boolean(a).data == Boolean(b).data
-    else:
-      result = false
   elif a of String:
     if b of String:
       result = String(a).data == String(b).data
-    else:
-      result = false
 
 proc checkNumberOperand(operator: Token, operand: Object) =
   ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
