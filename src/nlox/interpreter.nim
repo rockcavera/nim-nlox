@@ -223,23 +223,21 @@ proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt, interpreter)
 
-proc interpret*(interpreter: var Interpreter, statements: seq[Stmt]) =
+proc interpret*(lox: var Lox, statements: seq[Stmt]) =
   ## Try to execute `statements`. Otherwise, it throws a runtime error.
   try:
     for statement in statements:
-      execute(interpreter, statement)
+      execute(lox.interpreter, statement)
   except RuntimeError as error:
-    runtimeError(error)
+    runtimeError(lox, error)
 
 when defined(nloxTests):
-  proc interpretForEvaluateTest*(expression: Expr): string =
+  proc interpretForEvaluateTest*(lox: var Lox, expression: Expr): string =
     ## Attempts to evaluate `expression` and returns the stringified value.
     ## Otherwise, it throws a runtime error.
-    var interpreter = initInterpreter()
-
     try:
-      let value = evaluate(expression, interpreter)
+      let value = evaluate(expression, lox.interpreter)
 
       result = stringify(value)
     except RuntimeError as error:
-      runtimeError(error)
+      runtimeError(lox, error)

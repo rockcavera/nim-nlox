@@ -1,7 +1,7 @@
 {.used.}
 import std/private/[ospaths2], std/unittest
 
-import nlox/[astprinter, interpreter, logger, parser, scanner]
+import nlox/[astprinter, interpreter, lox, parser, scanner]
 
 import ./tconfig
 
@@ -10,30 +10,34 @@ const folder = "expressions"
 proc parseTest(scriptFile: string): string =
   let source = readFile(loxScriptsFolder / scriptFile)
 
+  var lox = initLox()
+
   var scanner = initScanner(source)
 
-  let tokens = scanTokens(scanner)
+  let tokens = scanTokens(lox, scanner)
 
   var parser = initParser(tokens)
 
-  let expression = parseForParseTest(parser)
+  let expression = parseForParseTest(lox, parser)
 
-  if not hadError:
+  if not lox.hadError:
     result = print(expression)
 
 proc evaluateTest(scriptFile: string): string =
   let source = readFile(loxScriptsFolder / scriptFile)
 
+  var lox = initLox()
+
   var scanner = initScanner(source)
 
-  let tokens = scanTokens(scanner)
+  let tokens = scanTokens(lox, scanner)
 
   var parser = initParser(tokens)
 
-  let expression = parseForParseTest(parser)
+  let expression = parseForParseTest(lox, parser)
 
-  if not hadError:
-    result = interpretForEvaluateTest(expression)
+  if not lox.hadError:
+    result = interpretForEvaluateTest(lox, expression)
 
 suite "Expressions":
   test "Parse":

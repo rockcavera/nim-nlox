@@ -96,7 +96,7 @@ proc peekNext(scanner: Scanner): char =
   else:
     result = scanner.source[scanner.current + 1]
 
-proc string(scanner: var Scanner) =
+proc string(lox: var Lox, scanner: var Scanner) =
   ## Parses the raw source code of `scanner` and captures the string literal
   ## enclosed in double quotes, adding a `Token`, of type `String`, with its
   ## value, to the list of tokens of `scanner`.
@@ -110,7 +110,7 @@ proc string(scanner: var Scanner) =
     discard advance(scanner)
 
   if isAtEnd(scanner):
-    error(scanner.line, "Unterminated string.")
+    error(lox, scanner.line, "Unterminated string.")
   else:
     # The closing ".
     discard advance(scanner)
@@ -164,7 +164,7 @@ proc identifier(scanner: var Scanner) =
 
   addToken(scanner, kind)
 
-proc scanToken(scanner: var Scanner) =
+proc scanToken(lox: var Lox, scanner: var Scanner) =
   ## Recognizes lexemes from the raw source code of `scanner`.
   let c = advance(scanner)
 
@@ -218,23 +218,24 @@ proc scanToken(scanner: var Scanner) =
   of '\n':
     inc(scanner.line)
   of '"':
-    string(scanner)
+    string(lox, scanner)
   else:
     if isDigit(c):
       number(scanner)
     elif isAlpha(c):
       identifier(scanner)
     else:
-      error(scanner.line, "Unexpected character.")
+      error(lox, scanner.line, "Unexpected character.")
 
-proc scanTokens*(scanner: var Scanner): seq[Token] =
+proc scanTokens*(lox: var Lox, scanner: var Scanner): seq[Token] =
   ## Returns a `seq[Token]` with all tokens scanned from the raw source code of
   ## `scanner`.
   while not isAtEnd(scanner):
     # We are at the beginning of the next lexeme.
     scanner.start = scanner.current
-    scanToken(scanner)
+    scanToken(lox, scanner)
 
-  add(scanner.tokens, Token(kind: Eof, literal: nil, lexeme: "", line: scanner.line))
+  add(scanner.tokens, Token(kind: Eof, literal: nil, lexeme: "",
+                            line: scanner.line))
 
   result = toSeq(scanner.tokens)

@@ -110,6 +110,15 @@ type
     environment*: Environment
       ## Reference to the interpreter environment
 
+  Lox* = object
+    ## Object that stores the Lox interpreter state
+    interpreter*: Interpreter
+      ## Interpreter information
+    hadError* = false
+      ## Determines if an error occurred in code execution.
+    hadRuntimeError* = false
+      ## Determines that a runtime error occurred while running a Lox script.
+
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
 

@@ -1,7 +1,7 @@
 {.used.}
 import std/private/[ospaths2], std/unittest
 
-import nlox/[scanner, token]
+import nlox/[lox, scanner, token]
 
 import ./tconfig
 
@@ -10,9 +10,11 @@ const folder = "scanning"
 proc scanningTest(scriptFile: string): string =
   let source = readFile(loxScriptsFolder / scriptFile)
 
+  var lox = initLox()
+
   var scanner = initScanner(source)
 
-  let tokens = scanTokens(scanner)
+  let tokens = scanTokens(lox, scanner)
 
   for token in tokens:
     add(result, $token)

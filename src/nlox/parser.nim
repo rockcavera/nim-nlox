@@ -5,16 +5,16 @@ import std/[lists, sequtils]
 import ./expr, ./literals, ./logger, ./stmt, ./types
 
 # Forward declaration
-proc expression(parser: var Parser): Expr
-proc declaration(parser: var Parser): Stmt
-proc statement(parser: var Parser): Stmt
+proc expression(lox: var Lox, parser: var Parser): Expr
+proc declaration(lox: var Lox, parser: var Parser): Stmt
+proc statement(lox: var Lox, parser: var Parser): Stmt
 
 proc initParser*(tokens: seq[Token]): Parser =
   ## Initializes a `Parser` object with the sequence of `tokens`.
   result.tokens = tokens
   result.current = 0
 
-proc previous(parser: var Parser): Token =
+proc previous(parser: Parser): Token =
   ## Returns the last `Token`.
   parser.tokens[parser.current - 1]
 
@@ -56,7 +56,7 @@ proc match(parser: var Parser, types: varargs[TokenType]): bool =
 
       break
 
-proc error(token: Token, message: string): ref ParseError =
+proc error(lox: var Lox, token: Token, message: string): ref ParseError =
   ## Returns a `ParseError` object with the `message` message, as well as prints
   ## the token that caused the error with the `message` message.
   new(result)
@@ -64,7 +64,7 @@ proc error(token: Token, message: string): ref ParseError =
   result.msg = message
   result.parent = nil
 
-  logger.error(token, message)
+  logger.error(lox, token, message)
 
 proc synchronize(parser: var Parser) =
   ## Discards tokens until it encounters a statement boundary. It is called
@@ -80,15 +80,16 @@ proc synchronize(parser: var Parser) =
 
     discard advance(parser)
 
-proc consume(parser: var Parser, typ: TokenType, message: string): Token =
+proc consume(lox: var Lox, parser: var Parser, typ: TokenType, message: string):
+            Token =
   ## Checks if the next `Token` is of type `typ` and returns it consuming.
   ## Otherwise, it raises a `ParseError` error with the message `message`.
   if check(parser, typ):
     result = advance(parser)
   else:
-    raise error(peek(parser), message)
+    raise error(lox, peek(parser), message)
 
-proc primary(parser: var Parser): Expr =
+proc primary(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule primary.
   # primary → "true" | "false" | "nil"
   #         | NUMBER | STRING
@@ -105,254 +106,255 @@ proc primary(parser: var Parser): Expr =
   elif match(parser, Identifier):
     result = newVariable(previous(parser))
   elif match(parser, LeftParen):
-    result = expression(parser)
+    result = expression(lox, parser)
 
-    discard consume(parser, RightParen, "Expect ')' after expression.")
+    discard consume(lox, parser, RightParen, "Expect ')' after expression.")
 
     result = newGrouping(result)
   else:
-    raise error(peek(parser), "Expect expression.")
+    raise error(lox, peek(parser), "Expect expression.")
 
-proc finishCall(parser: var Parser, callee: Expr): Expr =
+proc finishCall(lox: var Lox, parser: var Parser, callee: Expr): Expr =
   var arguments: seq[Expr]
 
   if not check(parser, RightParen):
     while true:
       if len(arguments) >= 255:
-        logger.error(peek(parser), "Can't have more than 255 arguments.")
+        logger.error(lox, peek(parser), "Can't have more than 255 arguments.")
 
-      add(arguments, expression(parser))
+      add(arguments, expression(lox, parser))
 
       if not match(parser, Comma):
         break
 
-  let paren = consume(parser, RightParen, "Expect ')' after arguments.")
+  let paren = consume(lox, parser, RightParen, "Expect ')' after arguments.")
 
   result = newCall(callee, paren, arguments)
 
-proc call(parser: var Parser): Expr =
-  result = primary(parser)
+proc call(lox: var Lox, parser: var Parser): Expr =
+  result = primary(lox, parser)
 
   while true:
     if match(parser, LeftParen):
-      result = finishCall(parser, result)
+      result = finishCall(lox, parser, result)
     else:
       break
 
-proc unary(parser: var Parser): Expr =
+proc unary(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule unary.
   # unary → ( "!" | "-" ) unary | call ;
   if match(parser, Bang, Minus):
     let
       operator = previous(parser)
-      right = unary(parser)
+      right = unary(lox, parser)
 
     result = newUnary(operator, right)
   else:
-    result = call(parser)
+    result = call(lox, parser)
 
-proc factor(parser: var Parser): Expr =
+proc factor(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule factor.
   # factor → unary ( ( "/" | "*" ) unary )* ;
-  result = unary(parser)
+  result = unary(lox, parser)
 
   while match(parser, Slash, Star):
     let
       operator = previous(parser)
-      right = unary(parser)
+      right = unary(lox, parser)
 
     result = newBinary(result, operator, right)
 
-proc term(parser: var Parser): Expr =
+proc term(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule term.
   # term → factor ( ( "-" | "+" ) factor )* ;
-  result = factor(parser)
+  result = factor(lox, parser)
 
   while match(parser, Minus, Plus):
     let
       operator = previous(parser)
-      right = factor(parser)
+      right = factor(lox, parser)
 
     result = newBinary(result, operator, right)
 
-proc comparison(parser: var Parser): Expr =
+proc comparison(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule comparison.
   # comparison → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-  result = term(parser)
+  result = term(lox, parser)
 
   while match(parser, Greater, GreaterEqual, Less, LessEqual):
     let
       operator = previous(parser)
-      right = term(parser)
+      right = term(lox, parser)
 
     result = newBinary(result, operator, right)
 
-proc equality(parser: var Parser): Expr =
+proc equality(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule equality.
   # equality → comparison ( ( "!=" | "==" ) comparison )* ;
-  result = comparison(parser)
+  result = comparison(lox, parser)
 
   while match(parser, BangEqual, EqualEqual):
     let
       operator = previous(parser)
-      right = comparison(parser)
+      right = comparison(lox, parser)
 
     result = newBinary(result, operator, right)
 
-proc `and`(parser: var Parser): Expr =
+proc `and`(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule logic_and.
   # logic_and → equality ( "and" equality )* ;
-  result = equality(parser)
+  result = equality(lox, parser)
 
   while match(parser, And):
     let
       operator = previous(parser)
-      right = equality(parser)
+      right = equality(lox, parser)
 
     result = newLogical(result, operator, right)
 
-proc `or`(parser: var Parser): Expr =
+proc `or`(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule logic_or.
   # logic_or → logic_and ( "or" logic_and )* ;
-  result = and(parser)
+  result = `and`(lox, parser)
 
   while match(parser, Or):
     let
       operator = previous(parser)
-      right = and(parser)
+      right = `and`(lox, parser)
 
     result = newLogical(result, operator, right)
 
-proc assignment(parser: var Parser): Expr =
+proc assignment(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule assignment.
   # assignment → IDENTIFIER "=" assignment
   #            | logic_or ;
-  result = or(parser)
+  result = `or`(lox, parser)
 
   if match(parser, Equal):
     let
       equals = previous(parser)
-      value = assignment(parser)
+      value = assignment(lox, parser)
 
     if result of Variable:
       let name = Variable(result).name
 
       result = newAssign(name, value)
     else:
-      logger.error(equals, "Invalid assignment target.")
+      logger.error(lox, equals, "Invalid assignment target.")
 
-proc expression(parser: var Parser): Expr =
+proc expression(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule expression.
   # expression → assignment ;
-  assignment(parser)
+  assignment(lox, parser)
 
-proc printStatement(parser: var Parser): Stmt =
+proc printStatement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule printStmt.
   # printStmt → "print" expression ";" ;
-  let value = expression(parser)
+  let value = expression(lox, parser)
 
-  discard consume(parser, Semicolon, "Expect ';' after value.")
+  discard consume(lox, parser, Semicolon, "Expect ';' after value.")
 
   result = newPrint(value)
 
-proc varDeclaration(parser: var Parser): Stmt =
+proc varDeclaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule varDecl.
   # varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
-  let name = consume(parser, Identifier, "Expect variable name.")
+  let name = consume(lox, parser, Identifier, "Expect variable name.")
 
   var initializer: Expr = nil
 
   if match(parser, Equal):
-    initializer = expression(parser)
+    initializer = expression(lox, parser)
 
-  discard consume(parser, Semicolon, "Expect ';' after variable declaration.")
+  discard consume(lox, parser, Semicolon,
+                  "Expect ';' after variable declaration.")
 
   result = newVar(name, initializer)
 
-proc whileStatement(parser: var Parser): Stmt =
+proc whileStatement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule whileStmt.
   # whileStmt → "while" "(" expression ")" statement ;
-  discard consume(parser, LeftParen, "Expect '(' after 'while'.")
+  discard consume(lox, parser, LeftParen, "Expect '(' after 'while'.")
 
-  let condition = expression(parser)
+  let condition = expression(lox, parser)
 
-  discard consume(parser, RightParen, "Expect ')' after condition.")
+  discard consume(lox, parser, RightParen, "Expect ')' after condition.")
 
-  let body = statement(parser)
+  let body = statement(lox, parser)
 
   result = newWhile(condition, body)
 
-proc expressionStatement(parser: var Parser): Stmt =
+proc expressionStatement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule exprStmt.
   # exprStmt → expression ";" ;
-  let expr = expression(parser)
+  let expr = expression(lox, parser)
 
-  discard consume(parser, Semicolon, "Expect ';' after expression.")
+  discard consume(lox, parser, Semicolon, "Expect ';' after expression.")
 
   result = newExpression(expr)
 
-proc `block`(parser: var Parser): seq[Stmt] =
+proc `block`(lox: var Lox, parser: var Parser): seq[Stmt] =
   ## Returns `Stmt` from parsing the grammar rule block.
   # block → "{" declaration* "}" ;
   var statements = initSinglyLinkedList[Stmt]()
 
   while (not check(parser, RightBrace)) and (not isAtEnd(parser)):
-    add(statements, declaration(parser))
+    add(statements, declaration(lox, parser))
 
-  discard consume(parser, RightBrace, "Expect '}' after block.")
+  discard consume(lox, parser, RightBrace, "Expect '}' after block.")
 
   result = toSeq(statements)
 
-proc ifStatement(parser: var Parser): Stmt =
+proc ifStatement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule ifStmt.
   # ifStmt → "if" "(" expression ")" statement
   #        ( "else" statement )? ;
-  discard consume(parser, LeftParen, "Expect '(' after 'if'.")
+  discard consume(lox, parser, LeftParen, "Expect '(' after 'if'.")
 
-  let condition = expression(parser)
+  let condition = expression(lox, parser)
 
-  discard consume(parser, RightParen, "Expect ')' after if condition.")
+  discard consume(lox, parser, RightParen, "Expect ')' after if condition.")
 
-  let thenBranch = statement(parser)
+  let thenBranch = statement(lox, parser)
 
   var elseBranch: Stmt = nil
 
   if match(parser, Else):
-    elseBranch = statement(parser)
+    elseBranch = statement(lox, parser)
 
   result = newIf(condition, thenBranch, elseBranch)
 
-proc forStatement(parser: var Parser): Stmt =
+proc forStatement(lox: var Lox, parser: var Parser): Stmt =
   ## ## Returns `Stmt` from parsing the grammar rule forStmt.
   # forStmt → "for" "(" ( varDecl | exprStmt | ";" )
   #           expression? ";"
   #           expression? ")" statement ;
-  discard consume(parser, LeftParen, "Expect '(' after 'for'.")
+  discard consume(lox, parser, LeftParen, "Expect '(' after 'for'.")
 
   var initializer: Stmt
 
   if match(parser, Semicolon):
     initializer = nil
   elif match(parser, TokenType.Var):
-    initializer = varDeclaration(parser)
+    initializer = varDeclaration(lox, parser)
   else:
-    initializer = expressionStatement(parser)
+    initializer = expressionStatement(lox, parser)
 
   var condition: Expr = nil
 
   if not check(parser, Semicolon):
-    condition = expression(parser)
+    condition = expression(lox, parser)
 
-  discard consume(parser, Semicolon, "Expect ';' after loop condition.")
+  discard consume(lox, parser, Semicolon, "Expect ';' after loop condition.")
 
   var increment: Expr = nil
 
   if not check(parser, RightParen):
-    increment = expression(parser)
+    increment = expression(lox, parser)
 
-  discard consume(parser, RightParen, "Expect ')' after for clauses.")
+  discard consume(lox, parser, RightParen, "Expect ')' after for clauses.")
 
-  result = statement(parser)
+  result = statement(lox, parser)
 
   if not isNil(increment):
     result = newBlock(@[result, newExpression(increment)])
@@ -365,7 +367,7 @@ proc forStatement(parser: var Parser): Stmt =
   if not isNil(initializer):
     result = newBlock(@[initializer, result])
 
-proc statement(parser: var Parser): Stmt =
+proc statement(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule statement.
   # statement → exprStmt
   #           | forStmt
@@ -374,46 +376,46 @@ proc statement(parser: var Parser): Stmt =
   #           | whileStmt
   #           | block ;
   if match(parser, For):
-    result = forStatement(parser)
+    result = forStatement(lox, parser)
   elif match(parser, TokenType.If):
-    result = ifStatement(parser)
+    result = ifStatement(lox, parser)
   elif match(parser, TokenType.Print):
-    result = printStatement(parser)
+    result = printStatement(lox, parser)
   elif match(parser, TokenType.While):
-    result = whileStatement(parser)
+    result = whileStatement(lox, parser)
   elif match(parser, LeftBrace):
-    result = newBlock(`block`(parser))
+    result = newBlock(`block`(lox, parser))
   else:
-    result = expressionStatement(parser)
+    result = expressionStatement(lox, parser)
 
-proc declaration(parser: var Parser): Stmt =
+proc declaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule declaration.
   # declaration → varDecl
   #             | statement ;
   try:
     if match(parser, TokenType.Var):
-      result = varDeclaration(parser)
+      result = varDeclaration(lox, parser)
     else:
-      result = statement(parser)
+      result = statement(lox, parser)
   except ParseError:
     synchronize(parser)
 
     result = nil
 
-proc parse*(parser: var Parser): seq[Stmt] =
+proc parse*(lox: var Lox, parser: var Parser): seq[Stmt] =
   ## Returns a sequence of parsed statements from `parser`.
   # program → declaration* EOF ;
   var statements = initSinglyLinkedList[Stmt]()
 
   while not isAtEnd(parser):
-    add(statements, declaration(parser))
+    add(statements, declaration(lox, parser))
 
   result = toSeq(statements)
 
 when defined(nloxTests):
-  proc parseForParseTest*(parser: var Parser): Expr =
+  proc parseForParseTest*(lox: var Lox, parser: var Parser): Expr =
     ## Returns a parsed `Expr` from `parser`.
     try:
-      result = expression(parser)
+      result = expression(lox, parser)
     except ParseError:
       result = nil
