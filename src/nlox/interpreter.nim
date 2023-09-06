@@ -178,26 +178,6 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
-method evaluate(expr: Call, interpreter: var Interpreter): Object =
-  let callee = evaluate(expr.callee, interpreter)
-
-  var arguments = newSeqOfCap[Object](len(expr.arguments))
-
-  for argument in expr.arguments:
-    add(arguments, evaluate(argument, interpreter))
-
-  if not(callee of LoxCallable):
-    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
-
-  let function = cast[LoxCallable](callee)
-
-  if len(arguments) != function.arity(function):
-    raise newRuntimeError(expr.paren,
-                          fmt"Expected {function.arity(function)} arguments but got" &
-                          fmt"{len(arguments)}.")
-
-  result = function.call(function, interpreter, arguments)
-
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `Object` type.
@@ -272,6 +252,36 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
   let function = newLoxFunction(stmt)
 
   define(interpreter.environment, stmt.name.lexeme, function)
+
+method evaluate(expr: Call, interpreter: var Interpreter): Object =
+  let callee = evaluate(expr.callee, interpreter)
+
+  var arguments = newSeqOfCap[Object](len(expr.arguments))
+
+  for argument in expr.arguments:
+    add(arguments, evaluate(argument, interpreter))
+
+  if not(callee of LoxCallable):
+    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
+
+  if callee of LoxFunction:
+    let function = cast[LoxFunction](callee)
+
+    if len(arguments) != arity(function):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {arity(function)} arguments but got " &
+                            fmt"{len(arguments)}.")
+
+    result = call(function, interpreter, arguments)
+  else:
+    let function = cast[LoxCallable](callee)
+
+    if len(arguments) != function.arity(function):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {function.arity(function)} arguments" &
+                            fmt" but got {len(arguments)}.")
+
+    result = function.call(function, interpreter, arguments)
 
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
