@@ -265,6 +265,14 @@ method evaluate(stmt: While, interpreter: var Interpreter) =
   while isTruthy(evaluate(stmt.condition, interpreter)):
     execute(interpreter, stmt.body)
 
+# Delayed imports
+import ./loxfunction
+
+method evaluate(stmt: Function, interpreter: var Interpreter) =
+  let function = newLoxFunction(stmt)
+
+  define(interpreter.environment, stmt.name.lexeme, function)
+
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt, interpreter)
