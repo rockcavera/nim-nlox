@@ -330,3 +330,19 @@ true
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Not":
+    const
+      script = folder / "not.lox"
+      expectedExitCode = 0
+      expectedOutput = """false
+true
+true
+false
+false
+true
+false
+false
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

@@ -1,3 +1,4 @@
-import ./tcompile, ./tassignment, ./tblock, ./tbool, ./tcomments,
-       ./texpressions, ./tfor, ./tif, ./tlogicaloperator, ./tnil, ./tnumber,
-       ./toperator, ./tprint, ./tscanning, ./tstring, ./tvariable, ./twhile
+import ./tcompile, ./tassignment, ./tblock, ./tbool, ./tcall, ./tclosure,
+       ./tcomments, ./texpressions, ./tfor, ./tfunction, ./tif,
+       ./tlogicaloperator, ./tnil, ./tnumber, ./toperator, ./tprint,
+       ./tregression, ./treturn, ./tscanning, ./tstring, ./tvariable, ./twhile

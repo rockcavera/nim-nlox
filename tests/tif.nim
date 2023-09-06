@@ -67,3 +67,21 @@ empty
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Fun in else":
+    const
+      script = folder / "fun_in_else.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'fun': Expect expression.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Fun in then":
+    const
+      script = folder / "fun_in_then.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'fun': Expect expression.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
