@@ -178,18 +178,6 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
-proc stringify(literal: Object): string =
-  ## Returns a `string` of `literal`. This is different from the `$` operator
-  ## for the `Object` type.
-  if isNil(literal):
-    result = "nil"
-  else:
-    result = $literal
-
-    if literal of Number:
-      if endsWith(result, ".0"):
-        setLen(result, len(result) - 2)
-
 proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
                    environment: Environment) =
   ## Runs `statements` from a higher block and changes the global environment
@@ -203,6 +191,29 @@ proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
       execute(interpreter, statement)
   finally:
     interpreter.environment = previous
+
+# Delayed imports
+import ./loxfunction
+
+proc stringify(literal: Object): string =
+  ## Returns a `string` of `literal`. This is different from the `$` operator
+  ## for the `Object` type.
+  if isNil(literal):
+    result = "nil"
+  elif literal of LoxFunction:
+    let function = cast[LoxFunction](literal)
+
+    result = toString(function)
+  elif literal of LoxCallable:
+    let function = cast[LoxCallable](literal)
+
+    result = function.toString(function)
+  else:
+    result = $literal
+
+    if literal of Number:
+      if endsWith(result, ".0"):
+        setLen(result, len(result) - 2)
 
 method evaluate(stmt: Stmt, interpreter: var Interpreter) {.base.} =
   ## Base method that raises `CatchableError` exception when `stmt` has not had
@@ -244,9 +255,6 @@ method evaluate(stmt: While, interpreter: var Interpreter) =
   ## Evaluate the `While` statement.
   while isTruthy(evaluate(stmt.condition, interpreter)):
     execute(interpreter, stmt.body)
-
-# Delayed imports
-import ./loxfunction
 
 method evaluate(stmt: Function, interpreter: var Interpreter) =
   let function = newLoxFunction(stmt)
