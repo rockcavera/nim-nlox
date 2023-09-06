@@ -21,7 +21,7 @@ type
     expression*: Expr
 
   Literal* = ref object of Expr
-    value*: LiteralValue
+    value*: Object
 
   Logical* = ref object of Expr
     left*: Expr
@@ -56,7 +56,7 @@ proc newGrouping*(expression: Expr): Grouping =
   result = new(Grouping)
   result.expression = expression
 
-proc newLiteral*(value: LiteralValue): Literal =
+proc newLiteral*(value: Object): Literal =
   result = new(Literal)
   result.value = value
 
@@ -74,4 +74,3 @@ proc newUnary*(operator: Token, right: Expr): Unary =
 proc newVariable*(name: Token): Variable =
   result = new(Variable)
   result.name = name
-

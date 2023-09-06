@@ -8,146 +8,143 @@ import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
 # Forward declaration
 proc execute(stmt: Stmt)
 
-proc isTruthy(literal: LiteralValue): bool =
+proc isTruthy(literal: Object): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
-  case literal.kind
-  of LitNull:
+  if isNil(literal):
     result = false
-  of LitBoolean:
-    result = literal.booleanLit
+  elif literal of Boolean:
+    result = Boolean(literal).data
   else:
     result = true
 
-proc isEqual(a: LiteralValue, b: LiteralValue): bool =
+proc isEqual(a: Object, b: Object): bool =
   ## Returns `true` if objects `a` and `b` are equal. Otherwise, it returns
   ## `false`.
-  case a.kind
-  of LitNull:
-    if b.kind == LitNull:
+  if isNil(a):
+    if isNil(b):
       result = true
     else:
       result = false
-  of LitNumber:
-    if b.kind == LitNumber:
-      if isNaN(a.numberLit) and isNaN(b.numberLit):
+  elif a of Number:
+    if b of Number:
+      if isNaN(Number(a).data) and isNaN(Number(b).data):
         result = true
       else:
-        result = a.numberLit == b.numberLit
+        result = Number(a).data == Number(b).data
     else:
       result = false
-  of LitString:
-    if b.kind == LitString:
-      result = a.stringLit == b.stringLit
+  elif a of Boolean:
+    if b of Boolean:
+      result = Boolean(a).data == Boolean(b).data
     else:
       result = false
-  of LitBoolean:
-    if b.kind == LitBoolean:
-      result = a.booleanLit == b.booleanLit
+  elif a of String:
+    if b of String:
+      result = String(a).data == String(b).data
     else:
       result = false
 
-proc checkNumberOperand(operator: Token, operand: LiteralValue) =
+proc checkNumberOperand(operator: Token, operand: Object) =
   ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
   ## it raises a `RuntimeError`.
-  if operand.kind != LitNumber:
+  if not(operand of Number):
     raise newRuntimeError(operator, "Operand must be a number.")
 
-proc checkNumberOperands(operator: Token, left: LiteralValue,
-                         right: LiteralValue) =
+proc checkNumberOperands(operator: Token, left: Object, right: Object) =
   ## Checks if the operands `left` and `right` are numbers, and if they are, it
   ## does nothing. Otherwise, it raises a `RuntimeError`.
-  if left.kind != LitNumber or right.kind != LitNumber:
+  if not(left of Number) or not(right of Number):
     raise newRuntimeError(operator, "Operands must be numbers.")
 
-method evaluate(expr: Expr): LiteralValue {.base.} =
+method evaluate(expr: Expr): Object {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method evaluate(expr: Literal): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of a `Literal` expression.
+method evaluate(expr: Literal): Object =
+  ## Returns a `Object` from the evaluation of a `Literal` expression.
   expr.value
 
-method evaluate(expr: Grouping): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of a `Grouping` expression.
+method evaluate(expr: Grouping): Object =
+  ## Returns a `Object` from the evaluation of a `Grouping` expression.
   evaluate(expr.expression)
 
-method evaluate(expr: Unary): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of an `Unary` expression.
+method evaluate(expr: Unary): Object =
+  ## Returns a `Object` from the evaluation of an `Unary` expression.
   let right = evaluate(expr.right)
 
   case expr.operator.kind
   of Bang:
-    result = initLiteralBoolean(not isTruthy(right))
+    result = newBoolean(not isTruthy(right))
   of Minus:
     checkNumberOperand(expr.operator, right)
 
-    result = initLiteralNumber(-right.numberLit)
+    result = newNumber(-Number(right).data)
   else:
-    result = initLiteral()
+    result = newObject()
 
-method evaluate(expr: Binary): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of an `Binary` expression.
+method evaluate(expr: Binary): Object =
+  ## Returns a `Object` from the evaluation of an `Binary` expression.
   let
     left = evaluate(expr.left)
     right = evaluate(expr.right)
 
   case expr.operator.kind
   of BangEqual:
-    result = initLiteralBoolean(not isEqual(left, right))
+    result = newBoolean(not isEqual(left, right))
   of EqualEqual:
-    result = initLiteralBoolean(isEqual(left, right))
+    result = newBoolean(isEqual(left, right))
   of Greater:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralBoolean(left.numberLit > right.numberLit)
+    result = newBoolean(Number(left).data > Number(right).data)
   of GreaterEqual:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralBoolean(left.numberLit >= right.numberLit)
+    result = newBoolean(Number(left).data >= Number(right).data)
   of Less:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralBoolean(left.numberLit < right.numberLit)
+    result = newBoolean(Number(left).data < Number(right).data)
   of LessEqual:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralBoolean(left.numberLit <= right.numberLit)
+    result = newBoolean(Number(left).data <= Number(right).data)
   of Minus:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralNumber(left.numberLit - right.numberLit)
+    result = newNumber(Number(left).data - Number(right).data)
   of Plus:
-    if left.kind == LitNumber and right.kind == LitNumber:
-      result = initLiteralNumber(left.numberLit + right.numberLit)
-    elif left.kind == LitString and right.kind == LitString:
-      result = initLiteralString(left.stringLit & right.stringLit)
+    if left of Number and right of Number:
+      result = newNumber(Number(left).data + Number(right).data)
+    elif left of String and right of String:
+      result = newString(String(left).data & String(right).data)
     else:
       raise newRuntimeError(expr.operator,
                             "Operands must be two numbers or two strings.")
   of Slash:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralNumber(left.numberLit / right.numberLit)
+    result = newNumber(Number(left).data / Number(right).data)
   of Star:
     checkNumberOperands(expr.operator, left, right)
 
-    result = initLiteralNumber(left.numberLit * right.numberLit)
+    result = newNumber(Number(left).data * Number(right).data)
   else:
-    result = initLiteral()
+    result = newObject()
 
-method evaluate(expr: Variable): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of a `Variable` expression.
+method evaluate(expr: Variable): Object =
+  ## Returns a `Object` from the evaluation of a `Variable` expression.
   get(environment.environment, expr.name)
 
-method evaluate(expr: Assign): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of an `Assign` expression.
+method evaluate(expr: Assign): Object =
+  ## Returns a `Object` from the evaluation of an `Assign` expression.
   result = evaluate(expr.value)
 
   assign(environment.environment, expr.name, result)
 
-method evaluate(expr: Logical): LiteralValue =
-  ## Returns a `LiteralValue` from the evaluation of a `Logical` expression.
+method evaluate(expr: Logical): Object =
+  ## Returns a `Object` from the evaluation of a `Logical` expression.
   result = evaluate(expr.left)
 
   block shortCircuit:
@@ -159,21 +156,17 @@ method evaluate(expr: Logical): LiteralValue =
 
     result = evaluate(expr.right)
 
-proc stringify(literal: LiteralValue): string =
+proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
-  ## for the `LiteralValue` type.
-  case literal.kind
-  of LitNull:
+  ## for the `Object` type.
+  if isNil(literal):
     result = "nil"
-  of LitNumber:
-    result = $literal.numberLit
+  else:
+    result = $literal
 
-    if endsWith(result, ".0"):
-      setLen(result, len(result) - 2)
-  of LitString:
-    result = literal.stringLit
-  of LitBoolean:
-    result = $literal.booleanLit
+    if literal of Number:
+      if endsWith(result, ".0"):
+        setLen(result, len(result) - 2)
 
 proc executeBlock(statements: seq[Stmt], env: Environment) =
   ## Runs `statements` from a higher block and changes the global environment
@@ -205,7 +198,7 @@ method evaluate(stmt: Print) =
 
 method evaluate(stmt: Var) =
   ## Evaluate the `Var` statement.
-  var value = initLiteral()
+  var value = newObject()
 
   if not isNil(stmt.initializer):
     value = evaluate(stmt.initializer)

@@ -1,33 +1,55 @@
 # Internal imports
 import ./types
 
-proc initLiteral*(): LiteralValue =
-  ## Initializes a `LiteralValue` object of kind `LitNull`
-  LiteralValue(kind: LitNull)
+proc newObject*(): Object =
+  ## Create a null `Object`.
+  result = nil
 
-proc initLiteralNumber*(numberLit: float): LiteralValue =
-  ## Initializes a `LiteralValue` object of kind `LitNumber` with the value
-  ## `numberLit`.
-  LiteralValue(kind: LitNumber, numberLit: numberLit)
+proc newBoolean*(data: bool): Boolean =
+  ## Creates a `Boolean` object with the value of `data`
+  result = new(Boolean)
+  result.data = data
 
-proc initLiteralString*(stringLit: string): LiteralValue =
-  ## Initializes a `LiteralValue` object of kind `LitString` with the value
-  ## `stringLit`.
-  LiteralValue(kind: LitString, stringLit: stringLit)
+proc newNumber*(data: float): Number =
+  ## creates a `Number` object with the value of `data`
+  result = new(Number)
+  result.data = data
 
-proc initLiteralBoolean*(booleanLit: bool): LiteralValue =
-  ## Initializes a `LiteralValue` object of kind `LitBoolean` with the value
-  ## `booleanLit`.
-  LiteralValue(kind: LitBoolean, booleanLit: booleanLit)
+proc newString*(data: string): String =
+  ## Creates a `String` object with the value of `data`
+  result = new(String)
+  result.data = data
 
-proc toString(lit: LiteralValue): string =
-  ## Returns a string from the `LiteralValue` object.
-  result = case lit.kind
-           of LitNumber: $lit.numberLit
-           of LitString: lit.stringLit
-           of LitBoolean: $lit.booleanLit
-           of LitNull: "null"
+method toString(literal: Object): string {.base.} =
+  ## Base method that raises `CatchableError` exception when `literal` has not
+  ## had its method implemented.
+  raise newException(CatchableError, "Method without implementation override")
 
-proc `$`*(lit: LiteralValue): string =
-  ## Stringify operator that returns a string from the `LiteralValue` object.
-  toString(lit)
+method toString(literal: Boolean): string =
+  ## Returns a `string` of `literal`.
+  $literal.data
+
+method toString(literal: Number): string =
+  ## Returns a `string` of `literal`.
+  $literal.data
+
+method toString(literal: String): string =
+  ## Returns a `string` of `literal`.
+  literal.data
+
+# proc toString(literal: Object): string =
+#   if isNil(literal):
+#     result = "null"
+#   elif literal of Boolean:
+#     result = $Boolean(literal).data
+#   elif literal of Number:
+#     result = $Number(literal).data
+#   elif literal of String:
+#     result = String(literal).data
+
+proc `$`*(literal: Object): string =
+  ## Stringify operator that returns a string from the `Object` object.
+  if isNil(literal): # prevents `NilAccessDefect`
+    result = "null"
+  else:
+    result = toString(literal)

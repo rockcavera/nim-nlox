@@ -2,24 +2,19 @@
 import std/[lists, tables]
 
 type
-  LiteralKind* = enum
-    ## Enumerates the kinds of literals.
-    LitNull, LitNumber, LitString, LitBoolean
+  Object* = ref object of RootObj
 
-  LiteralValue* = object
-    ## Object to store a literal value, which can be Number or String.
-    case kind*: LiteralKind
-    of LitNumber:
-      numberLit*: float
-        ## Stores the value of the Number
-    of LitString:
-      stringLit*: string
-        ## Stores the value of a String
-    of LitBoolean:
-      booleanLit*: bool
-        ## Stores the value of a Boolean
-    else:
-      discard
+  Boolean* = ref object of Object
+    ## An object for Lox's Boolean type.
+    data*: bool
+
+  Number* = ref object of Object
+    ## An object for Lox's Number type.
+    data*: float
+
+  String* = ref object of Object
+    ## An object for Lox's String type.
+    data*: string
 
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
@@ -75,7 +70,7 @@ type
     ## field.
     kind*: TokenType
       ## Stores the type of token.
-    literal*: LiteralValue
+    literal*: Object
       ## Stores a literal value, which can be Number or String.
     lexeme*: string
       ## Stores the lexeme.
@@ -107,7 +102,7 @@ type
     enclosing*: Environment
       ## Reference to the outer level environment. For the global environment
       ## this is `nil`.
-    values*: Table[string, LiteralValue]
+    values*: Table[string, Object]
       ## Hash table that stores variable names and values.
 
   ParseError* = object of CatchableError

@@ -98,7 +98,7 @@ proc main*(args: seq[string]) =
     "Binary   : Expr left, Token operator, Expr right",
     "Call     : Expr callee, Token paren, seq[Expr] arguments",
     "Grouping : Expr expression",
-    "Literal  : LiteralValue value",
+    "Literal  : Object value",
     "Logical  : Expr left, Token operator, Expr right",
     "Unary    : Token operator, Expr right",
     "Variable : Token name"])

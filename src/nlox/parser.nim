@@ -95,12 +95,12 @@ proc primary(parser: var Parser): Expr =
   #         | "(" expression ")"
   #         | IDENTIFIER ;
   if match(parser, False):
-    result = newLiteral(initLiteralBoolean(false))
+    result = newLiteral(newBoolean(false))
   elif match(parser, True):
-    result = newLiteral(initLiteralBoolean(true))
+    result = newLiteral(newBoolean(true))
   elif match(parser, Nil):
-    result = newLiteral(initLiteral())
-  elif match(parser, Number, String):
+    result = newLiteral(newObject())
+  elif match(parser, TokenType.Number, TokenType.String):
     result = newLiteral(previous(parser).literal)
   elif match(parser, Identifier):
     result = newVariable(previous(parser))
@@ -358,7 +358,7 @@ proc forStatement(parser: var Parser): Stmt =
     result = newBlock(@[result, newExpression(increment)])
 
   if isNil(condition):
-    condition = newLiteral(initLiteralBoolean(true))
+    condition = newLiteral(newBoolean(true))
 
   result = newWhile(condition, result)
 

@@ -22,7 +22,7 @@ method print*(expr: Grouping): string =
 
 method print*(expr: Literal): string =
   ## Returns a `string` representing the expression `expr`.
-  if expr.value.kind == LitNull:
+  if isNil(expr.value):
     result = "nil"
   else:
     result = $expr.value
