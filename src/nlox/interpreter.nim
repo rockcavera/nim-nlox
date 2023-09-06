@@ -267,7 +267,7 @@ method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
   raise newReturn(value)
 
 method evaluate(stmt: Function, interpreter: var Interpreter) =
-  let function = newLoxFunction(stmt)
+  let function = newLoxFunction(stmt, interpreter.environment)
 
   define(interpreter.environment, stmt.name.lexeme, function)
 
