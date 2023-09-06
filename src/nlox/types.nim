@@ -17,9 +17,10 @@ type
     data*: string
 
   LoxCallable* = ref object of Object
-    arity*: proc (): int
-    call*: proc (interpreter: Interpreter, arguments: seq[Object]): Object
-    toString*: proc (): string
+    arity*: proc (caller: LoxCallable): int
+    call*: proc (caller: LoxCallable, interpreter: var Interpreter,
+                 arguments: seq[Object]): Object
+    toString*: proc (caller: LoxCallable): string
 
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types

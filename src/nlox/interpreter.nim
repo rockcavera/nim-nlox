@@ -11,9 +11,10 @@ proc execute(interpreter: var Interpreter, stmt: Stmt)
 proc defineClock(interpreter: var Interpreter) =
   var clock = new(LoxCallable)
 
-  proc arity(): int = 0
+  proc arity(caller: LoxCallable): int = 0
 
-  proc call(interpreter: Interpreter, arguments: seq[Object]): Object =
+  proc call(caller: LoxCallable, interpreter: var Interpreter,
+            arguments: seq[Object]): Object =
     let
       currentTime = getTime()
       seconds = float(toUnix(currentTime))
@@ -22,7 +23,7 @@ proc defineClock(interpreter: var Interpreter) =
 
     result = newNumber(seconds + milliseconds)
 
-  proc toString(): string = "<native fn>"
+  proc toString(caller: LoxCallable): string = "<native fn>"
 
   clock.arity = arity
   clock.call = call
@@ -190,12 +191,12 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
 
   let function = cast[LoxCallable](callee)
 
-  if len(arguments) != function.arity():
+  if len(arguments) != function.arity(function):
     raise newRuntimeError(expr.paren,
-                          fmt"Expected {function.arity()} arguments but got" &
+                          fmt"Expected {function.arity(function)} arguments but got" &
                           fmt"{len(arguments)}.")
 
-  result = function.call(interpreter, arguments)
+  result = function.call(function, interpreter, arguments)
 
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
@@ -209,8 +210,8 @@ proc stringify(literal: Object): string =
       if endsWith(result, ".0"):
         setLen(result, len(result) - 2)
 
-proc executeBlock(interpreter: var Interpreter, statements: seq[Stmt],
-                  environment: Environment) =
+proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
+                   environment: Environment) =
   ## Runs `statements` from a higher block and changes the global environment
   ## variable reference to `environment`.
   let previous = interpreter.environment
