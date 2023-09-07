@@ -16,17 +16,6 @@ type
     ## An object for Lox's String type.
     data*: string
 
-  LoxCallable* = ref object of Object
-    ## An object for Lox calls.
-    arity*: proc (caller: LoxCallable): int
-      ## Procedure that returns the arity of the call.
-    call*: proc (caller: LoxCallable, interpreter: var Interpreter,
-                 arguments: seq[Object]): Object
-      ## Procedure that evaluates the `LoxCallable` object and returns `Object`.
-    toString*: proc (caller: LoxCallable): string
-      ## Procedure that returns a `string` representation of the `LoxCallable`
-      ## object
-
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
     # Single-character tokens.
@@ -116,21 +105,6 @@ type
     values*: Table[string, Object]
       ## Hash table that stores variable names and values.
 
-  Interpreter* = object
-    ## Object that stores interpreter information
-    globals*: Environment
-    environment*: Environment
-      ## Reference to the interpreter environment
-
-  Lox* = object
-    ## Object that stores the Lox interpreter state
-    interpreter*: Interpreter
-      ## Interpreter information
-    hadError* = false
-      ## Determines if an error occurred in code execution.
-    hadRuntimeError* = false
-      ## Determines that a runtime error occurred while running a Lox script.
-
   Return* = object of CatchableError
     ## Object used to unroll the stack when return is called in Lox. It is not
     ## used to raise an error of fact.
@@ -145,3 +119,34 @@ type
     token*: Token
       ## The `Token` is used to tell which line of code was running when the
       ## error occurred.
+
+# Delayed imports
+import ./expr
+
+type
+  Interpreter* = object
+    ## Object that stores interpreter information
+    globals*: Environment
+    environment*: Environment
+      ## Reference to the interpreter environment
+    locals*: Table[Expr, int]
+
+  LoxCallable* = ref object of Object
+    ## An object for Lox calls.
+    arity*: proc (caller: LoxCallable): int
+      ## Procedure that returns the arity of the call.
+    call*: proc (caller: LoxCallable, interpreter: var Interpreter,
+                 arguments: seq[Object]): Object
+      ## Procedure that evaluates the `LoxCallable` object and returns `Object`.
+    toString*: proc (caller: LoxCallable): string
+      ## Procedure that returns a `string` representation of the `LoxCallable`
+      ## object
+
+  Lox* = object
+    ## Object that stores the Lox interpreter state
+    interpreter*: Interpreter
+      ## Interpreter information
+    hadError* = false
+      ## Determines if an error occurred in code execution.
+    hadRuntimeError* = false
+      ## Determines that a runtime error occurred while running a Lox script.

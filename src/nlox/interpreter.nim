@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[math, strformat, strutils, times]
+import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
 import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
@@ -309,6 +309,9 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt, interpreter)
+
+proc resolve(lox: var Lox, expr: Expr, depth: int) =
+  lox.interpreter.locals[expr] = depth
 
 proc interpret*(lox: var Lox, statements: seq[Stmt]) =
   ## Try to execute `statements`. Otherwise, it throws a runtime error.
