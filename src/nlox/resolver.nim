@@ -35,6 +35,18 @@ proc resolveLocal(resolver: var Resolver, expr: Expr, name: Token) =
       resolve(resolver.interpreter, hi - i)
       break
 
+proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
+  beginScope(resolver)
+
+  for param in function.params:
+    declare(resolver, param)
+
+    define(resolver, param)
+
+  resolve(lox, function.body)
+
+  endScope(resolver)
+
 method resolve(expr: Expr, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
@@ -66,6 +78,13 @@ method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
     resolve(stmt.initializer, resolver, lox)
 
   define(resolver, stmt.name)
+
+method resolve(stmt: Function, resolver: var Resolver, lox: var Lox) =
+  declare(resolver, stmt.name)
+
+  define(resolver, stmt.name)
+
+  resolveFunction(lox, resolver, stmt)
 
 proc resolve*(lox: var Lox, statements: seq[Stmt]) =
   var resolver = initResolver(lox.interpreter)
