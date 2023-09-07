@@ -192,7 +192,12 @@ method evaluate(expr: Assign, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Assign` expression.
   result = evaluate(expr.value, interpreter)
 
-  assign(interpreter.environment, expr.name, result)
+  let distance = getOrDefault(interpreter.locals, expr, -1)
+
+  if distance == -1:
+    assign(interpreter.globals, expr.name, result)
+  else:
+    assignAt(interpreter.environment, distance, expr.name, result)
 
 method evaluate(expr: Logical, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Logical` expression.

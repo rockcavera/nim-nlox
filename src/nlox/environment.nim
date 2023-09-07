@@ -26,6 +26,9 @@ proc ancestor*(environment: Environment, distance: int): Environment =
 proc getAt*(environment: Environment, distance: int, name: string): Object =
   ancestor(environment, distance).values[name]
 
+proc assignAt*(environment: Environment, distance: int, name: Token, value: Object) =
+  ancestor(environment, distance).values[name.lexeme] = value
+
 proc get*(environment: Environment, name: Token): Object =
   ## Returns the `Object` value of the `name` variable of the
   ## `environment` environment. If the `name` variable is not defined in the
