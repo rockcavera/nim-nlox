@@ -17,6 +17,15 @@ proc define*(environment: Environment, name: string, value: Object) =
   ## `value`.
   environment.values[name] = value
 
+proc ancestor*(environment: Environment, distance: int): Environment =
+  result = environment
+
+  for i in 1 .. distance:
+    result = result.enclosing
+
+proc getAt*(environment: Environment, distance: int, name: string): Object =
+  ancestor(environment, distance).values[name]
+
 proc get*(environment: Environment, name: Token): Object =
   ## Returns the `Object` value of the `name` variable of the
   ## `environment` environment. If the `name` variable is not defined in the

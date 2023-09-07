@@ -82,6 +82,14 @@ proc checkNumberOperands(operator: Token, left: Object, right: Object) =
   if not(left of Number) or not(right of Number):
     raise newRuntimeError(operator, "Operands must be numbers.")
 
+proc lookUpVariable(interpreter: var Interpreter, name: Token, expr: Expr): Object =
+  let distance = getOrDefault(interpreter.locals, expr, -1)
+
+  if distance == -1:
+    result = get(interpreter.globals, name)
+  else:
+    result = getAt(interpreter.environment, distance, name.lexeme)
+
 proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
                    environment: Environment) =
   ## Runs `statements` from a higher block and changes the global environment
@@ -178,7 +186,7 @@ method evaluate(expr: Binary, interpreter: var Interpreter): Object =
 
 method evaluate(expr: Variable, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Variable` expression.
-  get(interpreter.environment, expr.name)
+  lookUpVariable(interpreter, expr.name, expr)
 
 method evaluate(expr: Assign, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Assign` expression.
