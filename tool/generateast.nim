@@ -55,13 +55,21 @@ proc defineAst(outputDir: string, baseName: string, imports: seq[string], types:
   if isNil(writer):
     quit(fmt"The file {path} cannot be opened.", 72)
 
+  if baseName == "Expr":
+    writeLine(writer, "type")
+    writeLine(writer, indent(fmt"{baseName}* = ref object of RootObj" , 2))
+    writeLine(writer, "")
+
   if len(imports) > 0:
     writeLine(writer, fmt"import {generateImportString(imports)}")
     writeLine(writer, "")
 
-  writeLine(writer, "type")
-  writeLine(writer, indent(fmt"{baseName}* = ref object of RootObj" , 2))
-  writeLine(writer, "")
+  if baseName == "Expr":
+    writeLine(writer, "type")
+  else:
+    writeLine(writer, "type")
+    writeLine(writer, indent(fmt"{baseName}* = ref object of RootObj" , 2))
+    writeLine(writer, "")
 
   var allTypes: seq[TypeDescription]
 

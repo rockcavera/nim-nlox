@@ -1,8 +1,9 @@
-import ./types
-
 type
   Expr* = ref object of RootObj
 
+import ./types
+
+type
   Assign* = ref object of Expr
     name*: Token
     value*: Expr
@@ -74,3 +75,4 @@ proc newUnary*(operator: Token, right: Expr): Unary =
 proc newVariable*(name: Token): Variable =
   result = new(Variable)
   result.name = name
+
