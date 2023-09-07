@@ -1,17 +1,18 @@
 import std/tables
 
-import ./expr, ./logger, ./stmt, ./types
+import ./expr, ./interpreter, ./logger, ./stmt, ./types
 
 type
   Resolver* = object
-    interpreter: Interpreter
+    # interpreter: Interpreter # It is not necessary. The `Lox` state is already passed.
     scopes: seq[Table[string, bool]] # No stack collection in stdlib
 
 # Forward declaration
 proc resolve*(lox: var Lox, statements: seq[Stmt])
 
 proc initResolver*(interpreter: Interpreter): Resolver =
-  result.interpreter = interpreter
+  # result.interpreter = interpreter
+  discard
 
 proc beginScope(resolver: var Resolver) =
   add(resolver.scopes, initTable[string, bool]())
@@ -27,12 +28,12 @@ proc define(resolver: var Resolver, name: Token) =
   if len(resolver.scopes) > 0:
     resolver.scopes[^1][name.lexeme] = true
 
-proc resolveLocal(resolver: var Resolver, expr: Expr, name: Token) =
+proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr, name: Token) =
   let hi = high(resolver.scopes)
 
   for i in countdown(hi, 0):
     if hasKey(resolver.scopes[i], name.lexeme):
-      resolve(resolver.interpreter, hi - i)
+      resolve(lox, expr, hi - i)
       break
 
 proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
@@ -54,12 +55,12 @@ method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
   if not(len(resolver.scopes) == 0) and (resolver.scopes[^1][expr.name.lexeme] == false):
     error(lox, expr.name, "Can't read local variable in its own initializer.")
 
-  resolveLocal(resolver, expr, expr.name)
+  resolveLocal(lox, resolver, expr, expr.name)
 
 method resolve(expr: Assign, resolver: var Resolver, lox: var Lox) =
   resolve(expr.value, resolver, lox)
 
-  resolveLocal(resolver, expr, expr.name)
+  resolveLocal(lox, resolver, expr, expr.name)
 
 method resolve(expr: Binary, resolver: var Resolver, lox: var Lox) =
   resolve(expr.left, resolver, lox)

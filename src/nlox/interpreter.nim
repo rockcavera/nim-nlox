@@ -2,7 +2,7 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./literals, ./logger, ./runtimeerror, ./stmt,
+import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./runtimeerror, ./stmt,
        ./types
 
 # Internal import of module with keyword name
@@ -310,7 +310,7 @@ proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.
   evaluate(stmt, interpreter)
 
-proc resolve(lox: var Lox, expr: Expr, depth: int) =
+proc resolve*(lox: var Lox, expr: Expr, depth: int) =
   lox.interpreter.locals[expr] = depth
 
 proc interpret*(lox: var Lox, statements: seq[Stmt]) =
