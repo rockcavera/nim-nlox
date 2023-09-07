@@ -65,7 +65,7 @@ method resolve(expr: Expr, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
 method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
-  if not(len(resolver.scopes) == 0) and (resolver.scopes[^1][expr.name.lexeme] == false):
+  if not(len(resolver.scopes) == 0) and (getOrDefault(resolver.scopes[^1], expr.name.lexeme, true) == false):
     error(lox, expr.name, "Can't read local variable in its own initializer.")
 
   resolveLocal(lox, resolver, expr, expr.name)
