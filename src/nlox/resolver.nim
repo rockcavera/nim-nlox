@@ -3,16 +3,20 @@ import std/tables
 import ./expr, ./interpreter, ./logger, ./stmt, ./types
 
 type
+  FunctionType = enum
+    None, Function
+
   Resolver* = object
     # interpreter: Interpreter # It is not necessary. The `Lox` state is already passed.
     scopes: seq[Table[string, bool]] # No stack collection in stdlib
+    currentFunction: FunctionType
 
 # Forward declaration
 proc resolve*(lox: var Lox, resolver: var Resolver, statements: seq[Stmt])
 
 proc initResolver*(): Resolver =
   # result.interpreter = interpreter
-  discard
+  result.currentFunction = FunctionType.None
 
 proc beginScope(resolver: var Resolver) =
   add(resolver.scopes, initTable[string, bool]())
@@ -39,7 +43,11 @@ proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr, name: Token)
       resolve(lox, expr, hi - i)
       break
 
-proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
+proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function, kind: FunctionType) =
+  let enclosingFunction = resolver.currentFunction
+
+  resolver.currentFunction = kind
+
   beginScope(resolver)
 
   for param in function.params:
@@ -50,6 +58,8 @@ proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
   resolve(lox, resolver, function.body)
 
   endScope(resolver)
+
+  resolver.currentFunction = enclosingFunction
 
 method resolve(expr: Expr, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
@@ -111,7 +121,7 @@ method resolve(stmt: Function, resolver: var Resolver, lox: var Lox) =
 
   define(resolver, stmt.name)
 
-  resolveFunction(lox, resolver, stmt)
+  resolveFunction(lox, resolver, stmt, FunctionType.Function)
 
 method resolve(stmt: Expression, resolver: var Resolver, lox: var Lox) =
   resolve(stmt.expression, resolver, lox)
@@ -127,6 +137,9 @@ method resolve(stmt: Print, resolver: var Resolver, lox: var Lox) =
   resolve(stmt.expression, resolver, lox)
 
 method resolve(stmt: stmt.Return, resolver: var Resolver, lox: var Lox) =
+  if resolver.currentFunction == FunctionType.None:
+    error(lox, stmt.keyword, "Can't return from top-level code.")
+
   if not isNil(stmt.value):
     resolve(stmt.value, resolver, lox)
 
