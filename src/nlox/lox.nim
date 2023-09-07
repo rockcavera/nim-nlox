@@ -19,6 +19,9 @@ proc run(lox: var Lox, source: string) =
 
   let statements = parse(lox, parser)
 
+  if lox.hadError:
+    return
+
   var resolver = initResolver()
 
   resolve(lox, resolver, statements)
