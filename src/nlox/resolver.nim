@@ -44,6 +44,11 @@ method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
 
   resolveLocal(resolver, expr, expr.name)
 
+method resolve(expr: Assign, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.value, resolver, lox)
+
+  resolveLocal(resolver, expr, expr.name)
+
 method resolve(stmt: Stmt, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
