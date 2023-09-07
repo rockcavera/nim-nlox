@@ -8,9 +8,9 @@ type
     scopes: seq[Table[string, bool]] # No stack collection in stdlib
 
 # Forward declaration
-proc resolve*(lox: var Lox, statements: seq[Stmt])
+proc resolve*(lox: var Lox, resolver: var Resolver, statements: seq[Stmt])
 
-proc initResolver*(interpreter: Interpreter): Resolver =
+proc initResolver*(): Resolver =
   # result.interpreter = interpreter
   discard
 
@@ -44,7 +44,7 @@ proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
 
     define(resolver, param)
 
-  resolve(lox, function.body)
+  resolve(lox, resolver, function.body)
 
   endScope(resolver)
 
@@ -91,7 +91,7 @@ method resolve(stmt: Stmt, resolver: var Resolver, lox: var Lox) {.base.} =
 method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
   beginScope(resolver)
 
-  resolve(lox, stmt.statements)
+  resolve(lox, resolver, stmt.statements)
 
   endScope(resolver)
 
@@ -131,8 +131,6 @@ method resolve(stmt: While, resolver: var Resolver, lox: var Lox) =
   resolve(stmt.condition, resolver, lox)
   resolve(stmt.body, resolver, lox)
 
-proc resolve*(lox: var Lox, statements: seq[Stmt]) =
-  var resolver = initResolver(lox.interpreter)
-
+proc resolve*(lox: var Lox, resolver: var Resolver, statements: seq[Stmt]) =
   for statement in statements:
     resolve(statement, resolver, lox)

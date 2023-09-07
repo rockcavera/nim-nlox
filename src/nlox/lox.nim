@@ -1,5 +1,5 @@
 # Internal imports
-import ./interpreter, ./parser, ./scanner, ./types
+import ./interpreter, ./parser, ./resolver, ./scanner, ./types
 
 proc initLox*(): Lox =
   ## Initializes an `Lox` object.
@@ -21,6 +21,10 @@ proc run(lox: var Lox, source: string) =
 
   if lox.hadError:
     return
+
+  var resolver = initResolver()
+
+  resolve(lox, resolver, statements)
 
   interpret(lox, statements)
 
