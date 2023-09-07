@@ -2,8 +2,8 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./runtimeerror, ./stmt,
-       ./types
+import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./runtimeerror,
+       ./stmt, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -82,7 +82,8 @@ proc checkNumberOperands(operator: Token, left: Object, right: Object) =
   if not(left of Number) or not(right of Number):
     raise newRuntimeError(operator, "Operands must be numbers.")
 
-proc lookUpVariable(interpreter: var Interpreter, name: Token, expr: Expr): Object =
+proc lookUpVariable(interpreter: var Interpreter, name: Token, expr: Expr):
+                   Object =
   let distance = getOrDefault(interpreter.locals, expr, -1)
 
   if distance == -1:

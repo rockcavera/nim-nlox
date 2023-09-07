@@ -7,7 +7,8 @@ type
     None, Function
 
   Resolver* = object
-    # interpreter: Interpreter # It is not necessary. The `Lox` state is already passed.
+    # interpreter: Interpreter # It is not necessary. The `Lox` state is already
+    # passed.
     scopes: seq[Table[string, bool]] # No stack collection in stdlib
     currentFunction: FunctionType
 
@@ -35,7 +36,8 @@ proc define(resolver: var Resolver, name: Token) =
   if len(resolver.scopes) > 0:
     resolver.scopes[^1][name.lexeme] = true
 
-proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr, name: Token) =
+proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr,
+                  name: Token) =
   let hi = high(resolver.scopes)
 
   for i in countdown(hi, 0):
@@ -43,7 +45,8 @@ proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr, name: Token)
       resolve(lox, expr, hi - i)
       break
 
-proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function, kind: FunctionType) =
+proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function,
+                     kind: FunctionType) =
   let enclosingFunction = resolver.currentFunction
 
   resolver.currentFunction = kind
@@ -65,7 +68,8 @@ method resolve(expr: Expr, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
 method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
-  if not(len(resolver.scopes) == 0) and (getOrDefault(resolver.scopes[^1], expr.name.lexeme, true) == false):
+  if not(len(resolver.scopes) == 0) and
+     (getOrDefault(resolver.scopes[^1], expr.name.lexeme, true) == false):
     error(lox, expr.name, "Can't read local variable in its own initializer.")
 
   resolveLocal(lox, resolver, expr, expr.name)
