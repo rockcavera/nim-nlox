@@ -20,8 +20,11 @@ proc beginScope(resolver: var Resolver) =
 proc endScope(resolver: var Resolver) =
   setLen(resolver.scopes, len(resolver.scopes) - 1)
 
-proc declare(resolver: var Resolver, name: Token) =
+proc declare(lox: var Lox, resolver: var Resolver, name: Token) =
   if len(resolver.scopes) > 0:
+    if hasKey(resolver.scopes[^1], name.lexeme):
+      error(lox, name, "Already a variable with this name in this scope.")
+
     resolver.scopes[^1][name.lexeme] = false
 
 proc define(resolver: var Resolver, name: Token) =
@@ -40,7 +43,7 @@ proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function) =
   beginScope(resolver)
 
   for param in function.params:
-    declare(resolver, param)
+    declare(lox, resolver, param)
 
     define(resolver, param)
 
@@ -96,7 +99,7 @@ method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
   endScope(resolver)
 
 method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
-  declare(resolver, stmt.name)
+  declare(lox, resolver, stmt.name)
 
   if not isNil(stmt.initializer):
     resolve(stmt.initializer, resolver, lox)
@@ -104,7 +107,7 @@ method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
   define(resolver, stmt.name)
 
 method resolve(stmt: Function, resolver: var Resolver, lox: var Lox) =
-  declare(resolver, stmt.name)
+  declare(lox, resolver, stmt.name)
 
   define(resolver, stmt.name)
 
