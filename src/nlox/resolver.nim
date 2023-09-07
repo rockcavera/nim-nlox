@@ -61,6 +61,29 @@ method resolve(expr: Assign, resolver: var Resolver, lox: var Lox) =
 
   resolveLocal(resolver, expr, expr.name)
 
+method resolve(expr: Binary, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.left, resolver, lox)
+  resolve(expr.right, resolver, lox)
+
+method resolve(expr: Call, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.callee, resolver, lox)
+
+  for argument in expr.arguments:
+    resolve(argument, resolver, lox)
+
+method resolve(expr: Grouping, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.expression, resolver, lox)
+
+method resolve(expr: Literal, resolver: var Resolver, lox: var Lox) =
+  discard
+
+method resolve(expr: Logical, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.left, resolver, lox)
+  resolve(expr.right, resolver, lox)
+
+method resolve(expr: Unary, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.right, resolver, lox)
+
 method resolve(stmt: Stmt, resolver: var Resolver, lox: var Lox) {.base.} =
   raise newException(CatchableError, "Method without implementation override")
 
@@ -85,6 +108,27 @@ method resolve(stmt: Function, resolver: var Resolver, lox: var Lox) =
   define(resolver, stmt.name)
 
   resolveFunction(lox, resolver, stmt)
+
+method resolve(stmt: Expression, resolver: var Resolver, lox: var Lox) =
+  resolve(stmt.expression, resolver, lox)
+
+method resolve(stmt: If, resolver: var Resolver, lox: var Lox) =
+  resolve(stmt.condition, resolver, lox)
+  resolve(stmt.thenBranch, resolver, lox)
+
+  if not isNil(stmt.elseBranch):
+    resolve(stmt.elseBranch, resolver, lox)
+
+method resolve(stmt: Print, resolver: var Resolver, lox: var Lox) =
+  resolve(stmt.expression, resolver, lox)
+
+method resolve(stmt: stmt.Return, resolver: var Resolver, lox: var Lox) =
+  if not isNil(stmt.value):
+    resolve(stmt.value, resolver, lox)
+
+method resolve(stmt: While, resolver: var Resolver, lox: var Lox) =
+  resolve(stmt.condition, resolver, lox)
+  resolve(stmt.body, resolver, lox)
 
 proc resolve*(lox: var Lox, statements: seq[Stmt]) =
   var resolver = initResolver(lox.interpreter)
