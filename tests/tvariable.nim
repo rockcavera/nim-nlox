@@ -158,3 +158,49 @@ local
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Collide with parameter":
+    const
+      script = folder / "collide_with_parameter.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'a': Already a variable with this name in this scope.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Duplicate local":
+    const
+      script = folder / "duplicate_local.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 3] Error at 'a': Already a variable with this name in this scope.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Duplicate parameter":
+    const
+      script = folder / "duplicate_parameter.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'arg': Already a variable with this name in this scope.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Early bound":
+    const
+      script = folder / "early_bound.lox"
+      expectedExitCode = 0
+      expectedOutput = """outer
+outer
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "User local in initializer":
+    const
+      script = folder / "use_local_in_initializer.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 3] Error at 'a': Can't read local variable in its own initializer.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

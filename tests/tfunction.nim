@@ -134,3 +134,13 @@ true
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Local mutual recursion":
+    const
+      script = folder / "local_mutual_recursion.lox"
+      expectedExitCode = 70
+      expectedOutput = """Undefined variable 'isOdd'.
+[line 4]
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

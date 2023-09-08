@@ -50,3 +50,12 @@ suite "Return":
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "At top level":
+    const
+      script = folder / "at_top_level.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 1] Error at 'return': Can't return from top-level code.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

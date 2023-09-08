@@ -113,3 +113,13 @@ closure
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Assign to shadowed later":
+    const
+      script = folder / "assign_to_shadowed_later.lox"
+      expectedExitCode = 0
+      expectedOutput = """inner
+assigned
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
