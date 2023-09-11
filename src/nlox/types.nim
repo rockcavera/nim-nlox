@@ -142,6 +142,12 @@ type
       ## Procedure that returns a `string` representation of the `LoxCallable`
       ## object
 
+  LoxClass* = ref object of LoxCallable
+    name*: string
+
+  LoxInstance* = ref object of Object
+    klass*: LoxClass
+
   Lox* = object
     ## Object that stores the Lox interpreter state
     interpreter*: Interpreter

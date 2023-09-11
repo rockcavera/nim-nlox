@@ -2,8 +2,8 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./loxclass,
-       ./runtimeerror, ./stmt, ./types
+import ./environment, ./expr, ./hashes2, ./loxinstance, ./literals, ./logger,
+       ./loxclass, ./runtimeerror, ./stmt, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -224,7 +224,11 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
     add(arguments, evaluate(argument, interpreter))
 
   # use method?
-  if callee of LoxFunction:
+  if callee of LoxClass:
+    let class = cast[LoxClass](callee)
+
+    result = call(class, interpreter, arguments)
+  elif callee of LoxFunction:
     let function = cast[LoxFunction](callee)
 
     if len(arguments) != arity(function):
@@ -253,7 +257,7 @@ proc stringify(literal: Object): string =
   elif literal of LoxClass:
     let class = cast[LoxClass](literal)
 
-    result = class.name
+    result = toString(class)
   elif literal of LoxFunction:
     let function = cast[LoxFunction](literal)
 
@@ -262,6 +266,10 @@ proc stringify(literal: Object): string =
     let function = cast[LoxCallable](literal)
 
     result = function.toString(function)
+  elif literal of LoxInstance:
+    let instance = cast[LoxInstance](literal)
+
+    result = toString(instance)
   else:
     result = $literal
 
