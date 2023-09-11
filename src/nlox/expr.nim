@@ -18,6 +18,10 @@ type
     paren*: Token
     arguments*: seq[Expr]
 
+  Get* = ref object of Expr
+    obj*: Expr
+    name*: Token
+
   Grouping* = ref object of Expr
     expression*: Expr
 
@@ -52,6 +56,11 @@ proc newCall*(callee: Expr, paren: Token, arguments: seq[Expr]): Call =
   result.callee = callee
   result.paren = paren
   result.arguments = arguments
+
+proc newGet*(obj: Expr, name: Token): Get =
+  result = new(Get)
+  result.obj = obj
+  result.name = name
 
 proc newGrouping*(expression: Expr): Grouping =
   result = new(Grouping)

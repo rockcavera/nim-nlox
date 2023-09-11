@@ -141,6 +141,11 @@ proc call(lox: var Lox, parser: var Parser): Expr =
   while true:
     if match(parser, LeftParen):
       result = finishCall(lox, parser, result)
+    elif match(parser, Dot):
+      let name = consume(lox, parser, Identifier,
+                         "Expect property name after '.'.")
+
+      result = newGet(result, name)
     else:
       break
 

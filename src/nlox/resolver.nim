@@ -112,6 +112,9 @@ method resolve(expr: Call, resolver: var Resolver, lox: var Lox) =
   for argument in expr.arguments:
     resolve(argument, resolver, lox)
 
+method resolve(expr: Get, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.obj, resolver, lox)
+
 method resolve(expr: Grouping, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Grouping` expression.
   resolve(expr.expression, resolver, lox)

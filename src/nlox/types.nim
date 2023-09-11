@@ -147,6 +147,7 @@ type
 
   LoxInstance* = ref object of Object
     klass*: LoxClass
+    fields*: Table[string, Object]
 
   Lox* = object
     ## Object that stores the Lox interpreter state
