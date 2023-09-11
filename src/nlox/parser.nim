@@ -135,7 +135,7 @@ proc finishCall(lox: var Lox, parser: var Parser, callee: Expr): Expr =
 
 proc call(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule call.
-  # call → primary ( "(" arguments? ")" )* ;
+  # call → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
   result = primary(lox, parser)
 
   while true:
