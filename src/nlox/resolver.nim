@@ -88,7 +88,8 @@ method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Variable` expression. Reports an error if the variable is
   ## declared but not defined.
   if not(len(resolver.scopes) == 0) and
-     (getOrDefault(resolver.scopes[^1], expr.name.lexeme, true) == false):
+     hasKey(resolver.scopes[^1], expr.name.lexeme) and
+     (resolver.scopes[^1][expr.name.lexeme] == false):
     error(lox, expr.name, "Can't read local variable in its own initializer.")
 
   resolveLocal(lox, resolver, expr, expr.name)
