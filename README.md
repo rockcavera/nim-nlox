@@ -23,7 +23,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 8. Statements and State
 - [x] 9. Control Flow
 - [x] 10. Functions
-- [ ] 11. Resolving and Binding
+- [x] 11. Resolving and Binding
 - [ ] 12. Classes
 - [ ] 13. Inheritance
 
