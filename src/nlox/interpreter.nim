@@ -84,6 +84,7 @@ proc checkNumberOperands(operator: Token, left: Object, right: Object) =
 
 proc lookUpVariable(interpreter: var Interpreter, name: Token, expr: Expr):
                    Object =
+  ## Returns an `Object` from the search for a variable with the name `name`.
   let distance = getOrDefault(interpreter.locals, expr, -1)
 
   if distance == -1:
@@ -325,6 +326,8 @@ proc execute(interpreter: var Interpreter, stmt: Stmt) =
   evaluate(stmt, interpreter)
 
 proc resolve*(lox: var Lox, expr: Expr, depth: int) =
+  ## Defines in `lox.interpreter.locals` the `depth` amount of scopes between
+  ## the current scope and where the `expr` variable is defined.
   lox.interpreter.locals[expr] = depth
 
 proc interpret*(lox: var Lox, statements: seq[Stmt]) =

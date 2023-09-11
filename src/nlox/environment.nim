@@ -18,16 +18,21 @@ proc define*(environment: Environment, name: string, value: Object) =
   environment.values[name] = value
 
 proc ancestor*(environment: Environment, distance: int): Environment =
+  ## Returns the environment that is a `distance` from the current environment.
   result = environment
 
   for i in 1 .. distance:
     result = result.enclosing
 
 proc getAt*(environment: Environment, distance: int, name: string): Object =
+  ## Returns the `Object` of `name`, which is in an environment at a `distance`
+  ## from the current environment.
   ancestor(environment, distance).values[name]
 
 proc assignAt*(environment: Environment, distance: int, name: Token,
                value: Object) =
+  ## Assigns `value` to `name`, which is in an environment a `distance` from the
+  ## current environment.
   ancestor(environment, distance).values[name.lexeme] = value
 
 proc get*(environment: Environment, name: Token): Object =
