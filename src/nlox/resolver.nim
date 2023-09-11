@@ -142,6 +142,11 @@ method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
 
   endScope(resolver)
 
+method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
+  declare(lox, resolver, stmt.name)
+
+  define(resolver, stmt.name)
+
 method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Var` statement.
   declare(lox, resolver, stmt.name)

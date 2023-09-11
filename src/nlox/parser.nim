@@ -75,7 +75,8 @@ proc synchronize(parser: var Parser) =
     if previous(parser).kind == Semicolon:
       break
 
-    if peek(parser).kind in {Class, Fun, Var, For, If, While, Print, Return}:
+    if peek(parser).kind in {TokenType.Class, Fun, Var, For, If, While, Print,
+                             Return}:
       break
 
     discard advance(parser)
@@ -439,13 +440,31 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
   else:
     result = expressionStatement(lox, parser)
 
+proc classDeclaration(lox: var Lox, parser: var Parser): Stmt =
+  # classDecl → "class" IDENTIFIER "{" function* "}" ;
+  let name = consume(lox, parser, Identifier, "Expect class name.")
+
+  discard consume(lox, parser, LeftBrace, "Expect '{' before class body.")
+
+  var methods: seq[Function]
+
+  while not(check(parser, RightBrace)) and not(isAtEnd(parser)):
+    add(methods, function(lox, parser, "method"))
+
+  discard consume(lox, parser, RightBrace, "Expect '}' after class body.")
+
+  result = newClass(name, methods)
+
 proc declaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule declaration.
-  # declaration → funDecl
+  # declaration → classDecl
+  #             | funDecl
   #             | varDecl
   #             | statement ;
   try:
-    if match(parser, Fun):
+    if match(parser, TokenType.Class):
+      result = classDeclaration(lox, parser)
+    elif match(parser, Fun):
       result = function(lox, parser, "function")
     elif match(parser, TokenType.Var):
       result = varDeclaration(lox, parser)

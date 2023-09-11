@@ -2,8 +2,8 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./runtimeerror,
-       ./stmt, ./types
+import ./environment, ./expr, ./hashes2, ./literals, ./logger, ./loxclass,
+       ./runtimeerror, ./stmt, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -250,6 +250,10 @@ proc stringify(literal: Object): string =
   ## for the `Object` type.
   if isNil(literal):
     result = "nil"
+  elif literal of LoxClass:
+    let class = cast[LoxClass](literal)
+
+    result = class.name
   elif literal of LoxFunction:
     let function = cast[LoxFunction](literal)
 
@@ -320,6 +324,13 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
   let function = newLoxFunction(stmt, interpreter.environment)
 
   define(interpreter.environment, stmt.name.lexeme, function)
+
+method evaluate(stmt: Class, interpreter: var Interpreter) =
+  define(interpreter.environment, stmt.name.lexeme, nil)
+
+  let klass = newLoxClass(stmt.name.lexeme)
+
+  assign(interpreter.environment, stmt.name, klass)
 
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.

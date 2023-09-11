@@ -6,6 +6,10 @@ type
   Block* = ref object of Stmt
     statements*: seq[Stmt]
 
+  Class* = ref object of Stmt
+    name*: Token
+    methods*: seq[Function]
+
   Expression* = ref object of Stmt
     expression*: Expr
 
@@ -37,6 +41,11 @@ type
 proc newBlock*(statements: seq[Stmt]): Block =
   result = new(Block)
   result.statements = statements
+
+proc newClass*(name: Token, methods: seq[Function]): Class =
+  result = new(Class)
+  result.name = name
+  result.methods = methods
 
 proc newExpression*(expression: Expr): Expression =
   result = new(Expression)
