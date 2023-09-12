@@ -45,6 +45,9 @@ method hash*(expr: Call): Hash =
   ## Returns a `Hash` of a `Call` expression.
   hash(expr.callee) !& hash(expr.paren) !& hash(expr.arguments)
 
+method hash*(expr: Get): Hash =
+  hash(expr.obj) !& hash(expr.name)
+
 method hash*(expr: Grouping): Hash =
   ## Returns a `Hash` of a `Grouping` expression.
   hash(expr.expression)
@@ -56,6 +59,12 @@ method hash*(expr: Literal): Hash =
 method hash*(expr: Logical): Hash =
   ## Returns a `Hash` of a `Logical` expression.
   hash(expr.left) !& hash(expr.operator) !& hash(expr.right)
+
+method hash*(expr: Set): Hash =
+  hash(expr.obj) !& hash(expr.name) !& hash(expr.value)
+
+method hash*(expr: This): Hash =
+  hash(expr.keyword)
 
 method hash*(expr: Unary): Hash =
   ## Returns a `Hash` of an `Unary` expression.
