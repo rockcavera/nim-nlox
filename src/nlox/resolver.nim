@@ -7,7 +7,7 @@ import ./expr, ./interpreter, ./logger, ./stmt, ./types
 type
   FunctionType = enum
     ## Function type enumerator.
-    None, Function, Method
+    None, Function, Initializer, Method
 
   ClassType = enum
     None, Class
@@ -174,7 +174,10 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
   resolver.scopes[^1]["this"] = true
 
   for `method` in stmt.methods:
-    let declaration = FunctionType.Method
+    var declaration = FunctionType.Method
+
+    if `method`.name.lexeme == "init":
+      declaration = FunctionType.Initializer
 
     resolveFunction(lox, resolver, `method`, declaration)
 
@@ -222,6 +225,9 @@ method resolve(stmt: stmt.Return, resolver: var Resolver, lox: var Lox) =
     error(lox, stmt.keyword, "Can't return from top-level code.")
 
   if not isNil(stmt.value):
+    if resolver.currentFunction == FunctionType.Initializer:
+      error(lox, stmt.keyword, "Can't return a value from an initializer.")
+
     resolve(stmt.value, resolver, lox)
 
 method resolve(stmt: While, resolver: var Resolver, lox: var Lox) =

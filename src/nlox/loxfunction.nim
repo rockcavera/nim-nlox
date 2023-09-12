@@ -32,6 +32,9 @@ proc call*(caller: LoxFunction, interpreter: var Interpreter,
   try:
     executeBlock(interpreter, caller.declaration.body, environment)
   except types.Return as returnValue:
+    if (caller.isInitializer):
+      return getAt(caller.closure, 0, "this")
+
     return returnValue.value
 
   if (caller.isInitializer):
