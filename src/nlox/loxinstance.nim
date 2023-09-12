@@ -8,8 +8,7 @@ proc toString*(instance: LoxInstance): string =
 proc set*(instance: LoxInstance, name: Token, value: Object) =
   instance.fields[name.lexeme] = value
 
-# Delayed imports
-import ./loxclass, ./loxfunction # loxclass import `newLoxInstance()`
+import ./loxclass, ./loxfunction
 
 proc get*(instance: LoxInstance, name: Token): Object =
   if hasKey(instance.fields, name.lexeme):

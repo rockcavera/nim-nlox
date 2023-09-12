@@ -3,7 +3,7 @@ import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
 import ./environment, ./expr, ./hashes2, ./initializers, ./literals, ./logger,
-       ./loxclass, ./runtimeerror, ./stmt, ./types
+       ./runtimeerror, ./stmt, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -214,6 +214,9 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
+# Delayed imports
+import ./loxclass
+
 method evaluate(expr: Call, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Call` expression.
   let callee = evaluate(expr.callee, interpreter)
@@ -226,6 +229,11 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
   # use method?
   if callee of LoxClass:
     let class = cast[LoxClass](callee)
+
+    if len(arguments) != arity(class):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {arity(class)} arguments but got " &
+                            fmt"{len(arguments)}.")
 
     result = call(class, interpreter, arguments)
   elif callee of LoxFunction:
