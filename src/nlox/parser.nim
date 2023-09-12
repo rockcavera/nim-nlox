@@ -453,8 +453,16 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
 
 proc classDeclaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule classDecl.
-  # classDecl → "class" IDENTIFIER "{" function* "}" ;
+  # classDecl → "class" IDENTIFIER ( "<" IDENTIFIER )?
+  #             "{" function* "}" ;
   let name = consume(lox, parser, Identifier, "Expect class name.")
+
+  var superclass: Variable = nil
+
+  if match(parser, Less):
+    discard consume(lox, parser, Identifier, "Expect superclass name.")
+
+    superclass = newVariable(previous(parser))
 
   discard consume(lox, parser, LeftBrace, "Expect '{' before class body.")
 
@@ -465,7 +473,7 @@ proc classDeclaration(lox: var Lox, parser: var Parser): Stmt =
 
   discard consume(lox, parser, RightBrace, "Expect '}' after class body.")
 
-  result = newClass(name, methods)
+  result = newClass(name, superclass, methods)
 
 proc declaration(lox: var Lox, parser: var Parser): Stmt =
   ## Returns `Stmt` from parsing the grammar rule declaration.

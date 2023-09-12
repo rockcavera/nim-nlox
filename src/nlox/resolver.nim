@@ -176,6 +176,12 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
   define(resolver, stmt.name)
 
+  if not isNil(stmt.superclass):
+    if stmt.name.lexeme == stmt.superclass.name.lexeme:
+      error(lox, stmt.superclass.name, "A class can't inherit from itself.")
+
+    resolve(stmt.superclass, resolver, lox)
+
   beginScope(resolver)
 
   resolver.scopes[^1]["this"] = true

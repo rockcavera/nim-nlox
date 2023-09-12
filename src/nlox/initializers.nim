@@ -6,11 +6,13 @@ import ./stmt, ./types
 
 # From loxclass
 
-proc newLoxClass*(name: string, methods: Table[string, LoxFunction]): LoxClass =
+proc newLoxClass*(name: string, superclass: LoxClass,
+                  methods: Table[string, LoxFunction]): LoxClass =
   ## Creates and returns a `LoxClass` with the name `name` and the methods
   ## `methods`.
   result = new(LoxClass)
   result.name = name
+  result.superclass = superclass
   result.methods = methods
 
 # End loxclass

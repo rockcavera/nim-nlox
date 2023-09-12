@@ -376,6 +376,14 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
 
 method evaluate(stmt: Class, interpreter: var Interpreter) =
   ## Evaluate the `Class` statement.
+  var superclass: Object = nil
+
+  if not isNil(stmt.superclass):
+    superclass = evaluate(stmt.superclass, interpreter)
+
+    if not(superclass of LoxClass):
+      raise newRuntimeError(stmt.superclass.name,"Superclass must be a class.")
+
   define(interpreter.environment, stmt.name.lexeme, nil)
 
   var methods = initTable[string, LoxFunction]()
@@ -386,7 +394,7 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
 
     methods[`method`.name.lexeme] = function
 
-  let klass = newLoxClass(stmt.name.lexeme, methods)
+  let klass = newLoxClass(stmt.name.lexeme, cast[LoxClass](superclass), methods)
 
   assign(interpreter.environment, stmt.name, klass)
 

@@ -158,6 +158,7 @@ type
     ## Object that stores Lox class information.
     name*: string
       ## Lox class name.
+    superclass*: LoxClass
     methods*: Table[string, LoxFunction]
       ## Lox class methods.
 

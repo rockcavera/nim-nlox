@@ -116,7 +116,8 @@ proc main*(args: seq[string]) =
 
   defineAst(outputDir, "Stmt", @["expr", "types"], @[
     "Block      : seq[Stmt] statements",
-    "Class      : Token name, seq[Function] methods",
+    "Class      : Token name, Variable superclass," &
+                " seq[Function] methods",
     "Expression : Expr expression",
     "Function   : Token name, seq[Token] params," &
                 " seq[Stmt] body",
