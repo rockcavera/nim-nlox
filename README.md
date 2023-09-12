@@ -24,7 +24,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 9. Control Flow
 - [x] 10. Functions
 - [x] 11. Resolving and Binding
-- [ ] 12. Classes
+- [x] 12. Classes
 - [ ] 13. Inheritance
 
 ## License
