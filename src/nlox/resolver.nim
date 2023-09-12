@@ -10,6 +10,7 @@ type
     None, Function, Initializer, Method
 
   ClassType = enum
+    ## Class type enumerator.
     None, Class
 
   Resolver* = object
@@ -21,6 +22,7 @@ type
     currentFunction: FunctionType
       ## Current function type.
     currentClass: ClassType
+      ## Current class type.
 
 # Forward declaration
 proc resolve*(lox: var Lox, resolver: var Resolver, statements: seq[Stmt])
@@ -118,6 +120,7 @@ method resolve(expr: Call, resolver: var Resolver, lox: var Lox) =
     resolve(argument, resolver, lox)
 
 method resolve(expr: Get, resolver: var Resolver, lox: var Lox) =
+  ## Resolves a `Get` expression.
   resolve(expr.obj, resolver, lox)
 
 method resolve(expr: Grouping, resolver: var Resolver, lox: var Lox) =
@@ -134,10 +137,13 @@ method resolve(expr: Logical, resolver: var Resolver, lox: var Lox) =
   resolve(expr.right, resolver, lox)
 
 method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
+  ## Resolves a `Set` expression.
   resolve(expr.value, resolver, lox)
   resolve(expr.obj, resolver, lox)
 
 method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
+  ## Resolves a `This` expression. Report error if "this" is used outside of a
+  ## class.
   if resolver.currentClass == ClassType.None:
     error(lox, expr.keyword, "Can't use 'this' outside of a class.")
   else:
@@ -161,6 +167,7 @@ method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
   endScope(resolver)
 
 method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
+  ## Resolves a `Class` statement.
   let enclosingClass = resolver.currentClass
 
   resolver.currentClass = ClassType.Class

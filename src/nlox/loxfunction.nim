@@ -13,12 +13,15 @@ proc toString*(caller: LoxFunction): string =
   fmt"<fn {caller.declaration.name.lexeme}>"
 
 proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
+  ## Returns a `LoxFunction`, which is an initializer, with a new environment,
+  ## in which "this" is declared as a variable bound to `instance`.
   let environment = newEnvironment(caller.closure)
 
   define(environment, "this", instance)
 
   result = newLoxFunction(caller.declaration, environment, caller.isInitializer)
 
+# Delayed imports
 import ./interpreter
 
 proc call*(caller: LoxFunction, interpreter: var Interpreter,

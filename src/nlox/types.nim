@@ -3,6 +3,7 @@ import std/[lists, tables]
 
 type
   Object* = ref object of RootObj
+    ## Base object.
 
   Boolean* = ref object of Object
     ## An object for Lox's Boolean type.
@@ -127,9 +128,12 @@ type
   Interpreter* = object
     ## Object that stores interpreter information
     globals*: Environment
+      ## Environment with global variables.
     environment*: Environment
       ## Reference to the interpreter environment
     locals*: Table[Expr, int]
+      ## Table that stores the scope distances between the variable `Expr` and
+      ## the location where it is defined.
 
   LoxCallable* = ref object of Object
     ## An object for Lox calls.
@@ -151,12 +155,18 @@ type
     isInitializer*: bool
 
   LoxClass* = ref object of LoxCallable
+    ## Object that stores Lox class information.
     name*: string
+      ## Lox class name.
     methods*: Table[string, LoxFunction]
+      ## Lox class methods.
 
   LoxInstance* = ref object of Object
+    ## Object that stores Lox instance information.
     klass*: LoxClass
+      ## Lox class bound to instance.
     fields*: Table[string, Object]
+      ## Lox instance fields.
 
   Lox* = object
     ## Object that stores the Lox interpreter state

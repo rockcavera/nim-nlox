@@ -8,9 +8,10 @@ proc initLox*(): Lox =
   result.hadRuntimeError = false
 
 proc run(lox: var Lox, source: string) =
-  ## Initializes a `Scanner` object with the raw `source` code, scans the
-  ## `Scanner` object, parses the scanned tokens and interprets the parsed
-  ## statements. If an error occurred, it returns without interpreting.
+  ## Initializes a `Scanner` object with the raw `source` code, checks the
+  ## `Scanner` object, parses the checked tokens, if no error occurred, resolves
+  ## the statements. Finally, if there was no error in the previous process, it
+  ## interprets the statements.
   var scanner = initScanner(source)
 
   let tokens = scanTokens(lox, scanner)

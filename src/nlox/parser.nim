@@ -385,7 +385,7 @@ proc ifStatement(lox: var Lox, parser: var Parser): Stmt =
   result = newIf(condition, thenBranch, elseBranch)
 
 proc forStatement(lox: var Lox, parser: var Parser): Stmt =
-  ## ## Returns `Stmt` from parsing the grammar rule forStmt.
+  ## Returns `Stmt` from parsing the grammar rule forStmt.
   # forStmt → "for" "(" ( varDecl | exprStmt | ";" )
   #           expression? ";"
   #           expression? ")" statement ;
@@ -452,6 +452,7 @@ proc statement(lox: var Lox, parser: var Parser): Stmt =
     result = expressionStatement(lox, parser)
 
 proc classDeclaration(lox: var Lox, parser: var Parser): Stmt =
+  ## Returns `Stmt` from parsing the grammar rule classDecl.
   # classDecl → "class" IDENTIFIER "{" function* "}" ;
   let name = consume(lox, parser, Identifier, "Expect class name.")
 

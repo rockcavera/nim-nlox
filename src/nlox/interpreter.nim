@@ -264,12 +264,14 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
     raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
 method evaluate(expr: This, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `This` expression.
   lookUpVariable(interpreter, expr.keyword, expr)
 
 # Delayed imports
 import ./loxinstance
 
 method evaluate(expr: Get, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Get` expression.
   let obj = evaluate(expr.obj, interpreter)
 
   if obj of LoxInstance:
@@ -278,6 +280,7 @@ method evaluate(expr: Get, interpreter: var Interpreter): Object =
     raise newRuntimeError(expr.name, "Only instances have properties.")
 
 method evaluate(expr: Set, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Set` expression.
   let obj = evaluate(expr.obj, interpreter)
 
   if obj of LoxInstance:
@@ -372,6 +375,7 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
   define(interpreter.environment, stmt.name.lexeme, function)
 
 method evaluate(stmt: Class, interpreter: var Interpreter) =
+  ## Evaluate the `Class` statement.
   define(interpreter.environment, stmt.name.lexeme, nil)
 
   var methods = initTable[string, LoxFunction]()
