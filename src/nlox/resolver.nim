@@ -132,6 +132,9 @@ method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
   resolve(expr.value, resolver, lox)
   resolve(expr.obj, resolver, lox)
 
+method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
+  resolveLocal(lox, resolver, expr, expr.keyword)
+
 method resolve(expr: Unary, resolver: var Resolver, lox: var Lox) =
   ## Resolves an `Unary` expression.
   resolve(expr.right, resolver, lox)
@@ -154,10 +157,16 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
   define(resolver, stmt.name)
 
+  beginScope(resolver)
+
+  resolver.scopes[^1]["this"] = true
+
   for `method` in stmt.methods:
     let declaration = FunctionType.Method
 
     resolveFunction(lox, resolver, `method`, declaration)
+
+  endScope(resolver)
 
 method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Var` statement.

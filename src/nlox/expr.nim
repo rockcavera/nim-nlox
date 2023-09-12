@@ -38,6 +38,9 @@ type
     name*: Token
     value*: Expr
 
+  This* = ref object of Expr
+    keyword*: Token
+
   Unary* = ref object of Expr
     operator*: Token
     right*: Expr
@@ -86,6 +89,10 @@ proc newSet*(obj: Expr, name: Token, value: Expr): Set =
   result.obj = obj
   result.name = name
   result.value = value
+
+proc newThis*(keyword: Token): This =
+  result = new(This)
+  result.keyword = keyword
 
 proc newUnary*(operator: Token, right: Expr): Unary =
   result = new(Unary)

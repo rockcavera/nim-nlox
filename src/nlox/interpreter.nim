@@ -2,7 +2,7 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./hashes2, ./loxinstance, ./literals, ./logger,
+import ./environment, ./expr, ./hashes2, ./initializers, ./literals, ./logger,
        ./loxclass, ./runtimeerror, ./stmt, ./types
 
 # Internal import of module with keyword name
@@ -248,6 +248,12 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
     result = function.call(function, interpreter, arguments)
   else:
     raise newRuntimeError(expr.paren, "Can only call functions and classes.")
+
+method evaluate(expr: This, interpreter: var Interpreter): Object =
+  lookUpVariable(interpreter, expr.keyword, expr)
+
+# Delayed imports
+import ./loxinstance
 
 method evaluate(expr: Get, interpreter: var Interpreter): Object =
   let obj = evaluate(expr.obj, interpreter)

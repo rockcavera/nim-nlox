@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./environment, ./interpreter, ./stmt, ./types
+import ./environment, ./initializers, ./interpreter, ./stmt, ./types
 
 proc call*(caller: LoxFunction, interpreter: var Interpreter,
           arguments: seq[Object]): Object =
@@ -27,9 +27,9 @@ proc toString*(caller: LoxFunction): string =
   ## Returns a representation of `caller` in `string`.
   fmt"<fn {caller.declaration.name.lexeme}>"
 
-proc newLoxFunction*(declaration: Function, closure: Environment): LoxFunction =
-  ## Create a `LoxFunction` with `declaration` and the current environment
-  ## `closure`.
-  result = new(LoxFunction)
-  result.declaration = declaration
-  result.closure = closure
+proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
+  let environment = newEnvironment(caller.closure)
+
+  define(environment, "this", instance)
+
+  result = newLoxFunction(caller.declaration, environment)

@@ -104,6 +104,8 @@ proc primary(lox: var Lox, parser: var Parser): Expr =
     result = newLiteral(newObject())
   elif match(parser, TokenType.Number, TokenType.String):
     result = newLiteral(previous(parser).literal)
+  elif match(parser, TokenType.This):
+    result = newThis(previous(parser))
   elif match(parser, Identifier):
     result = newVariable(previous(parser))
   elif match(parser, LeftParen):
