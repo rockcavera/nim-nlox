@@ -69,6 +69,9 @@ proc isEqual(a: Object, b: Object): bool =
   elif a of String:
     if b of String:
       result = String(a).data == String(b).data
+  elif a of LoxClass:
+    if b of LoxClass:
+      result = a == b
 
 proc checkNumberOperand(operator: Token, operand: Object) =
   ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
