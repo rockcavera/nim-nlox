@@ -2,7 +2,7 @@
 import std/tables
 
 # Internal imports
-import ./expr, ./interpreter, ./logger, ./stmt, ./types
+import ./interpreter, ./logger, ./types
 
 type
   FunctionType = enum
@@ -231,7 +231,7 @@ method resolve(stmt: Print, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Print` statement.
   resolve(stmt.expression, resolver, lox)
 
-method resolve(stmt: stmt.Return, resolver: var Resolver, lox: var Lox) =
+method resolve(stmt: types.Return, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Return` statement. Report an error if `return` is called in lox
   ## top-level code
   if resolver.currentFunction == FunctionType.None:

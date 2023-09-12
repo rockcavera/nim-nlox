@@ -106,12 +106,6 @@ type
     values*: Table[string, Object]
       ## Hash table that stores variable names and values.
 
-  Return* = object of CatchableError
-    ## Object used to unroll the stack when return is called in Lox. It is not
-    ## used to raise an error of fact.
-    value*: Object
-      ## The returned value.
-
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
 
@@ -121,10 +115,6 @@ type
       ## The `Token` is used to tell which line of code was running when the
       ## error occurred.
 
-# Delayed imports
-import ./expr, ./stmt
-
-type
   Interpreter* = object
     ## Object that stores interpreter information
     globals*: Environment
@@ -177,3 +167,98 @@ type
       ## Determines if an error occurred in code execution.
     hadRuntimeError* = false
       ## Determines that a runtime error occurred while running a Lox script.
+
+  # <Put it below, generateast!> #
+
+  # From expr
+
+  Expr* = ref object of RootObj
+
+  Assign* = ref object of Expr
+    name*: Token
+    value*: Expr
+
+  Binary* = ref object of Expr
+    left*: Expr
+    operator*: Token
+    right*: Expr
+
+  Call* = ref object of Expr
+    callee*: Expr
+    paren*: Token
+    arguments*: seq[Expr]
+
+  Get* = ref object of Expr
+    obj*: Expr
+    name*: Token
+
+  Grouping* = ref object of Expr
+    expression*: Expr
+
+  Literal* = ref object of Expr
+    value*: Object
+
+  Logical* = ref object of Expr
+    left*: Expr
+    operator*: Token
+    right*: Expr
+
+  Set* = ref object of Expr
+    obj*: Expr
+    name*: Token
+    value*: Expr
+
+  This* = ref object of Expr
+    keyword*: Token
+
+  Unary* = ref object of Expr
+    operator*: Token
+    right*: Expr
+
+  Variable* = ref object of Expr
+    name*: Token
+
+  # End expr
+
+  # From stmt
+
+  Stmt* = ref object of RootObj
+
+  Block* = ref object of Stmt
+    statements*: seq[Stmt]
+
+  Class* = ref object of Stmt
+    name*: Token
+    superclass*: Variable
+    methods*: seq[Function]
+
+  Expression* = ref object of Stmt
+    expression*: Expr
+
+  Function* = ref object of Stmt
+    name*: Token
+    params*: seq[Token]
+    body*: seq[Stmt]
+
+  If* = ref object of Stmt
+    condition*: Expr
+    thenBranch*: Stmt
+    elseBranch*: Stmt
+
+  Print* = ref object of Stmt
+    expression*: Expr
+
+  Return* = ref object of Stmt
+    keyword*: Token
+    value*: Expr
+
+  Var* = ref object of Stmt
+    name*: Token
+    initializer*: Expr
+
+  While* = ref object of Stmt
+    condition*: Expr
+    body*: Stmt
+
+  # End stmt
+

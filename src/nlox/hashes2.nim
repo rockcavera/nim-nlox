@@ -2,7 +2,7 @@
 import std/hashes
 
 # Internal imports
-import ./expr, ./types
+import ./types
 
 method toHash(literal: Object): Hash {.base.} =
   ## Base method that raises `CatchableError` exception when `literal` has not

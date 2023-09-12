@@ -2,7 +2,7 @@
 import std/[lists, sequtils, strformat]
 
 # Internal imports
-import ./expr, ./literals, ./logger, ./stmt, ./types
+import ./initializers, ./literals, ./logger, ./types
 
 # Forward declaration
 proc expression(lox: var Lox, parser: var Parser): Expr

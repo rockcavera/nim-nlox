@@ -2,7 +2,10 @@
 import std/strformat
 
 # Internal imports
-import ./environment, ./initializers, ./stmt, ./types
+import ./environment, ./initializers, ./types
+
+# Internal import of module with keyword name
+import "./return"
 
 proc arity*(caller: LoxFunction): int =
   ## Returns the arity of `caller`
@@ -36,7 +39,7 @@ proc call*(caller: LoxFunction, interpreter: var Interpreter,
 
   try:
     executeBlock(interpreter, caller.declaration.body, environment)
-  except types.Return as returnValue:
+  except `return`.Return as returnValue:
     result = returnValue.value
 
   if (caller.isInitializer):

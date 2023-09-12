@@ -2,8 +2,8 @@
 import std/[math, strformat, strutils, tables, times]
 
 # Internal imports
-import ./environment, ./expr, ./hashes2, ./initializers, ./literals, ./logger,
-       ./runtimeerror, ./stmt, ./types
+import ./environment, ./hashes2, ./initializers, ./literals, ./logger,
+       ./runtimeerror, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -359,7 +359,7 @@ method evaluate(stmt: While, interpreter: var Interpreter) =
   while isTruthy(evaluate(stmt.condition, interpreter)):
     execute(interpreter, stmt.body)
 
-method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
+method evaluate(stmt: types.Return, interpreter: var Interpreter) =
   ## Evaluate the `Return` statement.
   var value: Object = nil
 
