@@ -14,3 +14,6 @@ proc get*(instance: LoxInstance, name: Token): Object =
     result = instance.fields[name.lexeme]
   else:
     raise newRuntimeError(name, fmt"Undefined property '{name.lexeme}'.")
+
+proc set*(instance: LoxInstance, name: Token, value: Object) =
+  instance.fields[name.lexeme] = value

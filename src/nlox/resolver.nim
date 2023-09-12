@@ -128,6 +128,10 @@ method resolve(expr: Logical, resolver: var Resolver, lox: var Lox) =
   resolve(expr.left, resolver, lox)
   resolve(expr.right, resolver, lox)
 
+method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
+  resolve(expr.value, resolver, lox)
+  resolve(expr.obj, resolver, lox)
+
 method resolve(expr: Unary, resolver: var Resolver, lox: var Lox) =
   ## Resolves an `Unary` expression.
   resolve(expr.right, resolver, lox)

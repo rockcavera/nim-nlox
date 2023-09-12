@@ -33,6 +33,11 @@ type
     operator*: Token
     right*: Expr
 
+  Set* = ref object of Expr
+    obj*: Expr
+    name*: Token
+    value*: Expr
+
   Unary* = ref object of Expr
     operator*: Token
     right*: Expr
@@ -75,6 +80,12 @@ proc newLogical*(left: Expr, operator: Token, right: Expr): Logical =
   result.left = left
   result.operator = operator
   result.right = right
+
+proc newSet*(obj: Expr, name: Token, value: Expr): Set =
+  result = new(Set)
+  result.obj = obj
+  result.name = name
+  result.value = value
 
 proc newUnary*(operator: Token, right: Expr): Unary =
   result = new(Unary)

@@ -257,6 +257,16 @@ method evaluate(expr: Get, interpreter: var Interpreter): Object =
   else:
     raise newRuntimeError(expr.name, "Only instances have properties.")
 
+method evaluate(expr: Set, interpreter: var Interpreter): Object =
+  let obj = evaluate(expr.obj, interpreter)
+
+  if obj of LoxInstance:
+    result = evaluate(expr.value, interpreter)
+
+    set(cast[LoxInstance](obj), expr.name, result)
+  else:
+    raise newRuntimeError(expr.name, "Only instances have fields.")
+
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `Object` type.

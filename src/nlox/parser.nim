@@ -235,7 +235,7 @@ proc `or`(lox: var Lox, parser: var Parser): Expr =
 
 proc assignment(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule assignment.
-  # assignment → IDENTIFIER "=" assignment
+  # assignment → ( call "." )? IDENTIFIER "=" assignment
   #            | logic_or ;
   result = `or`(lox, parser)
 
@@ -248,6 +248,10 @@ proc assignment(lox: var Lox, parser: var Parser): Expr =
       let name = Variable(result).name
 
       result = newAssign(name, value)
+    elif result of Get:
+      let get = Get(result)
+
+      result = newSet(get.obj, get.name, value)
     else:
       logger.error(lox, equals, "Invalid assignment target.")
 
