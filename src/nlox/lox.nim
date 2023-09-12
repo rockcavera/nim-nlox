@@ -20,17 +20,13 @@ proc run(lox: var Lox, source: string) =
 
   let statements = parse(lox, parser)
 
-  if lox.hadError:
-    return
+  if not lox.hadError:
+    var resolver = initResolver()
 
-  var resolver = initResolver()
+    resolve(lox, resolver, statements)
 
-  resolve(lox, resolver, statements)
-
-  if lox.hadError:
-    return
-
-  interpret(lox, statements)
+    if not lox.hadError:
+      interpret(lox, statements)
 
 proc runFile(path: string) =
   ## Runs the .lox script passed in `path`.
