@@ -9,6 +9,9 @@ type
     ## Function type enumerator.
     None, Function, Method
 
+  ClassType = enum
+    None, Class
+
   Resolver* = object
     ## Stores resolver information.
     # interpreter: Interpreter # It is not necessary. The `Lox` state is already
@@ -17,6 +20,7 @@ type
       ## A stack of scopes.
     currentFunction: FunctionType
       ## Current function type.
+    currentClass: ClassType
 
 # Forward declaration
 proc resolve*(lox: var Lox, resolver: var Resolver, statements: seq[Stmt])
@@ -25,6 +29,7 @@ proc initResolver*(): Resolver =
   ## Initializes and returns a `Resolver` object.
   # result.interpreter = interpreter
   result.currentFunction = FunctionType.None
+  result.currentClass = ClassType.None
 
 proc beginScope(resolver: var Resolver) =
   ## Begins a scope at `resolver`.
@@ -133,7 +138,10 @@ method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
   resolve(expr.obj, resolver, lox)
 
 method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
-  resolveLocal(lox, resolver, expr, expr.keyword)
+  if resolver.currentClass == ClassType.None:
+    error(lox, expr.keyword, "Can't use 'this' outside of a class.")
+  else:
+    resolveLocal(lox, resolver, expr, expr.keyword)
 
 method resolve(expr: Unary, resolver: var Resolver, lox: var Lox) =
   ## Resolves an `Unary` expression.
@@ -153,6 +161,10 @@ method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
   endScope(resolver)
 
 method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
+  let enclosingClass = resolver.currentClass
+
+  resolver.currentClass = ClassType.Class
+
   declare(lox, resolver, stmt.name)
 
   define(resolver, stmt.name)
@@ -167,6 +179,8 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
     resolveFunction(lox, resolver, `method`, declaration)
 
   endScope(resolver)
+
+  resolver.currentClass = enclosingClass
 
 method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Var` statement.
