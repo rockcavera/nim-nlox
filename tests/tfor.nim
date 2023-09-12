@@ -118,3 +118,12 @@ done
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Class in body":
+    const
+      script = folder / "class_in_body.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'class': Expect expression.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

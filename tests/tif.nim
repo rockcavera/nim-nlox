@@ -85,3 +85,21 @@ empty
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Class in else":
+    const
+      script = folder / "class_in_else.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'class': Expect expression.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Class in then":
+    const
+      script = folder / "class_in_then.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at 'class': Expect expression.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

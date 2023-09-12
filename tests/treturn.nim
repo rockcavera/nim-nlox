@@ -59,3 +59,12 @@ suite "Return":
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "In method":
+    const
+      script = folder / "in_method.lox"
+      expectedExitCode = 0
+      expectedOutput = """ok
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

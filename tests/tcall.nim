@@ -6,7 +6,7 @@ import ./tconfig
 const folder = "call"
 
 suite "Call":
-  test "bool":
+  test "Bool":
     const
       script = folder / "bool.lox"
       expectedExitCode = 70
@@ -16,7 +16,7 @@ suite "Call":
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
 
-  test "nil":
+  test "Nil":
     const
       script = folder / "nil.lox"
       expectedExitCode = 70
@@ -26,7 +26,7 @@ suite "Call":
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
 
-  test "num":
+  test "Num":
     const
       script = folder / "num.lox"
       expectedExitCode = 70
@@ -36,12 +36,22 @@ suite "Call":
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
 
-  test "string":
+  test "String":
     const
       script = folder / "string.lox"
       expectedExitCode = 70
       expectedOutput = """Can only call functions and classes.
 [line 1]
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Object":
+    const
+      script = folder / "object.lox"
+      expectedExitCode = 70
+      expectedOutput = """Can only call functions and classes.
+[line 4]
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)

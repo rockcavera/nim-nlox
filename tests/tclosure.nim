@@ -123,3 +123,12 @@ assigned
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Close over method parameter":
+    const
+      script = folder / "close_over_method_parameter.lox"
+      expectedExitCode = 0
+      expectedOutput = """param
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

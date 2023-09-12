@@ -40,3 +40,21 @@ false
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Decimal point at eof":
+    const
+      script = folder / "decimal_point_at_eof.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at end: Expect property name after '.'.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Trailing dot":
+    const
+      script = folder / "trailing_dot.lox"
+      expectedExitCode = 65
+      expectedOutput = """[line 2] Error at ';': Expect property name after '.'.
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)

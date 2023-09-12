@@ -204,3 +204,12 @@ outer
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "Local from method":
+    const
+      script = folder / "local_from_method.lox"
+      expectedExitCode = 0
+      expectedOutput = """variable
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
