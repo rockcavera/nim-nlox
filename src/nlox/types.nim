@@ -148,6 +148,7 @@ type
       ## Lox function declarations.
     closure*: Environment
       ## Stores the function's current environment.
+    isInitializer*: bool
 
   LoxClass* = ref object of LoxCallable
     name*: string

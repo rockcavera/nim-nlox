@@ -17,7 +17,7 @@ proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
 
   define(environment, "this", instance)
 
-  result = newLoxFunction(caller.declaration, environment)
+  result = newLoxFunction(caller.declaration, environment, caller.isInitializer)
 
 import ./interpreter
 
@@ -29,9 +29,12 @@ proc call*(caller: LoxFunction, interpreter: var Interpreter,
   for i in 0 ..< len(caller.declaration.params):
     define(environment, caller.declaration.params[i].lexeme, arguments[i])
 
-  result = nil
-
   try:
     executeBlock(interpreter, caller.declaration.body, environment)
   except types.Return as returnValue:
-    result = returnValue.value
+    return returnValue.value
+
+  if (caller.isInitializer):
+    return getAt(caller.closure, 0, "this")
+
+  return nil

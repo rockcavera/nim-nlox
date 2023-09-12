@@ -361,7 +361,7 @@ method evaluate(stmt: stmt.Return, interpreter: var Interpreter) =
 
 method evaluate(stmt: Function, interpreter: var Interpreter) =
   ## Evaluate the `Function` statement.
-  let function = newLoxFunction(stmt, interpreter.environment)
+  let function = newLoxFunction(stmt, interpreter.environment, false)
 
   define(interpreter.environment, stmt.name.lexeme, function)
 
@@ -371,7 +371,8 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
   var methods = initTable[string, LoxFunction]()
 
   for `method` in stmt.methods:
-    let function = newLoxFunction(`method`, interpreter.environment)
+    let function = newLoxFunction(`method`, interpreter.environment,
+                                  `method`.name.lexeme == "init")
 
     methods[`method`.name.lexeme] = function
 
