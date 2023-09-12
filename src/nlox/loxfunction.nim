@@ -4,14 +4,6 @@ import std/strformat
 # Internal imports
 import ./environment, ./interpreter, ./stmt, ./types
 
-type
-  LoxFunction* = ref object of LoxCallable
-    ## Object that stores Lox function information.
-    declaration: Function
-      ## Lox function declarations.
-    closure: Environment
-      ## Stores the function's current environment.
-
 proc call*(caller: LoxFunction, interpreter: var Interpreter,
           arguments: seq[Object]): Object =
   ## Evaluates a `caller` and returns `Object`.

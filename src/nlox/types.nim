@@ -121,7 +121,7 @@ type
       ## error occurred.
 
 # Delayed imports
-import ./expr
+import ./expr, ./stmt
 
 type
   Interpreter* = object
@@ -142,8 +142,16 @@ type
       ## Procedure that returns a `string` representation of the `LoxCallable`
       ## object
 
+  LoxFunction* = ref object of LoxCallable
+    ## Object that stores Lox function information.
+    declaration*: Function
+      ## Lox function declarations.
+    closure*: Environment
+      ## Stores the function's current environment.
+
   LoxClass* = ref object of LoxCallable
     name*: string
+    methods*: Table[string, LoxFunction]
 
   LoxInstance* = ref object of Object
     klass*: LoxClass

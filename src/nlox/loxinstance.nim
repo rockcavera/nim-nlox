@@ -9,11 +9,17 @@ proc newLoxInstance*(klass: LoxClass): LoxInstance =
 proc toString*(instance: LoxInstance): string =
   result = fmt"{instance.klass.name} instance"
 
+# Delayed imports
+import ./loxclass # loxclass import `newLoxInstance()`
+
 proc get*(instance: LoxInstance, name: Token): Object =
   if hasKey(instance.fields, name.lexeme):
     result = instance.fields[name.lexeme]
   else:
-    raise newRuntimeError(name, fmt"Undefined property '{name.lexeme}'.")
+    result = instance.klass.findMethod(name.lexeme)
+
+    if isNil(result):
+      raise newRuntimeError(name, fmt"Undefined property '{name.lexeme}'.")
 
 proc set*(instance: LoxInstance, name: Token, value: Object) =
   instance.fields[name.lexeme] = value

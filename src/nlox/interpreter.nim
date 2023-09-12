@@ -354,7 +354,14 @@ method evaluate(stmt: Function, interpreter: var Interpreter) =
 method evaluate(stmt: Class, interpreter: var Interpreter) =
   define(interpreter.environment, stmt.name.lexeme, nil)
 
-  let klass = newLoxClass(stmt.name.lexeme)
+  var methods = initTable[string, LoxFunction]()
+
+  for `method` in stmt.methods:
+    let function = newLoxFunction(`method`, interpreter.environment)
+
+    methods[`method`.name.lexeme] = function
+
+  let klass = newLoxClass(stmt.name.lexeme, methods)
 
   assign(interpreter.environment, stmt.name, klass)
 

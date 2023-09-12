@@ -7,7 +7,7 @@ import ./expr, ./interpreter, ./logger, ./stmt, ./types
 type
   FunctionType = enum
     ## Function type enumerator.
-    None, Function
+    None, Function, Method
 
   Resolver* = object
     ## Stores resolver information.
@@ -153,6 +153,11 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
   declare(lox, resolver, stmt.name)
 
   define(resolver, stmt.name)
+
+  for `method` in stmt.methods:
+    let declaration = FunctionType.Method
+
+    resolveFunction(lox, resolver, `method`, declaration)
 
 method resolve(stmt: Var, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Var` statement.
