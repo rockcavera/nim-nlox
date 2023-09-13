@@ -86,6 +86,11 @@ proc newSet*(obj: Expr, name: Token, value: Expr): Set =
   result.name = name
   result.value = value
 
+proc newSuper*(keyword: Token, `method`: Token): Super =
+  result = new(Super)
+  result.keyword = keyword
+  result.`method` = `method`
+
 proc newThis*(keyword: Token): This =
   result = new(This)
   result.keyword = keyword

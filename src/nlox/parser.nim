@@ -92,10 +92,9 @@ proc consume(lox: var Lox, parser: var Parser, typ: TokenType, message: string):
 
 proc primary(lox: var Lox, parser: var Parser): Expr =
   ## Returns `Expr` from parsing the grammar rule primary.
-  # primary → "true" | "false" | "nil"
-  #         | NUMBER | STRING
-  #         | "(" expression ")"
-  #         | IDENTIFIER ;
+  # primary → "true" | "false" | "nil" | "this"
+  #         | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+  #         | "super" "." IDENTIFIER ;
   if match(parser, False):
     result = newLiteral(newBoolean(false))
   elif match(parser, True):
@@ -104,6 +103,15 @@ proc primary(lox: var Lox, parser: var Parser): Expr =
     result = newLiteral(newObject())
   elif match(parser, TokenType.Number, TokenType.String):
     result = newLiteral(previous(parser).literal)
+  elif match(parser, TokenType.Super):
+    let keyword = previous(parser)
+
+    discard consume(lox, parser, Dot, "Expect '.' after 'super'.")
+
+    let `method` = consume(lox, parser, Identifier,
+                           "Expect superclass method name.")
+
+    result = newSuper(keyword, `method`)
   elif match(parser, TokenType.This):
     result = newThis(previous(parser))
   elif match(parser, Identifier):

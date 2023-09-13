@@ -208,6 +208,10 @@ type
     name*: Token
     value*: Expr
 
+  Super* = ref object of Expr
+    keyword*: Token
+    `method`*: Token
+
   This* = ref object of Expr
     keyword*: Token
 
