@@ -11,7 +11,7 @@ type
 
   ClassType = enum
     ## Class type enumerator.
-    None, Class
+    None, Class, Subclass
 
   Resolver* = object
     ## Stores resolver information.
@@ -142,6 +142,11 @@ method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
   resolve(expr.obj, resolver, lox)
 
 method resolve(expr: Super, resolver: var Resolver, lox: var Lox) =
+  if resolver.currentClass == ClassType.None:
+    error(lox, expr.keyword, "Can't use 'super' outside of a class.")
+  elif resolver.currentClass != ClassType.Subclass:
+    error(lox, expr.keyword, "Can't use 'super' in a class with no superclass.")
+
   resolveLocal(lox, resolver, expr, expr.keyword)
 
 method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
@@ -182,6 +187,8 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
   if not isNil(stmt.superclass):
     if stmt.name.lexeme == stmt.superclass.name.lexeme:
       error(lox, stmt.superclass.name, "A class can't inherit from itself.")
+
+    resolver.currentClass = ClassType.Subclass
 
     resolve(stmt.superclass, resolver, lox)
 
