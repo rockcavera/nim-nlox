@@ -14,3 +14,12 @@ suite "Regression":
 """
 
     check (expectedOutput, expectedExitCode) == nloxTest(script)
+
+  test "394":
+    const
+      script = folder / "394.lox"
+      expectedExitCode = 0
+      expectedOutput = """B
+"""
+
+    check (expectedOutput, expectedExitCode) == nloxTest(script)
