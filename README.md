@@ -25,7 +25,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 10. Functions
 - [x] 11. Resolving and Binding
 - [x] 12. Classes
-- [ ] 13. Inheritance
+- [x] 13. Inheritance
 
 ## License
 All files are under the MIT license, with the exception of the .lox files located in the tests/scripts folder, which are under this [LICENSE](/tests/scripts/LICENSE) because they are third-party code, which can be accessed [here](https://github.com/munificent/craftinginterpreters/tree/master/test).
