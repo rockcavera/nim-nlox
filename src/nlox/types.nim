@@ -143,12 +143,14 @@ type
     closure*: Environment
       ## Stores the function's current environment.
     isInitializer*: bool
+      ## Stores whether `LoxFunction` is an initializer.
 
   LoxClass* = ref object of LoxCallable
     ## Object that stores Lox class information.
     name*: string
       ## Lox class name.
     superclass*: LoxClass
+      ## Superclass of `LoxClass`
     methods*: Table[string, LoxFunction]
       ## Lox class methods.
 
@@ -265,4 +267,3 @@ type
     body*: Stmt
 
   # End stmt
-

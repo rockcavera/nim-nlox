@@ -66,6 +66,7 @@ method hash*(expr: Set): Hash =
   hash(expr.obj) !& hash(expr.name) !& hash(expr.value)
 
 method hash*(expr: Super): Hash =
+  ## Returns a `Hash` of a `Super` expression.
   hash(expr.keyword) !& hash(expr.`method`)
 
 method hash*(expr: This): Hash =

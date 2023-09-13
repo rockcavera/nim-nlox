@@ -264,10 +264,13 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
     raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
 method evaluate(expr: Super, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Super` expression.
   let
     distance = interpreter.locals[expr]
-    superclass = cast[LoxClass](getAt(interpreter.environment, distance, "super"))
-    obj = cast[LoxInstance](getAt(interpreter.environment, distance - 1, "this"))
+    superclass = cast[LoxClass](getAt(interpreter.environment, distance,
+                                      "super"))
+    obj = cast[LoxInstance](getAt(interpreter.environment, distance - 1,
+                                  "this"))
     `method` = findMethod(superclass, expr.`method`.lexeme)
 
   if isNil(`method`):

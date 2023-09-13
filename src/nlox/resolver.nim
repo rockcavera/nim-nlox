@@ -142,6 +142,8 @@ method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
   resolve(expr.obj, resolver, lox)
 
 method resolve(expr: Super, resolver: var Resolver, lox: var Lox) =
+  ## Resolves a `Super` expression. Reports error if "super" is used outside of
+  ## a class or in a class with no superclass.
   if resolver.currentClass == ClassType.None:
     error(lox, expr.keyword, "Can't use 'super' outside of a class.")
   elif resolver.currentClass != ClassType.Subclass:
@@ -150,7 +152,7 @@ method resolve(expr: Super, resolver: var Resolver, lox: var Lox) =
   resolveLocal(lox, resolver, expr, expr.keyword)
 
 method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
-  ## Resolves a `This` expression. Report error if "this" is used outside of a
+  ## Resolves a `This` expression. Reports error if "this" is used outside of a
   ## class.
   if resolver.currentClass == ClassType.None:
     error(lox, expr.keyword, "Can't use 'this' outside of a class.")
@@ -175,7 +177,7 @@ method resolve(stmt: Block, resolver: var Resolver, lox: var Lox) =
   endScope(resolver)
 
 method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
-  ## Resolves a `Class` statement.
+  ## Resolves a `Class` statement. Reports error if a class inherits itself.
   let enclosingClass = resolver.currentClass
 
   resolver.currentClass = ClassType.Class
@@ -249,8 +251,8 @@ method resolve(stmt: Print, resolver: var Resolver, lox: var Lox) =
   resolve(stmt.expression, resolver, lox)
 
 method resolve(stmt: types.Return, resolver: var Resolver, lox: var Lox) =
-  ## Resolves a `Return` statement. Report an error if `return` is called in lox
-  ## top-level code
+  ## Resolves a `Return` statement. Reports an error if "return" is called from
+  ## top-level code or tries to return a value from an initializer.
   if resolver.currentFunction == FunctionType.None:
     error(lox, stmt.keyword, "Can't return from top-level code.")
 
