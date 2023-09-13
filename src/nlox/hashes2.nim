@@ -65,6 +65,9 @@ method hash*(expr: Set): Hash =
   ## Returns a `Hash` of a `Set` expression.
   hash(expr.obj) !& hash(expr.name) !& hash(expr.value)
 
+method hash*(expr: Super): Hash =
+  hash(expr.keyword) !& hash(expr.`method`)
+
 method hash*(expr: This): Hash =
   ## Returns a `Hash` of a `This` expression.
   hash(expr.keyword)

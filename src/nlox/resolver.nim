@@ -141,6 +141,9 @@ method resolve(expr: Set, resolver: var Resolver, lox: var Lox) =
   resolve(expr.value, resolver, lox)
   resolve(expr.obj, resolver, lox)
 
+method resolve(expr: Super, resolver: var Resolver, lox: var Lox) =
+  resolveLocal(lox, resolver, expr, expr.keyword)
+
 method resolve(expr: This, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `This` expression. Report error if "this" is used outside of a
   ## class.
@@ -182,6 +185,10 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
     resolve(stmt.superclass, resolver, lox)
 
+    beginScope(resolver)
+
+    resolver.scopes[^1]["super"] = true
+
   beginScope(resolver)
 
   resolver.scopes[^1]["this"] = true
@@ -195,6 +202,9 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
     resolveFunction(lox, resolver, `method`, declaration)
 
   endScope(resolver)
+
+  if not isNil(stmt.superclass):
+    endScope(resolver)
 
   resolver.currentClass = enclosingClass
 

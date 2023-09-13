@@ -263,6 +263,19 @@ method evaluate(expr: Call, interpreter: var Interpreter): Object =
   else:
     raise newRuntimeError(expr.paren, "Can only call functions and classes.")
 
+method evaluate(expr: Super, interpreter: var Interpreter): Object =
+  let
+    distance = interpreter.locals[expr]
+    superclass = cast[LoxClass](getAt(interpreter.environment, distance, "super"))
+    obj = cast[LoxInstance](getAt(interpreter.environment, distance - 1, "this"))
+    `method` = findMethod(superclass, expr.`method`.lexeme)
+
+  if isNil(`method`):
+    raise newRuntimeError(expr.`method`,
+                          fmt"Undefined property '{expr.`method`.lexeme}'.")
+
+  result = `bind`(`method`, obj)
+
 method evaluate(expr: This, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `This` expression.
   lookUpVariable(interpreter, expr.keyword, expr)
@@ -386,6 +399,11 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
 
   define(interpreter.environment, stmt.name.lexeme, nil)
 
+  if not isNil(stmt.superclass):
+    interpreter.environment = newEnvironment(interpreter.environment)
+
+    define(interpreter.environment, "super", superclass)
+
   var methods = initTable[string, LoxFunction]()
 
   for `method` in stmt.methods:
@@ -395,6 +413,9 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
     methods[`method`.name.lexeme] = function
 
   let klass = newLoxClass(stmt.name.lexeme, cast[LoxClass](superclass), methods)
+
+  if not isNil(stmt.superclass):
+    interpreter.environment = interpreter.environment.enclosing
 
   assign(interpreter.environment, stmt.name, klass)
 
