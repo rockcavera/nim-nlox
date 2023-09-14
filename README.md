@@ -36,7 +36,7 @@ II. A TREE-WALK INTERPRETER
 - [x] 12. Classes
 - [x] 13. Inheritance
 
-As you can see, nox is a complete Lox interpreter based on the Java version.
+As you can see, nlox is a complete Lox interpreter based on the Java version.
 
 ## How to use nlox?
 First you need to have a [Nim](https://nim-lang.org/install.html "Nim") 2.0.0 compiler or higher.
