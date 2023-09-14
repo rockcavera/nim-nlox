@@ -333,6 +333,8 @@ proc stringify(literal: Object): string =
     if literal of Number:
       if endsWith(result, ".0"):
         setLen(result, len(result) - 2)
+      elif result == "nan":
+        result = "NaN"
 
 method evaluate(stmt: Stmt, interpreter: var Interpreter) {.base.} =
   ## Base method that raises `CatchableError` exception when `stmt` has not had
