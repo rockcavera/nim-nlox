@@ -1,4 +1,4 @@
-import std/private/[oscommon, ospaths2], std/[osproc, strformat]
+import std/private/[oscommon, ospaths2], std/[cmdline, osproc, strutils, strformat]
 
 const
   nloxExe = "src" / "nlox.exe"
@@ -15,9 +15,11 @@ proc compilenlox() =
     if not fileExists(nloxSource):
       quit(fmt"`{nloxSource}` file not found.", 72)
 
-    # echo fmt"Compiling `{nloxSource}`..."
+    let options = join(commandLineParams(), " ")
 
-    let (_, exitCode) = execCmdEx(fmt"nim c {nloxSource}")
+    echo fmt"  nim c {options} {nloxSource}"
+
+    let (_, exitCode) = execCmdEx(fmt"nim c {options} {nloxSource}")
 
     if (exitCode != 0) or (not fileExists(nloxExe)):
       quit(fmt"Unable to compile `{nloxSource}`.", 70)
