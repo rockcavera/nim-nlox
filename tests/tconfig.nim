@@ -1,7 +1,7 @@
 import std/private/[oscommon, ospaths2], std/[cmdline, osproc, strutils, strformat]
 
 const
-  nloxExe = "src" / "nlox.exe"
+  nloxExe* = "src" / "nlox.exe"
   nloxSource = "src" / "nlox.nim"
   loxScriptsFolder* = "tests" / "scripts"
 
@@ -36,4 +36,4 @@ proc nloxTest*(script: string): tuple[output: string, exitCode: int] =
 
   let scriptFull = loxScriptsFolder / script
 
-  result = execCmdEx(fmt"{nloxExe}  {scriptFull}")
+  result = execCmdEx(fmt"{nloxExe} {scriptFull}")
