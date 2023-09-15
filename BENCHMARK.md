@@ -326,6 +326,7 @@ jlox
 | ------------ | ------------ | ------------ | ------------ |
 | nlox  | 8820000  | 147 | 0.46x  |
 | jlox  | 19800000  | 330 | 1.00x  |
+
 **&#42; bigger "sum" and "batch" is better**
 
 **Outputs:**
@@ -344,7 +345,7 @@ jlox
 ```
 
 ## Notes
-nim -v
+`nim -v`
 ```
 Nim Compiler Version 2.1.1 [Windows: amd64]
 Compiled at 2023-09-14
@@ -354,7 +355,7 @@ git hash: 38b58239e882eaa905bafa49237f0b9ca9d43569
 active boot switches: -d:release
 ```
 
-gcc -v
+`gcc -v`
 ```
 Using built-in specs.
 COLLECT_GCC=gcc
@@ -366,7 +367,7 @@ Supported LTO compression algorithms: zlib
 gcc version 13.2.0 (x86_64-posix-seh-rev0, Built by MinGW-Builds project)
 ```
 
-java -version
+`java -version`
 ```
 java version "17.0.6" 2023-01-17 LTS
 Java(TM) SE Runtime Environment (build 17.0.6+9-LTS-190)
