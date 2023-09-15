@@ -1,11 +1,15 @@
+# Stdlib imports
 import std/times
 
+# Internal imports
 import ./environment, ./literals, ./types
 
 proc clockArity(caller: LoxCallable): int = 0
+  ## `arity` for "clock()" .
 
 proc clockCall(caller: LoxCallable, interpreter: var Interpreter,
                arguments: seq[Object]): Object =
+  ## `call` for "clock()".
   let
     currentTime = getTime()
     seconds = float(toUnix(currentTime))
@@ -15,9 +19,10 @@ proc clockCall(caller: LoxCallable, interpreter: var Interpreter,
   result = newNumber(seconds + milliseconds)
 
 proc clockToString(caller: LoxCallable): string = "<native fn>"
+  ## `toString` for "clock()".
 
 proc defineClock(interpreter: var Interpreter) =
-  ## Defines the built-in function `clock()`
+  ## Defines the built-in function `clock()`.
   var clock = new(LoxCallable)
 
   clock.arity = clockArity
@@ -27,5 +32,5 @@ proc defineClock(interpreter: var Interpreter) =
   define(interpreter.globals, "clock", clock)
 
 proc defineAllNativeFunctions*(interpreter: var Interpreter) =
-  ## Define all native functions
+  ## Define all native functions.
   defineClock(interpreter)
