@@ -1,9 +1,9 @@
 # Stdlib imports
-import std/[math, strformat, strutils, tables, times]
+import std/[math, strformat, strutils, tables]
 
 # Internal imports
 import ./environment, ./hashes2, ./initializers, ./literals, ./logger,
-       ./runtimeerror, ./types
+       ./nativefunctions, ./runtimeerror, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -11,36 +11,12 @@ import "./return"
 # Forward declaration
 proc execute(interpreter: var Interpreter, stmt: Stmt)
 
-proc defineClock(interpreter: var Interpreter) =
-  ## Defines the built-in function `clock()`
-  var clock = new(LoxCallable)
-
-  proc arity(caller: LoxCallable): int = 0
-
-  proc call(caller: LoxCallable, interpreter: var Interpreter,
-            arguments: seq[Object]): Object =
-    let
-      currentTime = getTime()
-      seconds = float(toUnix(currentTime))
-      milliseconds = float(convert(Nanoseconds, Milliseconds,
-                                   nanosecond(currentTime))) / 1000.0
-
-    result = newNumber(seconds + milliseconds)
-
-  proc toString(caller: LoxCallable): string = "<native fn>"
-
-  clock.arity = arity
-  clock.call = call
-  clock.toString = toString
-
-  define(interpreter.globals, "clock", clock)
-
 proc initInterpreter*(): Interpreter =
   ## Initializes an `Interpreter` object.
   result.globals = newEnvironment()
   result.environment = result.globals
 
-  defineClock(result)
+  defineAllNativeFunctions(result)
 
 proc isTruthy(literal: Object): bool =
   ## Transforms the `literal` object into a boolean type and returns it.
