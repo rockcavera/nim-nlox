@@ -51,6 +51,12 @@ proc isEqual(a: Object, b: Object): bool =
   elif a of LoxFunction:
     if b of LoxFunction:
       result = a == b
+  elif a of LoxInstance:
+    if b of LoxInstance:
+      result = a == b
+  elif a of LoxCallable:
+    if b of LoxCallable:
+      result = a == b
 
 proc checkNumberOperand(operator: Token, operand: Object) =
   ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
