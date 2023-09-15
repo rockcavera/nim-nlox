@@ -6,15 +6,22 @@ import ./runtimeerror, ./types
 
 proc newEnvironment*(): Environment =
   ## Creates a new `Environment` with `enclosing` equal to `nil`.
-  Environment(enclosing: nil, values: initTable[string, Object]())
+  Environment(enclosing: nil, values: newTable[string, Object](4))
 
 proc newEnvironment*(enclosing: Environment): Environment =
   ## Creates a new `Environment` and sets the outer environment to `enclosing`.
-  Environment(enclosing: enclosing, values: initTable[string, Object]())
+  Environment(enclosing: enclosing, values: nil)
+
+proc newEnvironment*(enclosing: Environment, size: int): Environment =
+  ## Creates a new `Environment` and sets the outer environment to `enclosing`.
+  Environment(enclosing: enclosing, values: newTable[string, Object](size))
 
 proc define*(environment: Environment, name: string, value: Object) =
   ## Defines in the environment `environment` the variable `name` with the value
   ## `value`.
+  if isNil(environment.values):
+    environment.values = newTable[string, Object](4)
+
   environment.values[name] = value
 
 proc ancestor*(environment: Environment, distance: int): Environment =
@@ -40,7 +47,7 @@ proc get*(environment: Environment, name: Token): Object =
   ## `environment` environment. If the `name` variable is not defined in the
   ## current environment level, it will look in the outermost environments. If
   ## not found, it raises a `RuntimeError`.
-  if hasKey(environment.values, name.lexeme):
+  if not(isNil(environment.values)) and hasKey(environment.values, name.lexeme):
     result = environment.values[name.lexeme]
   elif not isNil(environment.enclosing):
     result = get(environment.enclosing, name)

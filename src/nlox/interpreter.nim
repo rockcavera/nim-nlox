@@ -387,7 +387,7 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
   define(interpreter.environment, stmt.name.lexeme, nil)
 
   if not isNil(stmt.superclass):
-    interpreter.environment = newEnvironment(interpreter.environment)
+    interpreter.environment = newEnvironment(interpreter.environment, 1)
 
     define(interpreter.environment, "super", superclass)
 

@@ -103,7 +103,7 @@ type
     enclosing*: Environment
       ## Reference to the outer level environment. For the global environment
       ## this is `nil`.
-    values*: Table[string, Object]
+    values*: TableRef[string, Object]
       ## Hash table that stores variable names and values.
 
   ParseError* = object of CatchableError

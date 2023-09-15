@@ -18,7 +18,7 @@ proc toString*(caller: LoxFunction): string =
 proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
   ## Returns a `LoxFunction`, which is an initializer, with a new environment,
   ## in which "this" is declared as a variable bound to `instance`.
-  let environment = newEnvironment(caller.closure)
+  let environment = newEnvironment(caller.closure, 1)
 
   define(environment, "this", instance)
 
@@ -30,7 +30,7 @@ import ./interpreter
 proc call*(caller: LoxFunction, interpreter: var Interpreter,
           arguments: seq[Object]): Object =
   ## Evaluates a `caller` and returns `Object`.
-  var environment = newEnvironment(caller.closure)
+  var environment = newEnvironment(caller.closure, len(caller.declaration.params))
 
   for i in 0 ..< len(caller.declaration.params):
     define(environment, caller.declaration.params[i].lexeme, arguments[i])
