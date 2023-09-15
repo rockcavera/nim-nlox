@@ -77,5 +77,9 @@ or:
 nimble test
 ```
 
+## nlox vs jlox benchmark
+visit [BENCHMARK.md](BENCHMARK.md)
+
+
 ## License
 All files are under the MIT license, with the exception of the .lox files located in the tests/scripts folder, which are under this [LICENSE](/tests/scripts/LICENSE) because they are third-party code, which can be accessed [here](https://github.com/munificent/craftinginterpreters/tree/master/test).
