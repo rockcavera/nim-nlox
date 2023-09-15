@@ -127,12 +127,12 @@ type
 
   LoxCallable* = ref object of Object
     ## An object for Lox calls.
-    arity*: proc (caller: LoxCallable): int
+    arity*: proc (caller: LoxCallable): int {.nimcall.}
       ## Procedure that returns the arity of the call.
     call*: proc (caller: LoxCallable, interpreter: var Interpreter,
-                 arguments: seq[Object]): Object
+                 arguments: seq[Object]): Object {.nimcall.}
       ## Procedure that evaluates the `LoxCallable` object and returns `Object`.
-    toString*: proc (caller: LoxCallable): string
+    toString*: proc (caller: LoxCallable): string {.nimcall.}
       ## Procedure that returns a `string` representation of the `LoxCallable`
       ## object
 
