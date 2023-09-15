@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[lists, sequtils, strutils, tables]
+import std/[lists, parseutils, sequtils, tables]
 
 # Internal imports
 import ./logger, ./token, ./types
@@ -140,8 +140,11 @@ proc number(scanner: var Scanner) =
     while (isDigit(peek(scanner))):
       discard advance(scanner)
 
-  addToken(scanner, parseFloat(subString(scanner.source, scanner.start,
-                                         scanner.current)))
+  var num: float
+
+  discard parseFloat(scanner.source, num, scanner.start)
+
+  addToken(scanner, num)
 
 proc isAlpha(c: char): bool =
   ## Returns `true` if character `c` is letter or underscore [A-Z_a-z].
