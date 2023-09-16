@@ -27,36 +27,47 @@ proc isTruthy(literal: Object): bool =
   else:
     result = true
 
+method equal(a: Object, b: Object): bool {.base.} =
+  raise newException(CatchableError, "Method without implementation override")
+
+method equal(a: Boolean, b: Object): bool =
+  if b of Boolean:
+    result = a.data == cast[Boolean](b).data
+
+method equal(a: Number, b: Object): bool =
+  if b of Number:
+    if isNaN(a.data):
+      result = isNaN(cast[Number](b).data)
+    else:
+      result = a.data == cast[Number](b).data
+
+method equal(a: String, b: Object): bool =
+  if b of String:
+    result = a.data == cast[String](b).data
+
+method equal(a: LoxInstance, b: Object): bool =
+  if b of LoxInstance:
+    result = a == cast[LoxInstance](b)
+
+method equal(a: LoxClass, b: Object): bool =
+  if b of LoxClass:
+    result = a == cast[LoxClass](b)
+
+method equal(a: LoxFunction, b: Object): bool =
+  if b of LoxFunction:
+    result = a == cast[LoxFunction](b)
+
+method equal(a: LoxCallable, b: Object): bool =
+  if b of LoxCallable:
+    result = a == cast[LoxCallable](b)
+
 proc isEqual(a: Object, b: Object): bool =
   ## Returns `true` if objects `a` and `b` are equal. Otherwise, it returns
   ## `false`.
   if isNil(a):
-    if isNil(b):
-      result = true
-  elif a of Number:
-    if b of Number:
-      if isNaN(cast[Number](a).data) and isNaN(cast[Number](b).data):
-        result = true
-      else:
-        result = cast[Number](a).data == cast[Number](b).data
-  elif a of Boolean:
-    if b of Boolean:
-      result = cast[Boolean](a).data == cast[Boolean](b).data
-  elif a of String:
-    if b of String:
-      result = String(a).data == String(b).data
-  elif a of LoxClass:
-    if b of LoxClass:
-      result = a == b
-  elif a of LoxFunction:
-    if b of LoxFunction:
-      result = a == b
-  elif a of LoxInstance:
-    if b of LoxInstance:
-      result = a == b
-  elif a of LoxCallable:
-    if b of LoxCallable:
-      result = a == b
+    result = isNil(b)
+  else:
+    result = equal(a, b)
 
 proc checkNumberOperand(operator: Token, operand: Object) =
   ## Checks if `operand` is a number, and if it is, it does nothing. Otherwise,
