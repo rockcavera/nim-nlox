@@ -7,7 +7,7 @@ import ./types
 # From loxclass
 
 proc newLoxClass*(name: string, superclass: LoxClass,
-                  methods: Table[string, LoxFunction]): LoxClass =
+                  methods: TableRef[string, LoxFunction]): LoxClass =
   ## Creates and returns a `LoxClass` with the name `name` and the methods
   ## `methods`.
   result = new(LoxClass)
@@ -154,4 +154,3 @@ proc newWhile*(condition: Expr, body: Stmt): While =
   result.body = body
 
   # End stmt
-

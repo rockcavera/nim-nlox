@@ -10,7 +10,10 @@ proc toString*(class: LoxClass): string = class.name
 proc findMethod*(class: LoxClass, name: string): LoxFunction =
   ## Returns a `LoxFunction` referring to the name `name` within the `LoxClass`
   ## `class`. If not found, returns `nil`.
-  result = getOrDefault(class.methods, name, nil)
+  result = nil
+
+  if not isNil(class.methods):
+    result = getOrDefault(class.methods, name, nil)
 
   if isNil(result) and not(isNil(class.superclass)):
     result = findMethod(class.superclass, name)

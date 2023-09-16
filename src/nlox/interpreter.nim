@@ -391,13 +391,16 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
 
     define(interpreter.environment, "super", superclass)
 
-  var methods = initTable[string, LoxFunction]()
+  var methods: TableRef[string, LoxFunction] = nil
 
-  for `method` in stmt.methods:
-    let function = newLoxFunction(`method`, interpreter.environment,
-                                  `method`.name.lexeme == "init")
+  if len(stmt.methods) > 0:
+    methods = newTable[string, LoxFunction](len(stmt.methods))
 
-    methods[`method`.name.lexeme] = function
+    for `method` in stmt.methods:
+      let function = newLoxFunction(`method`, interpreter.environment,
+                                    `method`.name.lexeme == "init")
+
+      methods[`method`.name.lexeme] = function
 
   let klass = newLoxClass(stmt.name.lexeme, cast[LoxClass](superclass), methods)
 

@@ -151,7 +151,7 @@ type
       ## Lox class name.
     superclass*: LoxClass
       ## Superclass of `LoxClass`
-    methods*: Table[string, LoxFunction]
+    methods*: TableRef[string, LoxFunction]
       ## Lox class methods.
 
   LoxInstance* = ref object of Object
