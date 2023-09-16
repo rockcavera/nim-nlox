@@ -23,6 +23,7 @@ proc newLoxInstance*(klass: LoxClass): LoxInstance =
   ## Creates and returns a `LoxInstance` with `klass`.
   result = new(LoxInstance)
   result.klass = klass
+  result.fields = nil
 
 # End loxinstance
 

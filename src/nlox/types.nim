@@ -158,7 +158,7 @@ type
     ## Object that stores Lox instance information.
     klass*: LoxClass
       ## Lox class bound to instance.
-    fields*: Table[string, Object]
+    fields*: TableRef[string, Object]
       ## Lox instance fields.
 
   Lox* = object

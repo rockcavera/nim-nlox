@@ -10,6 +10,9 @@ proc toString*(instance: LoxInstance): string =
 
 proc set*(instance: LoxInstance, name: Token, value: Object) =
   ## Defines `name` as `value` in `instance`.
+  if isNil(instance.fields):
+    instance.fields = newTable[string, Object](4)
+
   instance.fields[name.lexeme] = value
 
 # Delayed imports
@@ -17,7 +20,7 @@ import ./loxclass, ./loxfunction
 
 proc get*(instance: LoxInstance, name: Token): Object =
   ## Returns the `Object` bound to `name` in `instance`.
-  if hasKey(instance.fields, name.lexeme):
+  if not(isNil(instance.fields)) and hasKey(instance.fields, name.lexeme):
     result = instance.fields[name.lexeme]
   else:
     let `method` = instance.klass.findMethod(name.lexeme)
