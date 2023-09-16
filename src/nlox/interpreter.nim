@@ -23,7 +23,7 @@ proc isTruthy(literal: Object): bool =
   if isNil(literal):
     result = false
   elif literal of Boolean:
-    result = Boolean(literal).data
+    result = cast[Boolean](literal).data
   else:
     result = true
 
@@ -35,13 +35,13 @@ proc isEqual(a: Object, b: Object): bool =
       result = true
   elif a of Number:
     if b of Number:
-      if isNaN(Number(a).data) and isNaN(Number(b).data):
+      if isNaN(cast[Number](a).data) and isNaN(cast[Number](b).data):
         result = true
       else:
-        result = Number(a).data == Number(b).data
+        result = cast[Number](a).data == cast[Number](b).data
   elif a of Boolean:
     if b of Boolean:
-      result = Boolean(a).data == Boolean(b).data
+      result = cast[Boolean](a).data == cast[Boolean](b).data
   elif a of String:
     if b of String:
       result = String(a).data == String(b).data
@@ -120,7 +120,7 @@ method evaluate(expr: Unary, interpreter: var Interpreter): Object =
   of Minus:
     checkNumberOperand(expr.operator, right)
 
-    result = newNumber(-Number(right).data)
+    result = newNumber(-cast[Number](right).data)
   else:
     result = newObject()
 
@@ -138,26 +138,26 @@ method evaluate(expr: Binary, interpreter: var Interpreter): Object =
   of Greater:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newBoolean(Number(left).data > Number(right).data)
+    result = newBoolean(cast[Number](left).data > cast[Number](right).data)
   of GreaterEqual:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newBoolean(Number(left).data >= Number(right).data)
+    result = newBoolean(cast[Number](left).data >= cast[Number](right).data)
   of Less:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newBoolean(Number(left).data < Number(right).data)
+    result = newBoolean(cast[Number](left).data < cast[Number](right).data)
   of LessEqual:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newBoolean(Number(left).data <= Number(right).data)
+    result = newBoolean(cast[Number](left).data <= cast[Number](right).data)
   of Minus:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newNumber(Number(left).data - Number(right).data)
+    result = newNumber(cast[Number](left).data - cast[Number](right).data)
   of Plus:
     if left of Number and right of Number:
-      result = newNumber(Number(left).data + Number(right).data)
+      result = newNumber(cast[Number](left).data + cast[Number](right).data)
     elif left of String and right of String:
       result = newString(String(left).data & String(right).data)
     else:
@@ -166,11 +166,11 @@ method evaluate(expr: Binary, interpreter: var Interpreter): Object =
   of Slash:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newNumber(Number(left).data / Number(right).data)
+    result = newNumber(cast[Number](left).data / cast[Number](right).data)
   of Star:
     checkNumberOperands(expr.operator, left, right)
 
-    result = newNumber(Number(left).data * Number(right).data)
+    result = newNumber(cast[Number](left).data * cast[Number](right).data)
   else:
     result = newObject()
 
