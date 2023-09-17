@@ -6,7 +6,7 @@ import ./runtimeerror, ./types
 
 proc newEnvironment*(): Environment =
   ## Creates a new `Environment` with `enclosing` equal to `nil`.
-  Environment(enclosing: nil, values: newTable[string, Object](4))
+  Environment(enclosing: nil, values: newTable[string, Object](16))
 
 proc newEnvironment*(enclosing: Environment): Environment =
   ## Creates a new `Environment` and sets the outer environment to `enclosing`.
@@ -20,7 +20,7 @@ proc define*(environment: Environment, name: string, value: Object) =
   ## Defines in the environment `environment` the variable `name` with the value
   ## `value`.
   if isNil(environment.values):
-    environment.values = newTable[string, Object](4)
+    environment.values = newTable[string, Object](2)
 
   environment.values[name] = value
 

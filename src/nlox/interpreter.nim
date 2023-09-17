@@ -15,6 +15,7 @@ proc initInterpreter*(): Interpreter =
   ## Initializes an `Interpreter` object.
   result.globals = newEnvironment()
   result.environment = result.globals
+  result.locals = initTable[Expr, int](64)
 
   defineAllNativeFunctions(result)
 
@@ -313,7 +314,9 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
   ## Evaluate the `Class` statement.
   var superclass: Object = nil
 
-  if not isNil(stmt.superclass):
+  let notIsNilStmtSuperclass = not isNil(stmt.superclass)
+
+  if notIsNilStmtSuperclass:
     superclass = evaluate(stmt.superclass, interpreter)
 
     if not(superclass of LoxClass):
@@ -321,7 +324,7 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
 
   define(interpreter.environment, stmt.name.lexeme, nil)
 
-  if not isNil(stmt.superclass):
+  if notIsNilStmtSuperclass:
     interpreter.environment = newEnvironment(interpreter.environment, 1)
 
     define(interpreter.environment, "super", superclass)
@@ -339,7 +342,7 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
 
   let klass = newLoxClass(stmt.name.lexeme, cast[LoxClass](superclass), methods)
 
-  if not isNil(stmt.superclass):
+  if notIsNilStmtSuperclass:
     interpreter.environment = interpreter.environment.enclosing
 
   assign(interpreter.environment, stmt.name, klass)
