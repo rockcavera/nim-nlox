@@ -2,8 +2,8 @@
 import std/[math, strformat, strutils, tables]
 
 # Internal imports
-import ./environment, ./hashes2, ./initializers, ./literals, ./logger,
-       ./nativefunctions, ./runtimeerror, ./types
+import ./environment, ./hashes2, ./literals, ./logger, ./nativefunctions,
+       ./runtimeerror, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -105,35 +105,21 @@ proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
   finally:
     interpreter.environment = previous
 
-# Delayed imports
-import ./loxfunction # The `loxfunction` module calls `executeBlock()`
-
 method evaluate(expr: Expr, interpreter: var Interpreter): Object {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method evaluate(expr: Literal, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Literal` expression.
-  expr.value
+method evaluate(expr: Assign, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of an `Assign` expression.
+  result = evaluate(expr.value, interpreter)
 
-method evaluate(expr: Grouping, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Grouping` expression.
-  evaluate(expr.expression, interpreter)
+  let distance = getOrDefault(interpreter.locals, expr, -1)
 
-method evaluate(expr: Unary, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of an `Unary` expression.
-  let right = evaluate(expr.right, interpreter)
-
-  case expr.operator.kind
-  of Bang:
-    result = newBoolean(not isTruthy(right))
-  of Minus:
-    checkNumberOperand(expr.operator, right)
-
-    result = newNumber(-cast[Number](right).data)
+  if distance == -1:
+    assign(interpreter.globals, expr.name, result)
   else:
-    result = newObject()
+    assignAt(interpreter.environment, distance, expr.name, result)
 
 method evaluate(expr: Binary, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of an `Binary` expression.
@@ -185,20 +171,46 @@ method evaluate(expr: Binary, interpreter: var Interpreter): Object =
   else:
     result = newObject()
 
-method evaluate(expr: Variable, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Variable` expression.
-  lookUpVariable(interpreter, expr.name, expr)
+method evaluate(expr: Call, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Call` expression.
+  let callee = evaluate(expr.callee, interpreter)
 
-method evaluate(expr: Assign, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of an `Assign` expression.
-  result = evaluate(expr.value, interpreter)
+  var arguments = newSeqOfCap[Object](len(expr.arguments))
 
-  let distance = getOrDefault(interpreter.locals, expr, -1)
+  for argument in expr.arguments:
+    add(arguments, evaluate(argument, interpreter))
 
-  if distance == -1:
-    assign(interpreter.globals, expr.name, result)
+  if callee of LoxCallable:
+    let function = cast[LoxCallable](callee)
+
+    if len(arguments) != function.arity(function):
+      raise newRuntimeError(expr.paren,
+                            fmt"Expected {function.arity(function)} arguments" &
+                            fmt" but got {len(arguments)}.")
+
+    result = function.call(function, interpreter, arguments)
   else:
-    assignAt(interpreter.environment, distance, expr.name, result)
+    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
+
+# Delayed imports
+import ./loxinstance
+
+method evaluate(expr: Get, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Get` expression.
+  let obj = evaluate(expr.obj, interpreter)
+
+  if obj of LoxInstance:
+    result = get(cast[LoxInstance](obj), expr.name)
+  else:
+    raise newRuntimeError(expr.name, "Only instances have properties.")
+
+method evaluate(expr: Grouping, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Grouping` expression.
+  evaluate(expr.expression, interpreter)
+
+method evaluate(expr: Literal, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Literal` expression.
+  expr.value
 
 method evaluate(expr: Logical, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Logical` expression.
@@ -213,48 +225,19 @@ method evaluate(expr: Logical, interpreter: var Interpreter): Object =
 
     result = evaluate(expr.right, interpreter)
 
-# Delayed imports
-import ./loxclass
+method evaluate(expr: Set, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Set` expression.
+  let obj = evaluate(expr.obj, interpreter)
 
-method evaluate(expr: Call, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Call` expression.
-  let callee = evaluate(expr.callee, interpreter)
+  if obj of LoxInstance:
+    result = evaluate(expr.value, interpreter)
 
-  var arguments = newSeqOfCap[Object](len(expr.arguments))
-
-  for argument in expr.arguments:
-    add(arguments, evaluate(argument, interpreter))
-
-  # use method?
-  if callee of LoxClass:
-    let class = cast[LoxClass](callee)
-
-    if len(arguments) != arity(class):
-      raise newRuntimeError(expr.paren,
-                            fmt"Expected {arity(class)} arguments but got " &
-                            fmt"{len(arguments)}.")
-
-    result = call(class, interpreter, arguments)
-  elif callee of LoxFunction:
-    let function = cast[LoxFunction](callee)
-
-    if len(arguments) != arity(function):
-      raise newRuntimeError(expr.paren,
-                            fmt"Expected {arity(function)} arguments but got " &
-                            fmt"{len(arguments)}.")
-
-    result = call(function, interpreter, arguments)
-  elif callee of LoxCallable:
-    let function = cast[LoxCallable](callee)
-
-    if len(arguments) != function.arity(function):
-      raise newRuntimeError(expr.paren,
-                            fmt"Expected {function.arity(function)} arguments" &
-                            fmt" but got {len(arguments)}.")
-
-    result = function.call(function, interpreter, arguments)
+    set(cast[LoxInstance](obj), expr.name, result)
   else:
-    raise newRuntimeError(expr.paren, "Can only call functions and classes.")
+    raise newRuntimeError(expr.name, "Only instances have fields.")
+
+# Delayed imports
+import ./loxclass, ./loxfunction
 
 method evaluate(expr: Super, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Super` expression.
@@ -276,42 +259,29 @@ method evaluate(expr: This, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `This` expression.
   lookUpVariable(interpreter, expr.keyword, expr)
 
-# Delayed imports
-import ./loxinstance
+method evaluate(expr: Unary, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of an `Unary` expression.
+  let right = evaluate(expr.right, interpreter)
 
-method evaluate(expr: Get, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Get` expression.
-  let obj = evaluate(expr.obj, interpreter)
+  case expr.operator.kind
+  of Bang:
+    result = newBoolean(not isTruthy(right))
+  of Minus:
+    checkNumberOperand(expr.operator, right)
 
-  if obj of LoxInstance:
-    result = get(cast[LoxInstance](obj), expr.name)
+    result = newNumber(-cast[Number](right).data)
   else:
-    raise newRuntimeError(expr.name, "Only instances have properties.")
+    result = newObject()
 
-method evaluate(expr: Set, interpreter: var Interpreter): Object =
-  ## Returns a `Object` from the evaluation of a `Set` expression.
-  let obj = evaluate(expr.obj, interpreter)
-
-  if obj of LoxInstance:
-    result = evaluate(expr.value, interpreter)
-
-    set(cast[LoxInstance](obj), expr.name, result)
-  else:
-    raise newRuntimeError(expr.name, "Only instances have fields.")
+method evaluate(expr: Variable, interpreter: var Interpreter): Object =
+  ## Returns a `Object` from the evaluation of a `Variable` expression.
+  lookUpVariable(interpreter, expr.name, expr)
 
 proc stringify(literal: Object): string =
   ## Returns a `string` of `literal`. This is different from the `$` operator
   ## for the `Object` type.
   if isNil(literal):
     result = "nil"
-  elif literal of LoxClass:
-    let class = cast[LoxClass](literal)
-
-    result = toString(class)
-  elif literal of LoxFunction:
-    let function = cast[LoxFunction](literal)
-
-    result = toString(function)
   elif literal of LoxCallable:
     let function = cast[LoxCallable](literal)
 
@@ -334,56 +304,10 @@ method evaluate(stmt: Stmt, interpreter: var Interpreter) {.base.} =
   ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
-method evaluate(stmt: Expression, interpreter: var Interpreter) =
-  ## Evaluate the `Expression` statement.
-  discard evaluate(stmt.expression, interpreter)
-
-method evaluate(stmt: Print, interpreter: var Interpreter) =
-  ## Evaluate the `Print` statement.
-  let value = evaluate(stmt.expression, interpreter)
-
-  echo stringify(value)
-
-method evaluate(stmt: Var, interpreter: var Interpreter) =
-  ## Evaluate the `Var` statement.
-  var value = newObject()
-
-  if not isNil(stmt.initializer):
-    value = evaluate(stmt.initializer, interpreter)
-
-  define(interpreter.environment, stmt.name.lexeme, value)
-
 method evaluate(stmt: Block, interpreter: var Interpreter) =
   ## Evaluate the `Block` statement.
   executeBlock(interpreter, stmt.statements,
                newEnvironment(interpreter.environment))
-
-method evaluate(stmt: If, interpreter: var Interpreter) =
-  ## Evaluate the `If` statement.
-  if isTruthy(evaluate(stmt.condition, interpreter)):
-    execute(interpreter, stmt.thenBranch)
-  elif not isNil(stmt.elseBranch):
-    execute(interpreter, stmt.elseBranch)
-
-method evaluate(stmt: While, interpreter: var Interpreter) =
-  ## Evaluate the `While` statement.
-  while isTruthy(evaluate(stmt.condition, interpreter)):
-    execute(interpreter, stmt.body)
-
-method evaluate(stmt: types.Return, interpreter: var Interpreter) =
-  ## Evaluate the `Return` statement.
-  var value: Object = nil
-
-  if not isNil(stmt.value):
-    value = evaluate(stmt.value, interpreter)
-
-  raise newReturn(value)
-
-method evaluate(stmt: Function, interpreter: var Interpreter) =
-  ## Evaluate the `Function` statement.
-  let function = newLoxFunction(stmt, interpreter.environment, false)
-
-  define(interpreter.environment, stmt.name.lexeme, function)
 
 method evaluate(stmt: Class, interpreter: var Interpreter) =
   ## Evaluate the `Class` statement.
@@ -419,6 +343,52 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
     interpreter.environment = interpreter.environment.enclosing
 
   assign(interpreter.environment, stmt.name, klass)
+
+method evaluate(stmt: Expression, interpreter: var Interpreter) =
+  ## Evaluate the `Expression` statement.
+  discard evaluate(stmt.expression, interpreter)
+
+method evaluate(stmt: Function, interpreter: var Interpreter) =
+  ## Evaluate the `Function` statement.
+  let function = newLoxFunction(stmt, interpreter.environment, false)
+
+  define(interpreter.environment, stmt.name.lexeme, function)
+
+method evaluate(stmt: If, interpreter: var Interpreter) =
+  ## Evaluate the `If` statement.
+  if isTruthy(evaluate(stmt.condition, interpreter)):
+    execute(interpreter, stmt.thenBranch)
+  elif not isNil(stmt.elseBranch):
+    execute(interpreter, stmt.elseBranch)
+
+method evaluate(stmt: Print, interpreter: var Interpreter) =
+  ## Evaluate the `Print` statement.
+  let value = evaluate(stmt.expression, interpreter)
+
+  echo stringify(value)
+
+method evaluate(stmt: types.Return, interpreter: var Interpreter) =
+  ## Evaluate the `Return` statement.
+  var value: Object = nil
+
+  if not isNil(stmt.value):
+    value = evaluate(stmt.value, interpreter)
+
+  raise newReturn(value)
+
+method evaluate(stmt: Var, interpreter: var Interpreter) =
+  ## Evaluate the `Var` statement.
+  var value = newObject()
+
+  if not isNil(stmt.initializer):
+    value = evaluate(stmt.initializer, interpreter)
+
+  define(interpreter.environment, stmt.name.lexeme, value)
+
+method evaluate(stmt: While, interpreter: var Interpreter) =
+  ## Evaluate the `While` statement.
+  while isTruthy(evaluate(stmt.condition, interpreter)):
+    execute(interpreter, stmt.body)
 
 proc execute(interpreter: var Interpreter, stmt: Stmt) =
   ## Helper procedure to evaluate `stmt`.

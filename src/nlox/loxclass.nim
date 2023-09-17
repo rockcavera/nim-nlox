@@ -2,9 +2,13 @@
 import std/tables
 
 # Internal imports
-import ./initializers, ./types
+import ./types
 
-proc toString*(class: LoxClass): string = class.name
+# Forward declaration
+proc call(class: LoxCallable, interpreter: var Interpreter,
+          arguments: seq[Object]): Object
+
+proc toString(class: LoxCallable): string = cast[LoxClass](class).name
   ## Returns a representation of `class` in `string`.
 
 proc findMethod*(class: LoxClass, name: string): LoxFunction =
@@ -18,26 +22,41 @@ proc findMethod*(class: LoxClass, name: string): LoxFunction =
   if isNil(result) and not(isNil(class.superclass)):
     result = findMethod(class.superclass, name)
 
-# Delayed imports
-import ./loxfunction
-
-proc arity*(class: LoxClass): int =
+proc arity(class: LoxCallable): int =
   ## Returns the arity of `class`
-  let initializer = findMethod(class, "init")
+  let initializer = findMethod(cast[LoxClass](class), "init")
 
   if isNil(initializer):
     result = 0
   else:
-    result = loxfunction.arity(initializer)
+    result = initializer.arity(initializer)
 
-proc call*(class: LoxClass, interpreter: var Interpreter,
-           arguments: seq[Object]): Object =
+proc newLoxClass*(name: string, superclass: LoxClass,
+                  methods: TableRef[string, LoxFunction]): LoxClass =
+  ## Creates and returns a `LoxClass` with the name `name` and the methods
+  ## `methods`.
+  result = new(LoxClass)
+  result.name = name
+  result.superclass = superclass
+  result.methods = methods
+  result.call = call
+  result.arity = arity
+  result.toString = toString
+
+# Delayed imports
+import ./loxfunction, ./loxinstance
+
+proc call(class: LoxCallable, interpreter: var Interpreter,
+          arguments: seq[Object]): Object =
   ## Returns a `LoxInstance` of `class` and evaluates the `init` method, if
   ## present in `class.`
+  let class = cast[LoxClass](class)
+
   result = newLoxInstance(class)
 
   let initializer = findMethod(class, "init")
 
   if not isNil(initializer):
-    discard loxfunction.call(`bind`(initializer, cast[LoxInstance](result)),
-                             interpreter, arguments)
+    let function = `bind`(initializer, cast[LoxInstance](result))
+
+    discard function.call(function, interpreter, arguments)

@@ -63,7 +63,7 @@ proc defineConstructor(writer: FileStream, kind: TypeDescription) =
   for field in kind.fields:
     writeLine(writer, indent(fmt"result.{field.name} = {field.name}", 2))
 
-proc defineAst(typesFS, initializersFS: FileStream, baseName: string, types: seq[string]) =
+proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[string]) =
   writeLine(typesFS, indent(fmt"# From {toLower(baseName)}" , 2))
   writeLine(typesFS, "")
   writeLine(typesFS, indent(fmt"{baseName}* = ref object of RootObj" , 2))
@@ -89,16 +89,18 @@ proc defineAst(typesFS, initializersFS: FileStream, baseName: string, types: seq
   writeLine(typesFS, "")
 
   # Defining the constructors
-  writeLine(initializersFS, indent(fmt"# From {toLower(baseName)}" , 2))
-  writeLine(initializersFS, "")
+  var baseNameFS = newFileStream(outputDir / (toLower(baseName) & ".nim"), fmWrite)
+
+  writeLine(baseNameFS, fmt"# Internal imports")
+  writeLine(baseNameFS, fmt"import ./types")
+  writeLine(baseNameFS, "")
 
   for kind in allTypes:
-    defineConstructor(initializersFS, kind)
+    defineConstructor(baseNameFS, kind)
 
-    writeLine(initializersFS, "")
+    writeLine(baseNameFS, "")
 
-  writeLine(initializersFS, indent(fmt"# End {toLower(baseName)}" , 2))
-  writeLine(initializersFS, "")
+  close(baseNameFS)
 
 proc main*(args: seq[string]) =
   if len(args) != 1:
@@ -107,13 +109,10 @@ proc main*(args: seq[string]) =
   let
     outputDir = args[0]
     typesFile = outputDir / "types.nim"
-    initializersFile = outputDir / "initializers.nim"
 
-  var
-    typesFS = truncateFile(typesFile)
-    initializersFS = truncateFile(initializersFile)
+  var typesFS = truncateFile(typesFile)
 
-  defineAst(typesFS, initializersFS, "Expr", @[
+  defineAst(typesFS, outputDir, "Expr", @[
     "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
     "Call     : Expr callee, Token paren, seq[Expr] arguments",
@@ -127,7 +126,7 @@ proc main*(args: seq[string]) =
     "Unary    : Token operator, Expr right",
     "Variable : Token name"])
 
-  defineAst(typesFS, initializersFS, "Stmt", @[
+  defineAst(typesFS, outputDir, "Stmt", @[
     "Block      : seq[Stmt] statements",
     "Class      : Token name, Variable superclass," &
                 " seq[Function] methods",
@@ -142,6 +141,5 @@ proc main*(args: seq[string]) =
     "While      : Expr condition, Stmt body"])
 
   close(typesFS)
-  close(initializersFS)
 
 main(commandLineParams())

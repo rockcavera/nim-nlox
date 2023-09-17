@@ -2,18 +2,35 @@
 import std/strformat
 
 # Internal imports
-import ./environment, ./initializers, ./types
+import ./environment, ./types
 
 # Internal import of module with keyword name
 import "./return"
 
-proc arity*(caller: LoxFunction): int =
-  ## Returns the arity of `caller`
-  len(caller.declaration.params)
+# Forward declaration
+proc call(caller: LoxCallable, interpreter: var Interpreter,
+          arguments: seq[Object], ): Object
 
-proc toString*(caller: LoxFunction): string =
+proc arity(caller: LoxCallable): int =
+  ## Returns the arity of `caller`
+  len(cast[LoxFunction](caller).declaration.params)
+
+proc toString(caller: LoxCallable): string =
   ## Returns a representation of `caller` in `string`.
-  fmt"<fn {caller.declaration.name.lexeme}>"
+  fmt"<fn {cast[LoxFunction](caller).declaration.name.lexeme}>"
+
+proc newLoxFunction*(declaration: Function, closure: Environment,
+                     isInitializer: bool): LoxFunction =
+  ## Create a `LoxFunction` with `declaration` and the current environment
+  ## `closure`. If the `isInitializer` parameter is `true`, it informs that the
+  ## `LoxFunction` is an initializer.
+  result = new(LoxFunction)
+  result.declaration = declaration
+  result.closure = closure
+  result.isInitializer = isInitializer
+  result.call = call
+  result.arity = arity
+  result.toString = toString
 
 proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
   ## Returns a `LoxFunction`, which is an initializer, with a new environment,
@@ -27,10 +44,13 @@ proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
 # Delayed imports
 import ./interpreter
 
-proc call*(caller: LoxFunction, interpreter: var Interpreter,
-          arguments: seq[Object]): Object =
+proc call(caller: LoxCallable, interpreter: var Interpreter,
+          arguments: seq[Object], ): Object =
   ## Evaluates a `caller` and returns `Object`.
-  var environment = newEnvironment(caller.closure, len(caller.declaration.params))
+  let caller = cast[LoxFunction](caller)
+
+  var environment = newEnvironment(caller.closure,
+                                   len(caller.declaration.params))
 
   for i in 0 ..< len(caller.declaration.params):
     define(environment, caller.declaration.params[i].lexeme, arguments[i])

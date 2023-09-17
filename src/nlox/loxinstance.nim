@@ -4,6 +4,12 @@ import std/[strformat, tables]
 # Internal imports
 import ./runtimeerror, ./types
 
+proc newLoxInstance*(klass: LoxClass): LoxInstance =
+  ## Creates and returns a `LoxInstance` with `klass`.
+  result = new(LoxInstance)
+  result.klass = klass
+  result.fields = nil
+
 proc toString*(instance: LoxInstance): string =
   ## Returns a representation of `instance` in `string`.
   result = fmt"{instance.klass.name} instance"
@@ -23,7 +29,7 @@ proc get*(instance: LoxInstance, name: Token): Object =
   if not(isNil(instance.fields)) and hasKey(instance.fields, name.lexeme):
     result = instance.fields[name.lexeme]
   else:
-    let `method` = instance.klass.findMethod(name.lexeme)
+    let `method` = findMethod(instance.klass, name.lexeme)
 
     if isNil(`method`):
       raise newRuntimeError(name, fmt"Undefined property '{name.lexeme}'.")
