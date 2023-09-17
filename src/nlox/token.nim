@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./literals, ./types
+import ./literals, ./tostringobject, ./types
 
 proc initToken*(kind: TokenType): Token =
   ## Initializes a `Token` as `TokenType`.`kind`. The `lexeme` and `line` fields
@@ -22,6 +22,13 @@ proc initTokenString*(stringLit: string): Token =
   ## `-1`, respectively.
   Token(kind: String, literal: newString(stringLit), lexeme: "",
         line: -1)
+
+proc `$`(literal: Object): string =
+  ## Stringify operator that returns a string from the `Object` object.
+  if isNil(literal): # prevents `NilAccessDefect`
+    result = "null"
+  else:
+    result = toString(literal, false)
 
 proc toString(token: Token): string =
   ## Returns a string from the `Token` object.

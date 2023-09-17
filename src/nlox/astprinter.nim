@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./literals, ./types
+import ./tostringobject, ./types
 
 # Forward declaration
 proc parenthesize(name: string, exprs: varargs[Expr]): string
@@ -25,7 +25,7 @@ method print*(expr: Literal): string =
   if isNil(expr.value):
     result = "nil"
   else:
-    result = $expr.value
+    result = toString(expr.value, false)
 
 method print*(expr: Unary): string =
   ## Returns a `string` representing the expression `expr`.

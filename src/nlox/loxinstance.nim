@@ -8,10 +8,6 @@ proc newLoxInstance*(klass: LoxClass): LoxInstance =
   ## Creates and returns a `LoxInstance` with `klass`.
   LoxInstance(klass: klass, fields: nil)
 
-proc toString*(instance: LoxInstance): string =
-  ## Returns a representation of `instance` in `string`.
-  result = fmt"{instance.klass.name} instance"
-
 proc set*(instance: LoxInstance, name: Token, value: Object) =
   ## Defines `name` as `value` in `instance`.
   if isNil(instance.fields):

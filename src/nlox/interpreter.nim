@@ -1,9 +1,9 @@
 # Stdlib imports
-import std/[math, strformat, strutils, tables]
+import std/[math, strformat, tables]
 
 # Internal imports
 import ./environment, ./hashes2, ./literals, ./logger, ./nativefunctions,
-       ./runtimeerror, ./types
+       ./runtimeerror, ./tostringobject, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -278,27 +278,13 @@ method evaluate(expr: Variable, interpreter: var Interpreter): Object =
   ## Returns a `Object` from the evaluation of a `Variable` expression.
   lookUpVariable(interpreter, expr.name, expr)
 
-proc stringify(literal: Object): string =
-  ## Returns a `string` of `literal`. This is different from the `$` operator
+proc stringify(obj: Object): string =
+  ## Returns a `string` of `obj`. This is different from the `$` operator
   ## for the `Object` type.
-  if isNil(literal):
+  if isNil(obj):
     result = "nil"
-  elif literal of LoxCallable:
-    let function = cast[LoxCallable](literal)
-
-    result = function.toString(function)
-  elif literal of LoxInstance:
-    let instance = cast[LoxInstance](literal)
-
-    result = toString(instance)
   else:
-    result = $literal
-
-    if literal of Number:
-      if endsWith(result, ".0"):
-        setLen(result, len(result) - 2)
-      elif result == "nan":
-        result = "NaN"
+    result = toString(obj, true)
 
 method evaluate(stmt: Stmt, interpreter: var Interpreter) {.base.} =
   ## Base method that raises `CatchableError` exception when `stmt` has not had
