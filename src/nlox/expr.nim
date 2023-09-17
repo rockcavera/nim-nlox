@@ -2,62 +2,38 @@
 import ./types
 
 proc newAssign*(name: Token, value: Expr): Assign =
-  result = new(Assign)
-  result.name = name
-  result.value = value
+  Assign(name: name,value: value)
 
 proc newBinary*(left: Expr, operator: Token, right: Expr): Binary =
-  result = new(Binary)
-  result.left = left
-  result.operator = operator
-  result.right = right
+  Binary(left: left,operator: operator,right: right)
 
 proc newCall*(callee: Expr, paren: Token, arguments: seq[Expr]): Call =
-  result = new(Call)
-  result.callee = callee
-  result.paren = paren
-  result.arguments = arguments
+  Call(callee: callee,paren: paren,arguments: arguments)
 
 proc newGet*(obj: Expr, name: Token): Get =
-  result = new(Get)
-  result.obj = obj
-  result.name = name
+  Get(obj: obj,name: name)
 
 proc newGrouping*(expression: Expr): Grouping =
-  result = new(Grouping)
-  result.expression = expression
+  Grouping(expression: expression)
 
 proc newLiteral*(value: Object): Literal =
-  result = new(Literal)
-  result.value = value
+  Literal(value: value)
 
 proc newLogical*(left: Expr, operator: Token, right: Expr): Logical =
-  result = new(Logical)
-  result.left = left
-  result.operator = operator
-  result.right = right
+  Logical(left: left,operator: operator,right: right)
 
 proc newSet*(obj: Expr, name: Token, value: Expr): Set =
-  result = new(Set)
-  result.obj = obj
-  result.name = name
-  result.value = value
+  Set(obj: obj,name: name,value: value)
 
 proc newSuper*(keyword: Token, `method`: Token): Super =
-  result = new(Super)
-  result.keyword = keyword
-  result.`method` = `method`
+  Super(keyword: keyword,`method`: `method`)
 
 proc newThis*(keyword: Token): This =
-  result = new(This)
-  result.keyword = keyword
+  This(keyword: keyword)
 
 proc newUnary*(operator: Token, right: Expr): Unary =
-  result = new(Unary)
-  result.operator = operator
-  result.right = right
+  Unary(operator: operator,right: right)
 
 proc newVariable*(name: Token): Variable =
-  result = new(Variable)
-  result.name = name
+  Variable(name: name)
 

@@ -58,10 +58,15 @@ proc fieldsToParamStr(fields: seq[FieldDescription]): string =
 
 proc defineConstructor(writer: FileStream, kind: TypeDescription) =
   writeLine(writer, fmt"proc new{kind.name}*({fieldsToParamStr(kind.fields)}): {kind.name} =")
-  writeLine(writer, indent(fmt"result = new({kind.name})", 2))
+
+  var constructor = fmt"  {kind.name}("
 
   for field in kind.fields:
-    writeLine(writer, indent(fmt"result.{field.name} = {field.name}", 2))
+    add(constructor, fmt"{field.name}: {field.name},")
+
+  constructor[^1] = ')'
+
+  writeLine(writer, constructor)
 
 proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[string]) =
   writeLine(typesFS, indent(fmt"# From {toLower(baseName)}" , 2))

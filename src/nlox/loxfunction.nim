@@ -24,13 +24,9 @@ proc newLoxFunction*(declaration: Function, closure: Environment,
   ## Create a `LoxFunction` with `declaration` and the current environment
   ## `closure`. If the `isInitializer` parameter is `true`, it informs that the
   ## `LoxFunction` is an initializer.
-  result = new(LoxFunction)
-  result.declaration = declaration
-  result.closure = closure
-  result.isInitializer = isInitializer
-  result.call = call
-  result.arity = arity
-  result.toString = toString
+  LoxFunction(arity: arity, call: call, toString: toString,
+              declaration: declaration, closure: closure,
+              isInitializer: isInitializer)
 
 proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
   ## Returns a `LoxFunction`, which is an initializer, with a new environment,

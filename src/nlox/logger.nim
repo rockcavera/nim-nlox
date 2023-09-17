@@ -27,7 +27,7 @@ proc error*(lox: var Lox, line: int, message: string) =
   ## `message`.
   report(lox, line, "", message)
 
-proc runtimeError*(lox: var Lox, error: ref RuntimeError) =
+proc runtimeError*(lox: var Lox, error: RuntimeError) =
   ## Reports a runtime error by providing the line of code that was executing
   ## when the error occurred.
   echo fmt"{error.msg}{'\n'}[line {error.token.line}]"

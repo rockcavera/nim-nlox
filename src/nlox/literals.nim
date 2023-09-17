@@ -3,22 +3,19 @@ import ./types
 
 proc newObject*(): Object =
   ## Create a null `Object`.
-  result = nil
+  discard
 
 proc newBoolean*(data: bool): Boolean =
   ## Creates a `Boolean` object with the value of `data`
-  result = new(Boolean)
-  result.data = data
+  Boolean(data: data)
 
 proc newNumber*(data: float): Number =
   ## creates a `Number` object with the value of `data`
-  result = new(Number)
-  result.data = data
+  Number(data: data)
 
 proc newString*(data: string): String =
   ## Creates a `String` object with the value of `data`
-  result = new(String)
-  result.data = data
+  String(data: data)
 
 method toString(literal: Object): string {.base.} =
   ## Base method that raises `CatchableError` exception when `literal` has not

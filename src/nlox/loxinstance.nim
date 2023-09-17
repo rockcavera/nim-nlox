@@ -6,9 +6,7 @@ import ./runtimeerror, ./types
 
 proc newLoxInstance*(klass: LoxClass): LoxInstance =
   ## Creates and returns a `LoxInstance` with `klass`.
-  result = new(LoxInstance)
-  result.klass = klass
-  result.fields = nil
+  LoxInstance(klass: klass, fields: nil)
 
 proc toString*(instance: LoxInstance): string =
   ## Returns a representation of `instance` in `string`.

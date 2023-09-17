@@ -35,11 +35,8 @@ proc clockToString(caller: LoxCallable): string = "<native fn>"
 
 proc defineClock(interpreter: var Interpreter) =
   ## Defines the built-in function `clock()`.
-  var clock = new(LoxCallable)
-
-  clock.arity = clockArity
-  clock.call = clockCall
-  clock.toString = clockToString
+  let clock = LoxCallable(arity: clockArity, call: clockCall,
+                          toString: clockToString)
 
   define(interpreter.globals, "clock", clock)
 

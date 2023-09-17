@@ -109,7 +109,7 @@ type
   ParseError* = object of CatchableError
     ## Raised if a parsing error occurred.
 
-  RuntimeError* = object of CatchableError
+  RuntimeError* = ref object of CatchableError
     ## Raised if a runtime error occurred.
     token*: Token
       ## The `Token` is used to tell which line of code was running when the

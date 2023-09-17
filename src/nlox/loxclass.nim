@@ -35,13 +35,8 @@ proc newLoxClass*(name: string, superclass: LoxClass,
                   methods: TableRef[string, LoxFunction]): LoxClass =
   ## Creates and returns a `LoxClass` with the name `name` and the methods
   ## `methods`.
-  result = new(LoxClass)
-  result.name = name
-  result.superclass = superclass
-  result.methods = methods
-  result.call = call
-  result.arity = arity
-  result.toString = toString
+  LoxClass(arity: arity, call: call, toString: toString, name: name,
+           superclass: superclass, methods: methods)
 
 # Delayed imports
 import ./loxfunction, ./loxinstance
