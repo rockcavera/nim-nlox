@@ -279,8 +279,7 @@ method evaluate(expr: Variable, interpreter: var Interpreter): Object =
   lookUpVariable(interpreter, expr.name, expr)
 
 proc stringify(obj: Object): string =
-  ## Returns a `string` of `obj`. This is different from the `$` operator
-  ## for the `Object` type.
+  ## Returns a `string` of `obj`.
   if isNil(obj):
     result = "nil"
   else:

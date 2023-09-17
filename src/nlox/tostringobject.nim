@@ -1,10 +1,12 @@
+# Stdlib imports
 import std/[math, strformat, strutils]
 
+# Internal imports
 import ./types
 
 method toString*(obj: Object, isEvaluation: bool): string {.base.} =
-  ## Base method that raises `CatchableError` exception when `obj` has not
-  ## had its method implemented.
+  ## Base method that raises `CatchableError` exception when `obj` has not had
+  ## its method implemented.
   raise newException(CatchableError, "Method without implementation override")
 
 method toString*(obj: Boolean, isEvaluation: bool): string =

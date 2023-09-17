@@ -35,7 +35,7 @@ proc initResolver*(): Resolver =
 
 proc beginScope(resolver: var Resolver) =
   ## Begins a scope at `resolver`.
-  add(resolver.scopes, initTable[string, bool]())
+  add(resolver.scopes, initTable[string, bool](8))
 
 proc endScope(resolver: var Resolver) =
   ## Ends a scope in `resolver`.

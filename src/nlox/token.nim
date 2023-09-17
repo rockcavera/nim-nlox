@@ -24,7 +24,7 @@ proc initTokenString*(stringLit: string): Token =
         line: -1)
 
 proc `$`(literal: Object): string =
-  ## Stringify operator that returns a string from the `Object` object.
+  ## Stringify operator that returns a string from the `Object`.
   if isNil(literal): # prevents `NilAccessDefect`
     result = "null"
   else:
