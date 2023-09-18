@@ -17,7 +17,7 @@ type
     ## Stores resolver information.
     # interpreter: Interpreter # It is not necessary. The `Lox` state is already
     # passed.
-    scopes: seq[Table[string, bool]] # No stack collection in stdlib
+    scopes: seq[TableRef[string, bool]] # No stack collection in stdlib
       ## A stack of scopes.
     currentFunction: FunctionType
       ## Current function type.
@@ -32,10 +32,18 @@ proc initResolver*(): Resolver =
   # result.interpreter = interpreter
   result.currentFunction = FunctionType.None
   result.currentClass = ClassType.None
+  result.scopes = newSeqOfCap[TableRef[string, bool]](8)
 
 proc beginScope(resolver: var Resolver) =
   ## Begins a scope at `resolver`.
-  add(resolver.scopes, initTable[string, bool](8))
+  add(resolver.scopes, nil)
+
+proc beginScope(resolver: var Resolver, size: int) =
+  ## Begins a scope with size `size` in `resolver`.
+  add(resolver.scopes, nil)
+
+  if size > 0:
+    resolver.scopes[^1] = newTable[string, bool](size)
 
 proc endScope(resolver: var Resolver) =
   ## Ends a scope in `resolver`.
@@ -45,7 +53,9 @@ proc declare(lox: var Lox, resolver: var Resolver, name: Token) =
   ## Declares the name variable `name` in the outermost scope of `resolver`. If
   ## the same variable is declared in the same scope, an error will be reported.
   if len(resolver.scopes) > 0:
-    if hasKey(resolver.scopes[^1], name.lexeme):
+    if isNil(resolver.scopes[^1]):
+      resolver.scopes[^1] = newTable[string, bool](2)
+    elif hasKey(resolver.scopes[^1], name.lexeme):
       error(lox, name, "Already a variable with this name in this scope.")
 
     resolver.scopes[^1][name.lexeme] = false
@@ -62,7 +72,8 @@ proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr,
   let hi = high(resolver.scopes)
 
   for i in countdown(hi, 0):
-    if hasKey(resolver.scopes[i], name.lexeme):
+    if not(isNil(resolver.scopes[i])) and
+       hasKey(resolver.scopes[i], name.lexeme):
       resolve(lox, expr, hi - i)
       break
 
@@ -73,7 +84,7 @@ proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function,
 
   resolver.currentFunction = kind
 
-  beginScope(resolver)
+  beginScope(resolver, len(function.params))
 
   for param in function.params:
     declare(lox, resolver, param)
@@ -94,7 +105,7 @@ method resolve(expr: Expr, resolver: var Resolver, lox: var Lox) {.base.} =
 method resolve(expr: Variable, resolver: var Resolver, lox: var Lox) =
   ## Resolves a `Variable` expression. Reports an error if the variable is
   ## declared but not defined.
-  if not(len(resolver.scopes) == 0) and
+  if not(len(resolver.scopes) == 0) and not(isNil(resolver.scopes[^1])) and
      hasKey(resolver.scopes[^1], expr.name.lexeme) and
      (resolver.scopes[^1][expr.name.lexeme] == false):
     error(lox, expr.name, "Can't read local variable in its own initializer.")
@@ -186,7 +197,9 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
   define(resolver, stmt.name)
 
-  if not isNil(stmt.superclass):
+  let notIsNilStmtSuperclass = not isNil(stmt.superclass)
+
+  if notIsNilStmtSuperclass:
     if stmt.name.lexeme == stmt.superclass.name.lexeme:
       error(lox, stmt.superclass.name, "A class can't inherit from itself.")
 
@@ -194,11 +207,11 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
     resolve(stmt.superclass, resolver, lox)
 
-    beginScope(resolver)
+    beginScope(resolver, 1)
 
     resolver.scopes[^1]["super"] = true
 
-  beginScope(resolver)
+  beginScope(resolver, 1)
 
   resolver.scopes[^1]["this"] = true
 
@@ -212,7 +225,7 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
   endScope(resolver)
 
-  if not isNil(stmt.superclass):
+  if notIsNilStmtSuperclass:
     endScope(resolver)
 
   resolver.currentClass = enclosingClass
