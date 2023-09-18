@@ -1,14 +1,14 @@
 # Benchmark
 The benchmark brings the best of 3 measurements for the base jlox implementation and the nlox implementation. The measurements were made on an `Intel(R) Core(TM) i7-4810MQ` with the frequency locked at 2.80GHz, to avoid Turbo Boost
 
-nlox was compiled as: `nim c --threads:off -d:danger --mm:arc --panics:on -d:lto -d:nloxBenchmark nlox`
+nlox was compiled as: `nim c --threads:off -d:danger --mm:arc --panics:on -d:lto --passC:-march=native nlox`
 
 jlox was compiled as: `javac *.java`
 
 ## binary_trees.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 17.96800000000076  | 1.75x  |
+| nlox  | 17.33899998664856  | 1.69x  |
 | jlox  | 10.240000009536743  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -62,7 +62,7 @@ long lived tree of depth:
 check:
 -1
 elapsed:
-17.96800000000076
+17.33899998664856
 ```
 jlox
 ```
@@ -119,19 +119,19 @@ elapsed:
 ### elapsed
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 12.01100000000224  | 2.41x  |
+| nlox  | 11.9539999961853  | 2.40x  |
 | jlox  | 4.980999946594238  | 1.00x  |
 
 ### loop
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 8.798999999999069  | 2.29x  |
+| nlox  | 8.473999977111816  | 2.21x  |
 | jlox  | 3.8410000801086426  | 1.00x  |
 
 ### equals
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 3.212000000003172  | 2.82x  |
+| nlox  | 3.480000019073486  | 3.05x  |
 | jlox  | 1.1399998664855957  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -141,11 +141,11 @@ elapsed:
 nlox
 ```
 loop
-8.798999999999069
+8.473999977111816
 elapsed
-12.01100000000224
+11.9539999961853
 equals
-3.212000000003172
+3.480000019073486
 ```
 jlox
 ```
@@ -160,7 +160,7 @@ equals
 ## fib.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 17.63300000000163  | 2.98x  |
+| nlox  | 16.95099997520447  | 2.86x  |
 | jlox  | 5.924000024795532  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -170,7 +170,7 @@ equals
 nlox
 ```
 true
-17.63300000000163
+16.95099997520447
 ```
 jlox
 ```
@@ -181,7 +181,7 @@ true
 ## instantiation.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 7.047999999998865  | 3.29x  |
+| nlox  | 6.789000034332275  | 3.17x  |
 | jlox  | 2.1419999599456787  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -190,7 +190,7 @@ true
 
 nlox
 ```
-7.047999999998865
+6.789000034332275
 ```
 jlox
 ```
@@ -200,7 +200,7 @@ jlox
 ## invocation.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 7.472000000001572  | 3.96x  |
+| nlox  | 7.047000169754028  | 3.74x  |
 | jlox  | 1.8849999904632568  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -209,7 +209,7 @@ jlox
 
 nlox
 ```
-7.472000000001572
+7.047000169754028
 ```
 jlox
 ```
@@ -219,7 +219,7 @@ jlox
 ## method_call.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 3.46900000000096  | 1.32x  |
+| nlox  | 3.404999971389771  | 1.29x  |
 | jlox  | 2.636000156402588  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -230,7 +230,7 @@ nlox
 ```
 true
 false
-3.46900000000096
+3.404999971389771
 ```
 jlox
 ```
@@ -242,7 +242,7 @@ false
 ## properties.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 11.32499999999709  | 1.63x  |
+| nlox  | 10.54199981689453  | 1.51x  |
 | jlox  | 6.9659998416900635  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -251,7 +251,7 @@ false
 
 nlox
 ```
-11.32499999999709
+10.54199981689453
 ```
 jlox
 ```
@@ -263,19 +263,19 @@ jlox
 ### elapsed
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 11.32900000000154  | 1.97x  |
+| nlox  | 11.19400000572205  | 1.95x  |
 | jlox  | 5.740000009536743  | 1.00x  |
 
 ### loop
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 9.354999999999563  | 2.17x  |
+| nlox  | 8.875999927520752  | 2.06x  |
 | jlox  | 4.302000045776367  | 1.00x  |
 
 ### equals
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 1.974000000001979  | 1.30x  |
+| nlox  | 2.318000078201294  | 1.52x  |
 | jlox  | 1.523000000008324  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -285,11 +285,11 @@ jlox
 nlox
 ```
 loop
-9.354999999999563
+8.875999927520752
 elapsed
-11.32900000000154
+11.19400000572205
 equals
-1.974000000001979
+2.318000078201294
 ```
 jlox
 ```
@@ -304,7 +304,7 @@ equals
 ## trees.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 36.98800000000119  | 1.01x  |
+| nlox  | 36.49699997901917  | 1.00x  |
 | jlox  | 36.52900004386902  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -313,7 +313,7 @@ equals
 
 nlox
 ```
-36.98800000000119
+36.49699997901917
 ```
 jlox
 ```
@@ -323,7 +323,7 @@ jlox
 ## zoo.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 8.476000000002387  | 1.23x  |
+| nlox  | 8.010999917984009  | 1.16x  |
 | jlox  | 6.908999919891357  | 1.00x  |
 
 **&#42; smaller measurement is better**
@@ -333,7 +333,7 @@ jlox
 nlox
 ```
 10000002
-8.476000000002387
+8.010999917984009
 ```
 jlox
 ```
@@ -344,7 +344,7 @@ jlox
 ## zoo_batch.lox
 |   | sum  | batch  | Factor  |
 | ------------ | ------------ | ------------ | ------------ |
-| nlox  | 13620000  | 227 | 0.69x  |
+| nlox  | 13740000  | 229 | 0.69x  |
 | jlox  | 19800000  | 330 | 1.00x  |
 
 **&#42; bigger "sum" and "batch" is better**
@@ -353,9 +353,9 @@ jlox
 
 nlox
 ```
-13620000
-227
-10.02500000000146
+13740000
+229
+10.02400016784668
 ```
 jlox
 ```
