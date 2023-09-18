@@ -28,6 +28,12 @@ proc hash*(literal: Object): Hash =
   else:
     result = toHash(literal)
 
+proc hash*(token: Token): Hash =
+  ## Returns a `Hash` of the `Token`.
+  result = hash(token.kind) !& hash(token.literal) !& hash(token.lexeme) !&
+           hash(token.line)
+  result = !$result
+
 method hash*(expr: Expr): Hash {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
@@ -35,19 +41,23 @@ method hash*(expr: Expr): Hash {.base.} =
 
 method hash*(expr: Assign): Hash =
   ## Returns a `Hash` of an `Assign` expression.
-  hash(expr.name) !& hash(expr.value)
+  result = hash(expr.name) !& hash(expr.value)
+  result = !$result
 
 method hash*(expr: Binary): Hash =
   ## Returns a `Hash` of a `Binary` expression.
-  hash(expr.left) !& hash(expr.operator) !& hash(expr.right)
+  result = hash(expr.left) !& hash(expr.operator) !& hash(expr.right)
+  result = !$result
 
 method hash*(expr: Call): Hash =
   ## Returns a `Hash` of a `Call` expression.
-  hash(expr.callee) !& hash(expr.paren) !& hash(expr.arguments)
+  result = hash(expr.callee) !& hash(expr.paren) !& hash(expr.arguments)
+  result = !$result
 
 method hash*(expr: Get): Hash =
   ## Returns a `Hash` of a `Get` expression.
-  hash(expr.obj) !& hash(expr.name)
+  result = hash(expr.obj) !& hash(expr.name)
+  result = !$result
 
 method hash*(expr: Grouping): Hash =
   ## Returns a `Hash` of a `Grouping` expression.
@@ -59,15 +69,18 @@ method hash*(expr: Literal): Hash =
 
 method hash*(expr: Logical): Hash =
   ## Returns a `Hash` of a `Logical` expression.
-  hash(expr.left) !& hash(expr.operator) !& hash(expr.right)
+  result = hash(expr.left) !& hash(expr.operator) !& hash(expr.right)
+  result = !$result
 
 method hash*(expr: Set): Hash =
   ## Returns a `Hash` of a `Set` expression.
-  hash(expr.obj) !& hash(expr.name) !& hash(expr.value)
+  result = hash(expr.obj) !& hash(expr.name) !& hash(expr.value)
+  result = !$result
 
 method hash*(expr: Super): Hash =
   ## Returns a `Hash` of a `Super` expression.
-  hash(expr.keyword) !& hash(expr.`method`)
+  result = hash(expr.keyword) !& hash(expr.`method`)
+  result = !$result
 
 method hash*(expr: This): Hash =
   ## Returns a `Hash` of a `This` expression.
@@ -75,7 +88,8 @@ method hash*(expr: This): Hash =
 
 method hash*(expr: Unary): Hash =
   ## Returns a `Hash` of an `Unary` expression.
-  hash(expr.operator) !& hash(expr.right)
+  result = hash(expr.operator) !& hash(expr.right)
+  result = !$result
 
 method hash*(expr: Variable): Hash =
   ## Returns a `Hash` of a `Variable` expression.
