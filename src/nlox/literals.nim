@@ -1,3 +1,5 @@
+import std/hashes
+
 # Internal imports
 import ./types
 
@@ -16,3 +18,12 @@ proc newNumber*(data: float): Number =
 proc newString*(data: string): String =
   ## Creates a `String` object with the value of `data`
   String(data: data)
+
+proc newStringWithHash*(data: string): String =
+  ## Creates a `String` object with the value of `data`
+  String(data: data, hash: hash(data))
+
+let
+  stringWithHashInit* = newStringWithHash("init")
+  stringWithHashThis* = newStringWithHash("this")
+  stringWithHashSuper* = newStringWithHash("super")

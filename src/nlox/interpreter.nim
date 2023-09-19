@@ -2,7 +2,7 @@
 import std/[math, strformat, tables]
 
 # Internal imports
-import ./environment, ./hashes2, ./literals, ./logger, ./nativefunctions,
+import ./environment, ./hashes3, ./literals, ./logger, ./nativefunctions,
        ./runtimeerror, ./tostringobject, ./types
 
 # Internal import of module with keyword name
@@ -245,14 +245,14 @@ method evaluate(expr: Super, interpreter: var Interpreter): Object =
   let
     distance = interpreter.locals[expr]
     superclass = cast[LoxClass](getAt(interpreter.environment, distance,
-                                      "super"))
+                                      stringWithHashSuper))
     obj = cast[LoxInstance](getAt(interpreter.environment, distance - 1,
-                                  "this"))
+                                  stringWithHashThis))
     `method` = findMethod(superclass, expr.`method`.lexeme)
 
   if isNil(`method`):
     raise newRuntimeError(expr.`method`,
-                          fmt"Undefined property '{expr.`method`.lexeme}'.")
+                          fmt"Undefined property '{expr.`method`.lexeme.data}'.")
 
   result = `bind`(`method`, obj)
 
@@ -312,16 +312,16 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
   if notIsNilStmtSuperclass:
     interpreter.environment = newEnvironment(interpreter.environment, 1)
 
-    define(interpreter.environment, "super", superclass)
+    define(interpreter.environment, stringWithHashSuper, superclass)
 
-  var methods: TableRef[string, LoxFunction] = nil
+  var methods: TableRef[String, LoxFunction] = nil
 
   if len(stmt.methods) > 0:
-    methods = newTable[string, LoxFunction](len(stmt.methods))
+    methods = newTable[String, LoxFunction](len(stmt.methods))
 
     for `method` in stmt.methods:
       let function = newLoxFunction(`method`, interpreter.environment,
-                                    `method`.name.lexeme == "init")
+                                    `method`.name.lexeme.data == "init")
 
       methods[`method`.name.lexeme] = function
 

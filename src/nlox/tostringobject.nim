@@ -33,4 +33,4 @@ method toString*(obj: LoxCallable, isEvaluation: bool): string =
 
 method toString*(obj: LoxInstance, isEvaluation: bool): string =
   ## Returns a `string` of `obj`.
-  fmt"{obj.klass.name} instance"
+  fmt"{obj.klass.name.data} instance"

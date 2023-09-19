@@ -1,5 +1,5 @@
 # Stdlib imports
-import std/[lists, tables]
+import std/[hashes, lists, tables]
 
 type
   Object* = ref object of RootObj
@@ -16,6 +16,7 @@ type
   String* = ref object of Object
     ## An object for Lox's String type.
     data*: string
+    hash*: Hash
 
   TokenType* {.pure.} = enum
     ## Enumerator of all possible token types
@@ -73,7 +74,7 @@ type
       ## Stores the type of token.
     literal*: Object
       ## Stores a literal value, which can be Number or String.
-    lexeme*: string
+    lexeme*: String
       ## Stores the lexeme.
     line*: int
       ## Stores the token line.
@@ -103,7 +104,7 @@ type
     enclosing*: Environment
       ## Reference to the outer level environment. For the global environment
       ## this is `nil`.
-    values*: TableRef[string, Object]
+    values*: TableRef[String, Object]
       ## Hash table that stores variable names and values.
 
   ParseError* = object of CatchableError
@@ -147,18 +148,18 @@ type
 
   LoxClass* = ref object of LoxCallable
     ## Object that stores Lox class information.
-    name*: string
+    name*: String
       ## Lox class name.
     superclass*: LoxClass
       ## Superclass of `LoxClass`
-    methods*: TableRef[string, LoxFunction]
+    methods*: TableRef[String, LoxFunction]
       ## Lox class methods.
 
   LoxInstance* = ref object of Object
     ## Object that stores Lox instance information.
     klass*: LoxClass
       ## Lox class bound to instance.
-    fields*: TableRef[string, Object]
+    fields*: TableRef[String, Object]
       ## Lox instance fields.
 
   Lox* = object
@@ -175,6 +176,7 @@ type
   # From expr
 
   Expr* = ref object of RootObj
+    hash*: Hash
 
   Assign* = ref object of Expr
     name*: Token

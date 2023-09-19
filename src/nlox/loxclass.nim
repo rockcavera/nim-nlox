@@ -2,16 +2,16 @@
 import std/tables
 
 # Internal imports
-import ./types
+import ./hashes3, ./literals, ./types
 
 # Forward declaration
 proc call(class: LoxCallable, interpreter: var Interpreter,
           arguments: seq[Object]): Object
 
-proc toString(class: LoxCallable): string = cast[LoxClass](class).name
+proc toString(class: LoxCallable): string = cast[LoxClass](class).name.data
   ## Returns a representation of `class` in `string`.
 
-proc findMethod*(class: LoxClass, name: string): LoxFunction =
+proc findMethod*(class: LoxClass, name: String): LoxFunction =
   ## Returns a `LoxFunction` referring to the name `name` within the `LoxClass`
   ## `class`. If not found, returns `nil`.
   result = nil
@@ -24,15 +24,15 @@ proc findMethod*(class: LoxClass, name: string): LoxFunction =
 
 proc arity(class: LoxCallable): int =
   ## Returns the arity of `class`
-  let initializer = findMethod(cast[LoxClass](class), "init")
+  let initializer = findMethod(cast[LoxClass](class), stringWithHashInit)
 
   if isNil(initializer):
     result = 0
   else:
     result = initializer.arity(initializer)
 
-proc newLoxClass*(name: string, superclass: LoxClass,
-                  methods: TableRef[string, LoxFunction]): LoxClass =
+proc newLoxClass*(name: String, superclass: LoxClass,
+                  methods: TableRef[String, LoxFunction]): LoxClass =
   ## Creates and returns a `LoxClass` with the name `name` and the methods
   ## `methods`.
   LoxClass(arity: arity, call: call, toString: toString, name: name,
@@ -49,7 +49,7 @@ proc call(class: LoxCallable, interpreter: var Interpreter,
 
   result = newLoxInstance(class)
 
-  let initializer = findMethod(class, "init")
+  let initializer = findMethod(class, stringWithHashInit)
 
   if not isNil(initializer):
     let function = `bind`(initializer, cast[LoxInstance](result))

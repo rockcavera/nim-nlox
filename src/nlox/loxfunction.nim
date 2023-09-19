@@ -2,7 +2,7 @@
 import std/strformat
 
 # Internal imports
-import ./environment, ./types
+import ./environment, ./literals, ./types
 
 # Internal import of module with keyword name
 import "./return"
@@ -17,7 +17,7 @@ proc arity(caller: LoxCallable): int =
 
 proc toString(caller: LoxCallable): string =
   ## Returns a representation of `caller` in `string`.
-  fmt"<fn {cast[LoxFunction](caller).declaration.name.lexeme}>"
+  fmt"<fn {cast[LoxFunction](caller).declaration.name.lexeme.data}>"
 
 proc newLoxFunction*(declaration: Function, closure: Environment,
                      isInitializer: bool): LoxFunction =
@@ -33,7 +33,7 @@ proc `bind`*(caller: LoxFunction, instance: LoxInstance): LoxFunction =
   ## in which "this" is declared as a variable bound to `instance`.
   let environment = newEnvironment(caller.closure, 1)
 
-  define(environment, "this", instance)
+  define(environment, stringWithHashThis, instance)
 
   result = newLoxFunction(caller.declaration, environment, caller.isInitializer)
 
@@ -59,4 +59,4 @@ proc call(caller: LoxCallable, interpreter: var Interpreter,
     result = returnValue.value
 
   if (caller.isInitializer):
-    result = getAt(caller.closure, 0, "this")
+    result = getAt(caller.closure, 0, stringWithHashThis)

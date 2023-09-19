@@ -2,7 +2,7 @@
 import std/[strformat, tables]
 
 # Internal imports
-import ./runtimeerror, ./types
+import ./hashes3, ./runtimeerror, ./types
 
 proc newLoxInstance*(klass: LoxClass): LoxInstance =
   ## Creates and returns a `LoxInstance` with `klass`.
@@ -11,7 +11,7 @@ proc newLoxInstance*(klass: LoxClass): LoxInstance =
 proc set*(instance: LoxInstance, name: Token, value: Object) =
   ## Defines `name` as `value` in `instance`.
   if isNil(instance.fields):
-    instance.fields = newTable[string, Object](4)
+    instance.fields = newTable[String, Object](4)
 
   instance.fields[name.lexeme] = value
 
@@ -26,6 +26,6 @@ proc get*(instance: LoxInstance, name: Token): Object =
     let `method` = findMethod(instance.klass, name.lexeme)
 
     if isNil(`method`):
-      raise newRuntimeError(name, fmt"Undefined property '{name.lexeme}'.")
+      raise newRuntimeError(name, fmt"Undefined property '{name.lexeme.data}'.")
     else:
       result = `bind`(`method`, instance)

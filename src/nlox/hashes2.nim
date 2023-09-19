@@ -21,7 +21,7 @@ method toHash(literal: String): Hash =
   ## Returns a `Hash` of the `String` object.
   hash(literal.data)
 
-proc hash*(literal: Object): Hash =
+proc hash(literal: Object): Hash =
   ## Returns a `Hash` of the `Object`.
   if isNil(literal): # prevents `NilAccessDefect`
     result = hash(0)
@@ -30,14 +30,15 @@ proc hash*(literal: Object): Hash =
 
 proc hash*(token: Token): Hash =
   ## Returns a `Hash` of the `Token`.
-  result = hash(token.kind) !& hash(token.literal) !& hash(token.lexeme) !&
+  result = hash(token.kind) !& hash(token.literal) !& token.lexeme.hash !&
            hash(token.line)
   result = !$result
 
 method hash*(expr: Expr): Hash {.base.} =
   ## Base method that raises `CatchableError` exception when `expr` has not had
   ## its method implemented.
-  raise newException(CatchableError, "Method without implementation override")
+  let msg = "Method without implementation override"
+  raise newException(CatchableError, msg)
 
 method hash*(expr: Assign): Hash =
   ## Returns a `Hash` of an `Assign` expression.

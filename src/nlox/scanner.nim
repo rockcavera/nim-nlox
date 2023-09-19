@@ -2,7 +2,7 @@
 import std/[lists, parseutils, sequtils, tables]
 
 # Internal imports
-import ./logger, ./token, ./types
+import ./literals, ./logger, ./token, ./types
 
 let
   keywords = {"and": And, "class": Class, "else": Else, "false": False,
@@ -37,7 +37,8 @@ proc advance(scanner: var Scanner): char =
 
 proc addToken(scanner: var Scanner, token: var Token) =
   ## Adds `token` to list of `scanner` tokens.
-  token.lexeme = substring(scanner.source, scanner.start, scanner.current)
+  token.lexeme = newStringWithHash(substring(scanner.source, scanner.start,
+                                             scanner.current))
   token.line = scanner.line
 
   add(scanner.tokens, token)
@@ -238,7 +239,7 @@ proc scanTokens*(lox: var Lox, scanner: var Scanner): seq[Token] =
     scanner.start = scanner.current
     scanToken(lox, scanner)
 
-  add(scanner.tokens, Token(kind: Eof, literal: nil, lexeme: "",
-                            line: scanner.line))
+  add(scanner.tokens, Token(kind: Eof, literal: nil,
+                            lexeme: newStringWithHash(""), line: scanner.line))
 
   result = toSeq(scanner.tokens)

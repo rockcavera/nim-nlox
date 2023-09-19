@@ -38,7 +38,7 @@ proc defineClock(interpreter: var Interpreter) =
   let clock = LoxCallable(arity: clockArity, call: clockCall,
                           toString: clockToString)
 
-  define(interpreter.globals, "clock", clock)
+  define(interpreter.globals, newStringWithHash("clock"), clock)
 
 proc defineAllNativeFunctions*(interpreter: var Interpreter) =
   ## Define all native functions.

@@ -2,7 +2,7 @@
 import std/tables
 
 # Internal imports
-import ./interpreter, ./logger, ./types
+import ./hashes2, ./hashes3, ./interpreter, ./literals, ./logger, ./types
 
 type
   FunctionType = enum
@@ -17,7 +17,7 @@ type
     ## Stores resolver information.
     # interpreter: Interpreter # It is not necessary. The `Lox` state is already
     # passed.
-    scopes: seq[TableRef[string, bool]] # No stack collection in stdlib
+    scopes: seq[TableRef[String, bool]] # No stack collection in stdlib
       ## A stack of scopes.
     currentFunction: FunctionType
       ## Current function type.
@@ -32,7 +32,7 @@ proc initResolver*(): Resolver =
   # result.interpreter = interpreter
   result.currentFunction = FunctionType.None
   result.currentClass = ClassType.None
-  result.scopes = newSeqOfCap[TableRef[string, bool]](8)
+  result.scopes = newSeqOfCap[TableRef[String, bool]](8)
 
 proc beginScope(resolver: var Resolver) =
   ## Begins a scope at `resolver`.
@@ -43,7 +43,7 @@ proc beginScope(resolver: var Resolver, size: int) =
   add(resolver.scopes, nil)
 
   if size > 0:
-    resolver.scopes[^1] = newTable[string, bool](size)
+    resolver.scopes[^1] = newTable[String, bool](size)
 
 proc endScope(resolver: var Resolver) =
   ## Ends a scope in `resolver`.
@@ -54,7 +54,7 @@ proc declare(lox: var Lox, resolver: var Resolver, name: Token) =
   ## the same variable is declared in the same scope, an error will be reported.
   if len(resolver.scopes) > 0:
     if isNil(resolver.scopes[^1]):
-      resolver.scopes[^1] = newTable[string, bool](2)
+      resolver.scopes[^1] = newTable[String, bool](2)
     elif hasKey(resolver.scopes[^1], name.lexeme):
       error(lox, name, "Already a variable with this name in this scope.")
 
@@ -74,7 +74,11 @@ proc resolveLocal(lox: var Lox, resolver: var Resolver, expr: Expr,
   for i in countdown(hi, 0):
     if not(isNil(resolver.scopes[i])) and
        hasKey(resolver.scopes[i], name.lexeme):
+
+      expr.hash = hashes2.hash(expr)
+
       resolve(lox, expr, hi - i)
+
       break
 
 proc resolveFunction(lox: var Lox, resolver: var Resolver, function: Function,
@@ -209,16 +213,16 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
     beginScope(resolver, 1)
 
-    resolver.scopes[^1]["super"] = true
+    resolver.scopes[^1][stringWithHashSuper] = true
 
   beginScope(resolver, 1)
 
-  resolver.scopes[^1]["this"] = true
+  resolver.scopes[^1][stringWithHashThis] = true
 
   for `method` in stmt.methods:
     var declaration = FunctionType.Method
 
-    if `method`.name.lexeme == "init":
+    if `method`.name.lexeme.data == "init":
       declaration = FunctionType.Initializer
 
     resolveFunction(lox, resolver, `method`, declaration)

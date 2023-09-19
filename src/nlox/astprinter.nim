@@ -14,7 +14,7 @@ method print*(expr: Expr): string {.base.} =
 
 method print*(expr: Binary): string =
   ## Returns a `string` representing the expression `expr`.
-  parenthesize(expr.operator.lexeme, expr.left, expr.right)
+  parenthesize(expr.operator.lexeme.data, expr.left, expr.right)
 
 method print*(expr: Grouping): string =
   ## Returns a `string` representing the expression `expr`.
@@ -29,7 +29,7 @@ method print*(expr: Literal): string =
 
 method print*(expr: Unary): string =
   ## Returns a `string` representing the expression `expr`.
-  parenthesize(expr.operator.lexeme, expr.right)
+  parenthesize(expr.operator.lexeme.data, expr.right)
 
 proc parenthesize(name: string, exprs: varargs[Expr]): string =
   ## Returns a `string`, which encloses `name` and the subexpressions `exprs` in

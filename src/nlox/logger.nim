@@ -20,7 +20,7 @@ proc error*(lox: var Lox, token: Token, message: string) =
   if token.kind == Eof:
     report(lox, token.line, " at end", message)
   else:
-    report(lox, token.line, fmt" at '{token.lexeme}'", message)
+    report(lox, token.line, fmt" at '{token.lexeme.data}'", message)
 
 proc error*(lox: var Lox, line: int, message: string) =
   ## Reports that a syntax error occurred on a given `line` printing a

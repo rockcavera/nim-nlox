@@ -1,12 +1,12 @@
 # Stdlib imports
-import std/[tables, strformat]
+import std/[hashes, tables, strformat]
 
 # Internal imports
-import ./runtimeerror, ./types
+import ./hashes3, ./runtimeerror, ./types
 
 proc newEnvironment*(): Environment =
   ## Creates a new `Environment` with `enclosing` equal to `nil`.
-  Environment(enclosing: nil, values: newTable[string, Object](16))
+  Environment(enclosing: nil, values: newTable[String, Object](16))
 
 proc newEnvironment*(enclosing: Environment): Environment =
   ## Creates a new `Environment` and sets the outer environment to `enclosing`.
@@ -14,13 +14,13 @@ proc newEnvironment*(enclosing: Environment): Environment =
 
 proc newEnvironment*(enclosing: Environment, size: int): Environment =
   ## Creates a new `Environment` and sets the outer environment to `enclosing`.
-  Environment(enclosing: enclosing, values: newTable[string, Object](size))
+  Environment(enclosing: enclosing, values: newTable[String, Object](size))
 
-proc define*(environment: Environment, name: string, value: Object) =
+proc define*(environment: Environment, name: String, value: Object) =
   ## Defines in the environment `environment` the variable `name` with the value
   ## `value`.
   if isNil(environment.values):
-    environment.values = newTable[string, Object](2)
+    environment.values = newTable[String, Object](2)
 
   environment.values[name] = value
 
@@ -31,7 +31,7 @@ proc ancestor*(environment: Environment, distance: int): Environment =
   for i in 1 .. distance:
     result = result.enclosing
 
-proc getAt*(environment: Environment, distance: int, name: string): Object =
+proc getAt*(environment: Environment, distance: int, name: String): Object =
   ## Returns the `Object` of `name`, which is in an environment at a `distance`
   ## from the current environment.
   ancestor(environment, distance).values[name]
@@ -52,7 +52,7 @@ proc get*(environment: Environment, name: Token): Object =
   elif not isNil(environment.enclosing):
     result = get(environment.enclosing, name)
   else:
-    raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
+    raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme.data}'.")
 
 proc assign*(environment: Environment, name: Token, value: Object) =
   ## Assigns to the `name` variable, from the `environment` environment, the
@@ -64,4 +64,4 @@ proc assign*(environment: Environment, name: Token, value: Object) =
   elif not isNil(environment.enclosing):
     assign(environment.enclosing, name, value)
   else:
-    raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme}'.")
+    raise newRuntimeError(name, fmt"Undefined variable '{name.lexeme.data}'.")

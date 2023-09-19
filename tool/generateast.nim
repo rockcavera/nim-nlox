@@ -44,7 +44,7 @@ proc splitFields(fields: string): seq[FieldDescription] =
     add(result, FieldDescription(name: name, kind: kind))
 
 proc defineType(writer: FileStream, baseName: string, kind: TypeDescription) =
-  writeLine(writer, indent(fmt"{kind.name}* = ref object of {baseName}" , 2))
+  writeLine(writer, indent(fmt"{kind.name}* = ref object of {baseName}", 2))
 
   for field in kind.fields:
     writeLine(writer, indent(fmt"{field.name}*: {field.kind}" , 4))
@@ -71,7 +71,11 @@ proc defineConstructor(writer: FileStream, kind: TypeDescription) =
 proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[string]) =
   writeLine(typesFS, indent(fmt"# From {toLower(baseName)}" , 2))
   writeLine(typesFS, "")
-  writeLine(typesFS, indent(fmt"{baseName}* = ref object of RootObj" , 2))
+  writeLine(typesFS, indent(fmt"{baseName}* = ref object of RootObj", 2))
+
+  if baseName == "Expr":
+    writeLine(typesFS, indent(fmt"hash*: Hash", 4))
+
   writeLine(typesFS, "")
 
   var allTypes: seq[TypeDescription]
@@ -90,7 +94,7 @@ proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[stri
 
     writeLine(typesFS, "")
 
-  writeLine(typesFS, indent(fmt"# End {toLower(baseName)}" , 2))
+  writeLine(typesFS, indent(fmt"# End {toLower(baseName)}", 2))
   writeLine(typesFS, "")
 
   # Defining the constructors
