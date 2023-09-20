@@ -5,11 +5,15 @@ nlox was compiled as: `nim c --threads:off -d:danger --mm:arc --panics:on -d:lto
 
 jlox was compiled as: `javac *.java`
 
+**Comments**
+
+1.  The nlox implementation, i.e. in Nim, now precomputes the hashes of the `Expr` and `String` objects, which are used in hash tables. This optimization was made after verifying, through Intel VTune, that the `murmurHash()` procedure took more execution time. This raised the question of how to improve the hashing algorithm. But, after thinking a lot, the best solution was to use cache, considering that it would already be possible to know them during the static analysis (resolve). In order not to cheat with the Java implementation, it was also researched that the JVM calculates the hash of an object only once and stores it in cache to later reuse if the object is not modified, making querying hash tables a constant operation. In other words, this hash precomputation in JVM also occurs during the static analysis phase, before dynamic execution (evaluation).
+
 ## binary_trees.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 17.33899998664856  | 1.69x  |
-| jlox  | 10.240000009536743  | 1.00x  |
+| nlox  | 11.55900001525879  | 1.13x  |
+| jlox  | 10.2279999256134  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -62,7 +66,7 @@ long lived tree of depth:
 check:
 -1
 elapsed:
-17.33899998664856
+11.55900001525879
 ```
 jlox
 ```
@@ -111,7 +115,7 @@ long lived tree of depth:
 check:
 -1
 elapsed:
-10.240000009536743
+10.2279999256134
 ```
 
 ## equality.lox
@@ -119,20 +123,20 @@ elapsed:
 ### elapsed
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 11.9539999961853  | 2.40x  |
-| jlox  | 4.980999946594238  | 1.00x  |
+| nlox  | 9.858999967575073  | 1.95x  |
+| jlox  | 5.064000129699707  | 1.00x  |
 
 ### loop
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 8.473999977111816  | 2.21x  |
-| jlox  | 3.8410000801086426  | 1.00x  |
+| nlox  | 6.76200008392334  | 1.75x  |
+| jlox  | 3.870999813079834  | 1.00x  |
 
 ### equals
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 3.480000019073486  | 3.05x  |
-| jlox  | 1.1399998664855957  | 1.00x  |
+| nlox  | 3.096999883651733  | 2.60x  |
+| jlox  | 1.193000316619873  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -141,27 +145,27 @@ elapsed:
 nlox
 ```
 loop
-8.473999977111816
+6.76200008392334
 elapsed
-11.9539999961853
+9.858999967575073
 equals
-3.480000019073486
+3.096999883651733
 ```
 jlox
 ```
 loop
-3.8410000801086426
+3.870999813079834
 elapsed
-4.980999946594238
+5.064000129699707
 equals
-1.1399998664855957
+1.193000316619873
 ```
 
 ## fib.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 16.95099997520447  | 2.86x  |
-| jlox  | 5.924000024795532  | 1.00x  |
+| nlox  | 12.1399998664856  | 2.03x  |
+| jlox  | 5.976000070571899  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -170,19 +174,19 @@ equals
 nlox
 ```
 true
-16.95099997520447
+12.1399998664856
 ```
 jlox
 ```
 true
-5.924000024795532
+5.976000070571899
 ```
 
 ## instantiation.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 6.789000034332275  | 3.17x  |
-| jlox  | 2.1419999599456787  | 1.00x  |
+| nlox  | 5.596999883651733  | 2.58x  |
+| jlox  | 2.167999982833862  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -190,18 +194,18 @@ true
 
 nlox
 ```
-6.789000034332275
+5.596999883651733
 ```
 jlox
 ```
-2.1419999599456787
+2.167999982833862
 ```
 
 ## invocation.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 7.047000169754028  | 3.74x  |
-| jlox  | 1.8849999904632568  | 1.00x  |
+| nlox  | 6.06000018119812  | 3.22x  |
+| jlox  | 1.88100004196167  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -209,18 +213,18 @@ jlox
 
 nlox
 ```
-7.047000169754028
+6.06000018119812
 ```
 jlox
 ```
-1.8849999904632568
+1.88100004196167
 ```
 
 ## method_call.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 3.404999971389771  | 1.29x  |
-| jlox  | 2.636000156402588  | 1.00x  |
+| nlox  | 2.671000003814697  | 0.99x  |
+| jlox  | 2.703000068664551  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -230,20 +234,20 @@ nlox
 ```
 true
 false
-3.404999971389771
+2.671000003814697
 ```
 jlox
 ```
 true
 false
-2.636000156402588
+2.703000068664551
 ```
 
 ## properties.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 10.54199981689453  | 1.51x  |
-| jlox  | 6.9659998416900635  | 1.00x  |
+| nlox  | 9.588000059127808  | 1.42x  |
+| jlox  | 6.745000123977661  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -251,11 +255,11 @@ false
 
 nlox
 ```
-10.54199981689453
+9.588000059127808
 ```
 jlox
 ```
-6.9659998416900635
+6.745000123977661
 ```
 
 ## string_equality.lox
@@ -263,20 +267,20 @@ jlox
 ### elapsed
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 11.19400000572205  | 1.95x  |
-| jlox  | 5.740000009536743  | 1.00x  |
+| nlox  | 6.279000043869019  | 1.09x  |
+| jlox  | 5.746999979019165  | 1.00x  |
 
 ### loop
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 8.875999927520752  | 2.06x  |
-| jlox  | 4.302000045776367  | 1.00x  |
+| nlox  | 4.26200008392334  | 1.01x  |
+| jlox  | 4.23199987411499  | 1.00x  |
 
 ### equals
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 2.318000078201294  | 1.52x  |
-| jlox  | 1.523000000008324  | 1.00x  |
+| nlox  | 2.016999959945679  | 1.33x  |
+| jlox  | 1.515000104904175  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -285,27 +289,27 @@ jlox
 nlox
 ```
 loop
-8.875999927520752
+4.26200008392334
 elapsed
-11.19400000572205
+6.279000043869019
 equals
-2.318000078201294
+2.016999959945679
 ```
 jlox
 ```
 loop
-4.302000045776367
+4.23199987411499
 elapsed
-5.740000009536743
+5.746999979019165
 equals
-1.437999963760376
+1.515000104904175
 ```
 
 ## trees.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 36.49699997901917  | 1.00x  |
-| jlox  | 36.52900004386902  | 1.00x  |
+| nlox  | 30.66300010681152  | 0.82x  |
+| jlox  | 37.21399998664856  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -313,18 +317,18 @@ equals
 
 nlox
 ```
-36.49699997901917
+30.66300010681152
 ```
 jlox
 ```
-36.52900004386902
+37.21399998664856
 ```
 
 ## zoo.lox
 |   | Measurement (s)  | Factor  |
 | ------------ | ------------ | ------------ |
-| nlox  | 8.010999917984009  | 1.16x  |
-| jlox  | 6.908999919891357  | 1.00x  |
+| nlox  | 5.635999917984009  | 0.81x  |
+| jlox  | 6.937000036239624  | 1.00x  |
 
 **&#42; smaller measurement is better**
 
@@ -333,19 +337,19 @@ jlox
 nlox
 ```
 10000002
-8.010999917984009
+5.635999917984009
 ```
 jlox
 ```
 1.0000002E7
-6.908999919891357
+6.937000036239624
 ```
 
 ## zoo_batch.lox
 |   | sum  | batch  | Factor  |
 | ------------ | ------------ | ------------ | ------------ |
-| nlox  | 13740000  | 229 | 0.69x  |
-| jlox  | 19800000  | 330 | 1.00x  |
+| nlox  | 18240000  | 304 | 0.94x  |
+| jlox  | 19320000  | 322 | 1.00x  |
 
 **&#42; bigger "sum" and "batch" is better**
 
@@ -353,25 +357,25 @@ jlox
 
 nlox
 ```
-13740000
-229
-10.02400016784668
+18240000
+304
+10.0239999294281
 ```
 jlox
 ```
-1.98E7
-330
-10.009999990463257
+19320000
+322
+10.02699995040894
 ```
 
 ## Notes
 `nim -v`
 ```
 Nim Compiler Version 2.1.1 [Windows: amd64]
-Compiled at 2023-09-17
+Compiled at 2023-09-19
 Copyright (c) 2006-2023 by Andreas Rumpf
 
-git hash: 8836207a4e68c177d5059131df05a9d433dd3c8d
+git hash: 5568ba0d9f39469891b5e4625ad39ebcfa5e1ee3
 active boot switches: -d:release
 ```
 
