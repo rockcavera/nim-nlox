@@ -1,11 +1,24 @@
-import std/private/[oscommon, ospaths2], std/[cmdline, osproc, strutils, strformat]
+import std/[cmdline, exitprocs, osproc, random, strutils, strformat],
+       std/private/[oscommon, osfiles, ospaths2]
+
+randomize()
 
 const
-  nloxExe* = "src" / "nlox.exe"
   nloxSource = "src" / "nlox.nim"
   loxScriptsFolder* = "tests" / "scripts"
 
+let nloxExeName = "nlox" & $rand(100_000..999_999)
+
+when defined(windows):
+  let nloxExe* = nloxExeName & ".exe"
+else:
+  let nloxExe* = nloxExeName
+
 var nloxExeCompiled = false
+
+proc removeNloxExe() =
+  if fileExists(nloxExe):
+    discard tryRemoveFile(nloxExe)
 
 proc compilenlox() =
   if (not fileExists(nloxExe)) or (not nloxExeCompiled):
@@ -15,16 +28,20 @@ proc compilenlox() =
     if not fileExists(nloxSource):
       quit(fmt"`{nloxSource}` file not found.", 72)
 
-    let options = join(commandLineParams(), " ")
+    let
+      options = join(commandLineParams() & @[fmt"-o:{nloxExeName}"], " ")
+      cmdLine = fmt"nim c {options} {nloxSource}"
 
-    echo fmt"  nim c {options} {nloxSource}"
+    echo "  ", cmdLine
 
-    let (_, exitCode) = execCmdEx(fmt"nim c {options} {nloxSource}")
+    let (_, exitCode) = execCmdEx(cmdLine)
 
     if (exitCode != 0) or (not fileExists(nloxExe)):
-      quit(fmt"Unable to compile `{nloxSource}`.", 70)
+      quit(fmt"Unable to compile `{nloxSource}` {nloxExe} {fileExists(nloxExe)}.", 70)
 
     nloxExeCompiled = true
+
+    addExitProc(removeNloxExe)
 
 proc nloxCompiled*(): bool =
   compilenlox()
