@@ -8,8 +8,9 @@ import ./hashes3, ./literals, ./types
 proc call(class: LoxCallable, interpreter: var Interpreter,
           arguments: seq[Object]): Object
 
-proc toString(class: LoxCallable): string = cast[LoxClass](class).name.data
+proc toString(class: LoxCallable): string =
   ## Returns a representation of `class` in `string`.
+  cast[LoxClass](class).name.data
 
 proc findMethod*(class: LoxClass, name: String): LoxFunction =
   ## Returns a `LoxFunction` referring to the name `name` within the `LoxClass`

@@ -4,8 +4,9 @@ import std/times
 # Internal imports
 import ./environment, ./literals, ./types
 
-proc clockArity(caller: LoxCallable): int = 0
+proc clockArity(caller: LoxCallable): int =
   ## `arity` for "clock()" .
+  0
 
 when defined(nloxBenchmark):
   import std/monotimes
@@ -30,8 +31,9 @@ else:
 
     result = newNumber(seconds + milliseconds)
 
-proc clockToString(caller: LoxCallable): string = "<native fn>"
+proc clockToString(caller: LoxCallable): string =
   ## `toString` for "clock()".
+  "<native fn>"
 
 proc defineClock(interpreter: var Interpreter) =
   ## Defines the built-in function `clock()`.

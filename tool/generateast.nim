@@ -1,4 +1,5 @@
-import std/private/[oscommon, ospaths2], std/[cmdline, streams, strformat, strutils]
+import std/[cmdline, streams, strformat, strutils],
+       std/private/[oscommon, ospaths2]
 
 type
   FieldDescription = object
@@ -11,7 +12,7 @@ type
 
 const findComment = "# <Put it below, generateast!> #"
 
-proc truncateFile(fileName: string): FileStream =
+proc truncateFile(fileName: string): StringStream =
   if not fileExists(fileName):
     quit(fmt"The file `{fileName}` does not exist!", 72)
 
@@ -24,10 +25,7 @@ proc truncateFile(fileName: string): FileStream =
 
   setLen(data, len(findComment) + i)
 
-  result = newFileStream(fileName, fmWrite)
-
-  if isNil(result):
-    quit(fmt"The file `{fileName}` cannot be opened.", 72)
+  result = newStringStream()
 
   write(result, data)
 
@@ -43,7 +41,7 @@ proc splitFields(fields: string): seq[FieldDescription] =
 
     add(result, FieldDescription(name: name, kind: kind))
 
-proc defineType(writer: FileStream, baseName: string, kind: TypeDescription) =
+proc defineType(writer: StringStream, baseName: string, kind: TypeDescription) =
   writeLine(writer, indent(fmt"{kind.name}* = ref object of {baseName}", 2))
 
   for field in kind.fields:
@@ -56,27 +54,31 @@ proc fieldsToParamStr(fields: seq[FieldDescription]): string =
 
     setLen(result, len(result) - 2)
 
-proc defineConstructor(writer: FileStream, kind: TypeDescription) =
-  writeLine(writer, fmt"proc new{kind.name}*({fieldsToParamStr(kind.fields)}): {kind.name} =")
+proc defineConstructor(writer: StringStream, kind: TypeDescription) =
+  writeLine(writer, fmt"proc new{kind.name}*({fieldsToParamStr(kind.fields)})" &
+                    fmt": {kind.name} =")
 
   var constructor = fmt"  {kind.name}("
 
   for field in kind.fields:
-    add(constructor, fmt"{field.name}: {field.name},")
+    add(constructor, fmt"{field.name}: {field.name}, ")
 
-  constructor[^1] = ')'
+  constructor[^2] = ')'
+
+  setLen(constructor, len(constructor) - 1)
 
   writeLine(writer, constructor)
 
-proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[string]) =
-  writeLine(typesFS, indent(fmt"# From {toLower(baseName)}" , 2))
-  writeLine(typesFS, "")
-  writeLine(typesFS, indent(fmt"{baseName}* = ref object of RootObj", 2))
+proc defineAst(typesSS: StringStream, outputDir, baseName: string,
+               types: seq[string]) =
+  writeLine(typesSS, indent(fmt"# From {toLower(baseName)}" , 2))
+  writeLine(typesSS, "")
+  writeLine(typesSS, indent(fmt"{baseName}* = ref object of RootObj", 2))
 
   if baseName == "Expr":
-    writeLine(typesFS, indent(fmt"hash*: Hash", 4))
+    writeLine(typesSS, indent(fmt"hash*: Hash", 4))
 
-  writeLine(typesFS, "")
+  writeLine(typesSS, "")
 
   var allTypes: seq[TypeDescription]
 
@@ -90,26 +92,34 @@ proc defineAst(typesFS: FileStream, outputDir, baseName: string, types: seq[stri
 
   # Defining the types
   for kind in allTypes:
-    defineType(typesFS, baseName, kind)
+    defineType(typesSS, baseName, kind)
 
-    writeLine(typesFS, "")
+    writeLine(typesSS, "")
 
-  writeLine(typesFS, indent(fmt"# End {toLower(baseName)}", 2))
-  writeLine(typesFS, "")
+  writeLine(typesSS, indent(fmt"# End {toLower(baseName)}", 2))
+  writeLine(typesSS, "")
 
   # Defining the constructors
-  var baseNameFS = newFileStream(outputDir / (toLower(baseName) & ".nim"), fmWrite)
+  let baseNameFile = outputDir / (toLower(baseName) & ".nim")
 
-  writeLine(baseNameFS, fmt"# Internal imports")
-  writeLine(baseNameFS, fmt"import ./types")
-  writeLine(baseNameFS, "")
+  var baseNameSS = newStringStream()
+
+  writeLine(baseNameSS, fmt"# Internal imports")
+  writeLine(baseNameSS, fmt"import ./types")
+  writeLine(baseNameSS, "")
 
   for kind in allTypes:
-    defineConstructor(baseNameFS, kind)
+    defineConstructor(baseNameSS, kind)
 
-    writeLine(baseNameFS, "")
+    writeLine(baseNameSS, "")
 
-  close(baseNameFS)
+  setPosition(baseNameSS, 0)
+
+  setLen(baseNameSS.data, len(baseNameSS.data) - 1)
+
+  writeFile(baseNameFile, readAll(baseNameSS))
+
+  close(baseNameSS)
 
 proc main*(args: seq[string]) =
   if len(args) != 1:
@@ -119,9 +129,9 @@ proc main*(args: seq[string]) =
     outputDir = args[0]
     typesFile = outputDir / "types.nim"
 
-  var typesFS = truncateFile(typesFile)
+  var typesSS = truncateFile(typesFile)
 
-  defineAst(typesFS, outputDir, "Expr", @[
+  defineAst(typesSS, outputDir, "Expr", @[
     "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
     "Call     : Expr callee, Token paren, seq[Expr] arguments",
@@ -135,7 +145,7 @@ proc main*(args: seq[string]) =
     "Unary    : Token operator, Expr right",
     "Variable : Token name"])
 
-  defineAst(typesFS, outputDir, "Stmt", @[
+  defineAst(typesSS, outputDir, "Stmt", @[
     "Block      : seq[Stmt] statements",
     "Class      : Token name, Variable superclass," &
                 " seq[Function] methods",
@@ -149,6 +159,12 @@ proc main*(args: seq[string]) =
     "Var        : Token name, Expr initializer",
     "While      : Expr condition, Stmt body"])
 
-  close(typesFS)
+  setPosition(typesSS, 0)
+
+  setLen(typesSS.data, len(typesSS.data) - 1)
+
+  writeFile(typesFile, readAll(typesSS))
+
+  close(typesSS)
 
 main(commandLineParams())
