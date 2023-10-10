@@ -12,7 +12,7 @@ let nloxExeName = "nlox" & $rand(100_000..999_999)
 when defined(windows):
   let nloxExe* = nloxExeName & ".exe"
 else:
-  let nloxExe* = nloxExeName
+  let nloxExe* = getCurrentDir() / nloxExeName
 
 var nloxExeCompiled = false
 
@@ -37,7 +37,7 @@ proc compilenlox() =
     let (_, exitCode) = execCmdEx(cmdLine)
 
     if (exitCode != 0) or (not fileExists(nloxExe)):
-      quit(fmt"Unable to compile `{nloxSource}` {nloxExe} {fileExists(nloxExe)}.", 70)
+      quit(fmt"Unable to compile `{nloxSource}`.", 70)
 
     nloxExeCompiled = true
 
