@@ -43,16 +43,16 @@ proc runFile(path: string) =
     quit(70)
 
 proc runPrompt() =
-  ## Runs the interactive prompt (REPL). If CTRL + D is sent, the execution will
-  ## end.
+  ## Runs the interactive prompt (REPL). If CTRL + D, on Unix, or CTRL + Z, on
+  ## Windows, is sent, the execution will end.
   var lox = initLox()
 
   while true:
     write(stdout, "> ")
 
-    let line = readLine(stdin)
+    var line: string
 
-    if line == "\4": # Ctrl + D
+    if not readLine(stdin, line):
       break
 
     run(lox, line)
