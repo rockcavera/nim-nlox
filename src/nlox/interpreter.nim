@@ -104,9 +104,6 @@ proc executeBlock*(interpreter: var Interpreter, statements: seq[Stmt],
     for statement in statements:
       execute(interpreter, statement)
   finally:
-    interpreter.environment.values = nil # for some unknown reason `TableRef` is
-                                         # not being deallocated without
-                                         # assigning `nil` with `--mm:arc`
     interpreter.environment = previous
 
 method evaluate(expr: Expr, interpreter: var Interpreter): Object {.base.} =
