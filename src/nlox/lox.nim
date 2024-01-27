@@ -1,3 +1,6 @@
+# Stdlib imports
+import std/exitprocs
+
 # Internal imports
 import ./interpreter, ./parser, ./resolver, ./scanner, ./types
 
@@ -37,10 +40,9 @@ proc runFile(path: string) =
   run(lox, bytes)
 
   if lox.hadError:
-    quit(65)
-
-  if lox.hadRuntimeError:
-    quit(70)
+    setProgramResult(65)
+  elif lox.hadRuntimeError:
+    setProgramResult(70)
 
 proc runPrompt() =
   ## Runs the interactive prompt (REPL). If CTRL + D, on Unix, or CTRL + Z, on

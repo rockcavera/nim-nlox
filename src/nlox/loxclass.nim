@@ -25,7 +25,7 @@ proc findMethod*(class: LoxClass, name: String): LoxFunction =
 
 proc arity(class: LoxCallable): int =
   ## Returns the arity of `class`
-  let initializer = findMethod(cast[LoxClass](class), stringWithHashInit)
+  let initializer = findMethod(cast[LoxClass](class), newStringWithHash("init"))
 
   if isNil(initializer):
     result = 0
@@ -50,7 +50,7 @@ proc call(class: LoxCallable, interpreter: var Interpreter,
 
   result = newLoxInstance(class)
 
-  let initializer = findMethod(class, stringWithHashInit)
+  let initializer = findMethod(class, newStringWithHash("init"))
 
   if not isNil(initializer):
     let function = `bind`(initializer, cast[LoxInstance](result))

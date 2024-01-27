@@ -245,9 +245,9 @@ method evaluate(expr: Super, interpreter: var Interpreter): Object =
   let
     distance = interpreter.locals[expr]
     superclass = cast[LoxClass](getAt(interpreter.environment, distance,
-                                      stringWithHashSuper))
+                                      newStringWithHash("super")))
     obj = cast[LoxInstance](getAt(interpreter.environment, distance - 1,
-                                  stringWithHashThis))
+                                  newStringWithHash("this")))
     `method` = findMethod(superclass, expr.`method`.lexeme)
 
   if isNil(`method`):
@@ -312,7 +312,7 @@ method evaluate(stmt: Class, interpreter: var Interpreter) =
   if notIsNilStmtSuperclass:
     interpreter.environment = newEnvironment(interpreter.environment, 1)
 
-    define(interpreter.environment, stringWithHashSuper, superclass)
+    define(interpreter.environment, newStringWithHash("super"), superclass)
 
   var methods: TableRef[String, LoxFunction] = nil
 

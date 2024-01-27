@@ -1,3 +1,4 @@
+# Stdlib imports
 import std/hashes
 
 # Internal imports
@@ -19,11 +20,10 @@ proc newString*(data: string): String =
   ## Creates a `String` object with the value of `data`
   String(data: data)
 
+proc newStringWithHash*(data: static[string]): String =
+  ## Creates a `String` object with the value of `data`
+  String(data: data, hash: static(hash(data)))
+
 proc newStringWithHash*(data: string): String =
   ## Creates a `String` object with the value of `data`
   String(data: data, hash: hash(data))
-
-let
-  stringWithHashInit* = newStringWithHash("init")
-  stringWithHashThis* = newStringWithHash("this")
-  stringWithHashSuper* = newStringWithHash("super")

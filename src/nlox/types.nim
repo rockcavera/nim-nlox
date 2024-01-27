@@ -91,6 +91,8 @@ type
       ## Points at the character currently being considered.
     line*: int
       ## The line that is being scanned.
+    keywords*: Table[string, TokenType]
+      ## A table with all keywords.
 
   Parser* = object
     ## Object that stores parser information.

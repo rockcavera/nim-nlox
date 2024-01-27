@@ -213,11 +213,11 @@ method resolve(stmt: Class, resolver: var Resolver, lox: var Lox) =
 
     beginScope(resolver, 1)
 
-    resolver.scopes[^1][stringWithHashSuper] = true
+    resolver.scopes[^1][newStringWithHash("super")] = true
 
   beginScope(resolver, 1)
 
-  resolver.scopes[^1][stringWithHashThis] = true
+  resolver.scopes[^1][newStringWithHash("this")] = true
 
   for `method` in stmt.methods:
     var declaration = FunctionType.Method

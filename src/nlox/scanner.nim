@@ -4,7 +4,7 @@ import std/[lists, parseutils, sequtils, tables]
 # Internal imports
 import ./literals, ./logger, ./token, ./types
 
-let
+const
   keywords = {"and": And, "class": Class, "else": Else, "false": False,
               "for": For, "fun": Fun, "if": If, "nil": Nil, "or": Or,
               "print": Print, "return": Return, "super": Super, "this": This,
@@ -24,6 +24,7 @@ proc initScanner*(source: string): Scanner =
   result.start = 0
   result.current = 0
   result.line = 1
+  result.keywords = keywords
 
 proc isAtEnd(scanner: Scanner): bool =
   ## Returns `true` if the scan done in `scanner` has reached the end.
@@ -164,7 +165,7 @@ proc identifier(scanner: var Scanner) =
 
   let
     text = subString(scanner.source, scanner.start, scanner.current)
-    kind = getOrDefault(keywords, text, Identifier)
+    kind = getOrDefault(scanner.keywords, text, Identifier)
 
   addToken(scanner, kind)
 

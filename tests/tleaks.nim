@@ -53,17 +53,17 @@ proc getIdValgrind(s: string): string =
     add(result, '=')
 
     inc(i)
-  
+
   while s[i] != '=':
     add(result, s[i])
 
     inc(i)
-  
+
   while s[i] == '=':
     add(result, '=')
 
     inc(i)
-  
+
   add(result, ' ')
 
 proc nloxTestLeak(script: string): tuple[leak: bool, output: string, exitCode: int] =
@@ -83,7 +83,7 @@ proc nloxTestLeak(script: string): tuple[leak: bool, output: string, exitCode: i
     ss = newStringStream(rawOutput)
     line: string
     recOutput = false
-  
+
   while readLine(ss, line):
     if line == valgrindId:
       recOutput = not recOutput
@@ -94,7 +94,7 @@ proc nloxTestLeak(script: string): tuple[leak: bool, output: string, exitCode: i
     elif not(startsWith(line, valgrindId)) and recOutput:
       add(result.output, line)
       add(result.output, '\L')
-  
+
   close(ss)
 
 template checkLeak() =

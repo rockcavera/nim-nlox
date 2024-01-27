@@ -33,7 +33,7 @@ proc `bind`*(function: LoxFunction, instance: LoxInstance): LoxFunction =
   ## in which "this" is declared as a variable bound to `instance`.
   let environment = newEnvironment(function.closure, 1)
 
-  define(environment, stringWithHashThis, instance)
+  define(environment, newStringWithHash("this"), instance)
 
   result = newLoxFunction(function.declaration, environment,
                           function.isInitializer)
@@ -60,4 +60,4 @@ proc call(function: LoxCallable, interpreter: var Interpreter,
     result = returnValue.value
 
   if (function.isInitializer):
-    result = getAt(function.closure, 0, stringWithHashThis)
+    result = getAt(function.closure, 0, newStringWithHash("this"))
