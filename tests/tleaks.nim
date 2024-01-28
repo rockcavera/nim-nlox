@@ -33,7 +33,7 @@ proc compilenlox() =
     if not fileExists(nloxSource):
       quit(fmt"`{nloxSource}` file not found.", 72)
 
-    let cmdLine = fmt"nim c -o:{nloxExeName} --mm:arc --panics:on -d:useMalloc --debugger:native --threads:off {nloxSource}"
+    let cmdLine = fmt"nim c -o:{nloxExeName} --mm:arc --panics:on -d:useMalloc --debugger:native --threads:off -d:valgrind {nloxSource}"
 
     echo "  ", cmdLine
 
@@ -83,6 +83,7 @@ proc nloxTestLeak(script: string): tuple[leak: bool, output: string, exitCode: i
     ss = newStringStream(rawOutput)
     line: string
     recOutput = false
+    leakSummary: string
 
   while readLine(ss, line):
     if line == valgrindId:
@@ -90,12 +91,26 @@ proc nloxTestLeak(script: string): tuple[leak: bool, output: string, exitCode: i
     elif line == strLeaked:
       result.leak = true
 
+      add(leakSummary, line)
+      add(leakSummary, '\L')
+
+      var i = 5
+
+      while i > 0 and readLine(ss, line):
+        add(leakSummary, line)
+        add(leakSummary, '\L')
+
+        dec(i)
+
       break
     elif not(startsWith(line, valgrindId)) and recOutput:
       add(result.output, line)
       add(result.output, '\L')
 
   close(ss)
+
+  if result.leak:
+    echo leakSummary
 
 template checkLeak() =
   let (leak, output, exitcode) = nloxTestLeak(script)
