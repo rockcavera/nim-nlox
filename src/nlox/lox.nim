@@ -39,6 +39,9 @@ proc runFile(path: string) =
 
   run(lox, bytes)
 
+  lox.interpreter.environment.values = nil # Without this line, Valgrind claims
+                                           # a memory leak
+
   if lox.hadError:
     setProgramResult(65)
   elif lox.hadRuntimeError:
