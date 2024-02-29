@@ -71,7 +71,7 @@ proc main*(args: seq[string]) =
   if len(args) > 1:
     echo "Usage: lox [script]"
 
-    quit(64)
+    setProgramResult(64)
   elif len(args) == 1:
     runFile(args[0])
   else:
