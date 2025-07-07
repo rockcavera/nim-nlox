@@ -2,7 +2,7 @@
 import std/[strformat, tables]
 
 # Internal imports
-import ./hashes3, ./runtimeerror, ./types
+import ./runtimeerror, ./types
 
 proc newLoxInstance*(klass: LoxClass): LoxInstance =
   ## Creates and returns a `LoxInstance` with `klass`.

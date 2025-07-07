@@ -75,8 +75,8 @@ proc synchronize(parser: var Parser) =
     if previous(parser).kind == Semicolon:
       break
 
-    if peek(parser).kind in {TokenType.Class, Fun, Var, For, If, While, Print,
-                             Return}:
+    if peek(parser).kind in {TokenType.Class, TokenType.Fun, TokenType.Var, TokenType.For, TokenType.If, TokenType.While, TokenType.Print,
+                             TokenType.Return}:
       break
 
     discard advance(parser)
