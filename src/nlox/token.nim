@@ -13,14 +13,14 @@ proc initTokenNumber*(numberLit: float): Token =
   ## Initialize a `Token` as `TokenType.Number` and the field `Token.numberLit`
   ## as `numberLit`. The `lexeme` and `line` fields are initialized to `""` and
   ## `-1`, respectively.
-  Token(kind: Number, literal: newNumber(numberlit), lexeme: nil,
+  Token(kind: TokenType.Number, literal: newNumber(numberlit), lexeme: nil,
         line: -1)
 
 proc initTokenString*(stringLit: string): Token =
   ## Initialize a `Token` as `TokenType.String` and the field `Token.stringLit`
   ## as `stringLit`. The `lexeme` and `line` fields are initialized to `""` and
   ## `-1`, respectively.
-  Token(kind: String, literal: newString(stringLit), lexeme: nil,
+  Token(kind: TokenType.String, literal: newString(stringLit), lexeme: nil,
         line: -1)
 
 proc `$`(literal: Object): string =

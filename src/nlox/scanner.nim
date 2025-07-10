@@ -5,10 +5,10 @@ import std/[lists, parseutils, sequtils, tables]
 import ./literals, ./logger, ./token, ./types
 
 const
-  keywords = {"and": And, "class": Class, "else": Else, "false": False,
-              "for": For, "fun": Fun, "if": If, "nil": Nil, "or": Or,
-              "print": Print, "return": Return, "super": Super, "this": This,
-              "true": True, "var": Var, "while": While}.toTable
+  keywords = {"and": TokenType.And, "class": TokenType.Class, "else": TokenType.Else, "false": TokenType.False,
+              "for": TokenType.For, "fun": TokenType.Fun, "if": TokenType.If, "nil": TokenType.Nil, "or": TokenType.Or,
+              "print": TokenType.Print, "return": TokenType.Return, "super": TokenType.Super, "this": TokenType.This,
+              "true": TokenType.True, "var": TokenType.Var, "while": TokenType.While}.toTable
     ## A table with all keywords, where the key is the string representation and
     ## the value the `TypeToken`.
 
